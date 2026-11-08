@@ -1,0 +1,21 @@
+# WRDS data are licensed: never commit them (raw pulls, built samples, Stata exports)
+data/
+*.pkl
+*.parquet
+*.dta
+.pgpass
+
+# generated results: regenerate with `python run_all.py` (force-add a file to share it: git add -f output/...)
+output/
+tests/synthetic_data/
+tests/synthetic_output/
+
+# Python / editors / OS
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

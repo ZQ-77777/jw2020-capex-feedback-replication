@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jayaraman &amp; Wu (2020) Tables 1–3 Replication Report</title>
+<style>
+:root{color-scheme:light;
+ --bg:#F1F4F8;--sheet:#FFFFFF;--ink:#15223A;--muted:#55667E;--rule:#D4DCE6;--rule2:#AEBBCC;
+ --acc:#1D5BA6;--acc-soft:#E2EBF7;--up:#A6650F;--up-soft:#F7ECDA;--ok:#1F7A4D;--ok-soft:#E1F1E8;--bad:#A23A3A;
+ --code:#EEF2F6;--mark:#FFF0B8;
+ --serif:Georgia,"Times New Roman","Noto Serif SC","Songti SC",serif;
+ --sans:"Helvetica Neue",Arial,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+ --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+ --bg:#0D1520;--sheet:#141F2E;--ink:#E2E8F0;--muted:#9CABBF;--rule:#293A50;--rule2:#3D5170;
+ --acc:#80AEEA;--acc-soft:#1B2D46;--up:#E3B465;--up-soft:#382D19;--ok:#74CF9F;--ok-soft:#17322A;--bad:#E88B8B;--code:#1A283B;--mark:#4D4118}}
+:root[data-theme="dark"]{color-scheme:dark;
+ --bg:#0D1520;--sheet:#141F2E;--ink:#E2E8F0;--muted:#9CABBF;--rule:#293A50;--rule2:#3D5170;
+ --acc:#80AEEA;--acc-soft:#1B2D46;--up:#E3B465;--up-soft:#382D19;--ok:#74CF9F;--ok-soft:#17322A;--bad:#E88B8B;--code:#1A283B;--mark:#4D4118}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.78 var(--sans);-webkit-text-size-adjust:100%}
+a{color:var(--acc)}:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+code{font-family:var(--mono);font-size:.86em;background:var(--code);padding:.06em .32em;border-radius:3px}
+.layout{display:grid;grid-template-columns:262px minmax(0,1fr);max-width:1260px;margin:0 auto;gap:34px;padding:0 22px}
+nav.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;padding:28px 0}
+.brand b{display:block;font:600 15px/1.45 var(--serif)}.brand span{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+nav.toc ol{list-style:none;margin:14px 0 0;padding:0}nav.toc ol ol{margin:2px 0 6px 16px}
+nav.toc a{display:block;padding:3px 10px;border-left:2px solid transparent;color:var(--muted);text-decoration:none;font-size:14px;line-height:1.5}
+nav.toc ol ol a{font-size:13px}nav.toc a:hover,nav.toc a.on{color:var(--ink);border-left-color:var(--acc)}
+.side{margin-top:16px;display:grid;gap:8px;font-size:13px;color:var(--muted)}
+.btn{font:14px var(--sans);padding:6px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--sheet);color:var(--ink);cursor:pointer}
+details.mtoc{display:none}
+main{padding:30px 0 110px;min-width:0}
+.sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:36px 44px}
+h1{font:600 clamp(26px,3.6vw,36px)/1.3 var(--serif);margin:4px 0 8px}
+h2{font:600 25px/1.35 var(--serif);margin:0 0 10px}h2 .no{color:var(--acc);margin-right:.4em}
+h3{font:600 19px/1.45 var(--sans);margin:30px 0 8px;scroll-margin-top:12px}
+h4{font:600 16px/1.5 var(--sans);margin:18px 0 4px}
+p,ul,ol{max-width:50em}p{margin:9px 0}li{margin:3px 0}
+section.sec{padding-top:52px;margin-top:52px;border-top:1px solid var(--rule)}
+section.sec:first-of-type{border-top:0;margin-top:18px;padding-top:18px}
+.lead{color:var(--muted);font-size:16.5px}.cite{color:var(--muted);font-size:14px}
+.key{border-left:3px solid var(--acc);padding:4px 0 4px 14px;font-weight:600;max-width:48em}
+.note{border-left:3px solid var(--up);background:var(--up-soft);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;max-width:50em}
+.note.info{border-left-color:var(--acc);background:var(--acc-soft)}.note.ok{border-left-color:var(--ok);background:var(--ok-soft)}
+.tw{overflow-x:auto;margin:12px 0;border:1px solid var(--rule);border-radius:6px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:7px 11px;border-bottom:1px solid var(--rule)}
+thead th{font-weight:600;color:var(--muted);font-size:13.5px;background:var(--bg)}
+tr:last-child td,tr:last-child th{border-bottom:0}
+.tw table:not(.anno) tbody td:first-child{min-width:6.5em}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.status{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.status div{border-top:3px solid var(--sc);background:var(--bg);padding:10px 12px;font-size:14px}.status b{display:block;margin-bottom:2px}
+.fx{font-family:Georgia,"Times New Roman",var(--serif);font-size:15.5px;background:var(--code);border-left:3px solid var(--acc);
+ padding:8px 12px;margin:6px 0;border-radius:0 5px 5px 0;overflow-x:auto;line-height:1.7}
+figure.code{margin:12px 0;border:1px solid var(--rule);border-radius:6px;overflow:hidden;scroll-margin-top:12px}
+figure.code figcaption{background:var(--bg);color:var(--muted);font-size:13px;padding:5px 12px;border-bottom:1px solid var(--rule)}
+figure.code pre{margin:0;padding:12px 14px;overflow-x:auto;font:13px/1.55 var(--mono);background:var(--code)}
+figure.code pre code{background:none;padding:0;font-size:inherit}
+figure.code:target{outline:2px solid var(--acc)}
+details.src{margin:8px 0}details.src summary{cursor:pointer;color:var(--acc);font-size:14.5px}
+.codeline{margin:6px 0;border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+.codeline span{display:block;font-size:12.5px;color:var(--muted);background:var(--bg);padding:2px 10px}
+.codeline pre{margin:0;padding:6px 10px;overflow-x:auto;font:12.5px/1.5 var(--mono);background:var(--code)}
+.codeline pre code{background:none;padding:0}
+table.anno td{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.anno .lab{text-align:left}
+table.anno .cx{cursor:pointer}table.anno .cx:hover{background:var(--acc-soft)}
+table.anno .sel{outline:2px solid var(--acc);outline-offset:-2px;background:var(--acc-soft)}
+table.anno tr.sep td,table.anno tr.sep th{border-top:1.5px solid var(--rule2)}
+.se{display:block;color:var(--muted);font-size:12.5px}
+.explain{border:1px solid var(--rule2);border-left:4px solid var(--acc);border-radius:6px;padding:12px 16px;background:var(--sheet);margin:10px 0 18px;scroll-margin-top:50px}
+.explain h5{margin:0 0 8px;font:600 16.5px/1.45 var(--sans)}
+.explain dl{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:7px 14px;margin:0}
+.explain dt{color:var(--muted);font-size:14px;padding-top:1px}.explain dd{margin:0;min-width:0}
+ol.chain{margin:2px 0;padding-left:1.3em}ol.chain li{margin:2px 0}
+.hint{color:var(--muted);font-size:13.5px;margin:2px 0}
+.wf .row{display:grid;grid-template-columns:minmax(160px,300px) 1fr;gap:14px;align-items:center;margin:8px 0}
+.wf .track{position:relative;height:32px;background:var(--bg);border-radius:4px}
+.wf .fill{position:absolute;left:0;top:0;bottom:0;background:var(--acc-soft);border-left:3px solid var(--acc);border-radius:4px;display:flex;align-items:center;padding-left:10px;font:600 14px var(--sans);white-space:nowrap}
+.wf .minus{color:var(--bad);font-weight:400;font-size:13px;margin-left:8px}
+svg.fig{width:100%;height:auto;display:block;margin:10px 0}svg text{font-family:var(--sans);fill:var(--ink)}
+svg .mut{fill:var(--muted)}svg a:hover rect{stroke:var(--up)}
+.steps{list-style:none;padding:0;counter-reset:st;max-width:none}
+.steps>li{counter-increment:st;position:relative;padding:2px 0 16px 46px;border-left:1px solid var(--rule);margin-left:15px}
+.steps>li:last-child{border-left-color:transparent}
+.steps>li::before{content:counter(st);position:absolute;left:-16px;top:0;width:31px;height:31px;border-radius:50%;background:var(--sheet);border:1.5px solid var(--acc);color:var(--acc);font:600 14px/28px var(--sans);text-align:center}
+.steps h4{margin:2px 0}
+pre.cmd{background:var(--code);padding:8px 12px;border-radius:5px;overflow-x:auto;font:13px/1.55 var(--mono);margin:6px 0}
+footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);color:var(--muted);font-size:13.5px}
+@media (max-width:980px){.layout{grid-template-columns:1fr;padding:0 8px;gap:0}nav.toc{display:none}
+ details.mtoc{display:block;position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--rule);padding:10px 4px}
+ details.mtoc summary{cursor:pointer;font-weight:600}details.mtoc ol{max-height:70vh;overflow-y:auto;font-size:14.5px;padding-left:1.4em}
+ .sheet{padding:22px 14px;border-radius:0;border-left:0;border-right:0}.status{grid-template-columns:1fr}
+ .explain dl{grid-template-columns:minmax(0,1fr)}.explain dt{padding-top:6px}.wf .row{grid-template-columns:1fr}}
+@media print{nav.toc,details.mtoc,.side,.hint{display:none}.layout{display:block}.sheet{border:0;padding:0}
+ details.src{display:block}details.src>*{display:block}section.sec{break-inside:auto}h2,h3{break-after:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <div class="brand"><b>Jayaraman &amp; Wu (2020)<br>Tables 1–3 Replication Report</b></div>
+  <ol id="toc"></ol>
+  <div class="side"><button class="btn" id="themeBtn" type="button">Dark / light</button><span>Single offline file; prints to PDF from the browser.</span></div>
+</nav>
+<main>
+<details class="mtoc"><summary>Contents</summary><ol id="mtoc"></ol></details>
+<div class="sheet">
+
+<header id="top">
+  <p class="cite">Jayaraman, S. &amp; Wu, J. S. (2020). Should I Stay or Should I Grow? Using Voluntary Disclosure to Elicit Market Feedback. <i>Review of Financial Studies</i> 33(8): 3854–3888.</p>
+  <h1>Tables 1–3 Replication Report</h1>
+  <p class="cite">Zhang Qi</p>
+  <div class="status">
+    <div style="--sc:var(--ok)"><b>Done</b>All code for Tables 1–3; estimator and synthetic-data validation; Stata cross-check script</div>
+    <div style="--sc:var(--up)"><b>Waiting on</b>WRDS access including I/B/E/S Guidance; check of targets against the published RFS version</div>
+    <div style="--sc:var(--acc)"><b>Once data arrive</b>Five commands produce Tables 1–3 and a cell-by-cell comparison (Appendix A)</div>
+  </div>
+  <p class="lead">This report sets out what the replication has done before using WRDS data, how every number will be computed from the raw data, and how success will be judged. The text runs from the research question to the data, the sample, the variables, the estimation and the three tables. In §8–§10 <b>every cell of the three tables can be clicked</b> to show its meaning, its formula, its path from raw fields to the number, and the file and lines of the code that computes it.</p>
+</header>
+
+<!-- ============================================================= 1 -->
+<section class="sec" id="s1" data-title="Summary">
+<h2><span class="no">1</span>Summary</h2>
+<p class="key">The replication of Tables 1–3 is ready to run: download, sample construction, variable construction, estimation and a cell-by-cell comparison with the paper are all coded and tested. The only missing input is WRDS data.</p>
+<div class="tw"><table>
+<thead><tr><th>Aspect</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td>Coverage</td><td>Table 1 Panels A, B and C; the 8 models of Table 2; the 4 models and 7 difference p-values of Table 3; the economic magnitudes and footnote figures the text quotes; the robustness checks in footnotes 17–19 and 23</td><td>§4–§10; Appendix B</td></tr>
+<tr><td>Estimator</td><td>Fixed-effects OLS with clustered standard errors following Stata <code>reghdfe</code>, matching least squares with dummy variables to 1e−8</td><td>§13</td></tr>
+<tr><td>End to end</td><td>Full pipeline run on synthetic data with a planted effect; recovers the pattern Table 3 tests (an effect only where spreads rise)</td><td>§13</td></tr>
+<tr><td>Transparency</td><td>All 37 choices the paper leaves open are logged, 14 of which affect Tables 1–3; each is a switch with its evidence stated</td><td>§12</td></tr>
+<tr><td>Cross-check</td><td>A Stata script re-estimates Tables 2–3 with <code>reghdfe</code> on the identical sample, and a program compares the two cell by cell</td><td>§7.4</td></tr>
+<tr><td>Outstanding</td><td>WRDS access (I/B/E/S Guidance is often licensed separately); confirmation of target numbers against the RFS version (currently from the May 2019 working paper)</td><td>§15</td></tr>
+</tbody></table></div>
+<p>The headline numbers to reproduce: the CAR coefficient of <b>1.193</b> in Table 2 model (1) and <b>0.849</b> in model (8); and in Table 3 the contrast between <b>1.206</b> where spreads rise and <b>−0.295</b> where they do not (difference p = 0.019). The databases have been revised since 2019, so digit-for-digit equality is not the goal; success criteria are in §14.</p>
+</section>
+
+<!-- ============================================================= 2 -->
+<section class="sec" id="s2" data-title="Question and scope">
+<h2><span class="no">2</span>Research question and scope</h2>
+<p>The paper argues that managers use voluntary capital-expenditure forecasts to elicit feedback from the market: the more positive the market's reaction to a forecast, the more actual capex is revised upward relative to the forecast by year end. Tables 1–3 form the complete argument for this claim.</p>
+<svg class="fig" viewBox="0 0 760 150" role="img" aria-label="Logic of the three tables">
+  <g style="font-size:14px">
+  <a href="#s8"><rect x="2" y="20" width="230" height="100" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.6"/>
+  <text x="18" y="50" style="font-weight:600">Table 1  What is the sample?</text><text x="18" y="76" class="mut" style="font-size:13px">17,577 forecasts, 1,790 firms</text><text x="18" y="98" class="mut" style="font-size:13px">distributions and variation</text></a>
+  <a href="#s9"><rect x="265" y="20" width="230" height="100" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.6"/>
+  <text x="281" y="50" style="font-weight:600">Table 2  Is there a relation?</text><text x="281" y="76" class="mut" style="font-size:13px">better reaction → upward revision</text><text x="281" y="98" class="mut" style="font-size:13px">robust to FE and placebos</text></a>
+  <a href="#s10"><rect x="528" y="20" width="230" height="100" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.6"/>
+  <text x="544" y="50" style="font-weight:600">Table 3  Why?</text><text x="544" y="76" class="mut" style="font-size:13px">only with informed trading</text><text x="544" y="98" class="mut" style="font-size:13px">driven by positive reactions</text></a>
+  <path d="M234 70 L261 70" style="stroke:var(--rule2);stroke-width:2"/><path d="M497 70 L524 70" style="stroke:var(--rule2);stroke-width:2"/>
+  </g></svg>
+<p>The scope of this replication is Tables 1–3. The code for Tables 4–6 is also written (run with <code>JW_SCOPE=all</code>) but is outside this report.</p>
+</section>
+
+<!-- ============================================================= 3 -->
+<section class="sec" id="s3" data-title="Pipeline: raw data to tables">
+<h2><span class="no">3</span>Pipeline: from raw WRDS data to the numbers in the tables</h2>
+<p>The replication is a one-way pipeline with fixed inputs and outputs at each step. Click a box to jump to its section.</p>
+<svg class="fig" viewBox="0 0 760 250" role="img" aria-label="Replication pipeline">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--rule2)"/></marker></defs>
+<g style="font-size:13.5px">
+<a href="#s4"><rect x="2" y="10" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="16" y="38" style="font-weight:600">① Raw data (§4)</text><text x="16" y="62" class="mut">9 WRDS tables</text><text x="16" y="82" class="mut">pull_wrds.py</text></a>
+<a href="#s5"><rect x="265" y="10" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="279" y="38" style="font-weight:600">② Links and sample (§5)</text><text x="279" y="62" class="mut">IBES → CRSP → Compustat</text><text x="279" y="82" class="mut">40,785 → … → 17,577</text></a>
+<a href="#s6"><rect x="528" y="10" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="542" y="38" style="font-weight:600">③ Variables (§6)</text><text x="542" y="62" class="mut">CAPEX_ADJ, CAR, controls</text><text x="542" y="82" class="mut">build_capex_sample.py</text></a>
+<a href="#s7"><rect x="528" y="150" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="542" y="178" style="font-weight:600">④ Estimation (§7)</text><text x="542" y="202" class="mut">FE OLS, clustered SEs</text><text x="542" y="222" class="mut">hdfe.py</text></a>
+<a href="#s8"><rect x="265" y="150" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="279" y="178" style="font-weight:600">⑤ Tables (§8–§10)</text><text x="279" y="202" class="mut">cell by cell vs the paper</text><text x="279" y="222" class="mut">tables.py</text></a>
+<a href="#s13"><rect x="2" y="150" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="16" y="178" style="font-weight:600">⑥ Checks (§13)</text><text x="16" y="202" class="mut">results report, Stata check</text><text x="16" y="222" class="mut">report.py, compare_stata.py</text></a>
+<path d="M234 53 L261 53" style="stroke:var(--rule2);stroke-width:1.8" marker-end="url(#ar)"/><path d="M497 53 L524 53" style="stroke:var(--rule2);stroke-width:1.8" marker-end="url(#ar)"/>
+<path d="M643 98 L643 146" style="stroke:var(--rule2);stroke-width:1.8" marker-end="url(#ar)"/><path d="M526 193 L499 193" style="stroke:var(--rule2);stroke-width:1.8" marker-end="url(#ar)"/>
+<path d="M263 193 L236 193" style="stroke:var(--rule2);stroke-width:1.8" marker-end="url(#ar)"/></g></svg>
+
+<h3 id="s3-1">3.1 One forecast from raw record to regression: Newfield Exploration, April 2010</h3>
+<p>The paper's Appendix 1 example shows how one record becomes the numbers in the tables. <b>PERMNO, GVKEY and the daily returns below are illustrative</b>: they show the computation; the true values come from WRDS.</p>
+<div class="tw"><table>
+<thead><tr><th>Step</th><th>Raw data / input</th><th>Computation</th><th>Result</th><th>Code</th></tr></thead>
+<tbody>
+<tr><td>1 Forecast record</td><td><code>ibes.det_guidance</code>: ticker = NFX, anndats = 2010-04-26, measure = CPX, pdicity = ANN, prd_yr = 2010, prd_mon = 12, val_1 = 1,600, val_2 missing</td><td>val_2 missing → point forecast</td><td>F = $1,600 million</td><td>{{REF:classify}}</td></tr>
+<tr><td>2 Links</td><td><code>ibcrsphist</code>: NFX link valid on 2010-04-26; <code>ccmxpf_lnkhist</code></td><td>ticker → PERMNO → GVKEY</td><td>PERMNO, GVKEY (illustrative)</td><td>{{REF:link_ibes}}; {{REF:link_ccm}}</td></tr>
+<tr><td>3 Actual capex</td><td><code>comp.funda</code>: datadate = 2010-12-31, capx = 1,971</td><td>datadate year-month = prd_yr / prd_mon</td><td>A = 1,971</td><td>{{REF:link_actual}}</td></tr>
+<tr><td>4 CAPEX_ADJ</td><td>A = 1,971, F = L = H = 1,600</td><td>100 × (1,971 − 1,600) / 1,600</td><td><b>+23.19%</b></td><td>{{REF:capex_adj}}</td></tr>
+<tr><td>5 Day 0</td><td><code>crsp.dsi</code> trading calendar</td><td>2010-04-26 is a trading day (Monday)</td><td>t₀ = 2010-04-26; window 4/22, 4/23, 4/26, 4/27, 4/28</td><td>{{REF:day0}}</td></tr>
+<tr><td>6 CAR</td><td><code>dsf.ret</code> (illustrative): 0.4, −0.3, 5.2, 2.2, 0.9 (%); <code>dsi.sprtrn</code> (illustrative): 0.2, −0.5, 0.6, 0.4, 0.2</td><td>Σ (ret − sprtrn) = 0.2 + 0.2 + 4.6 + 1.8 + 0.7</td><td><b>CAR = +7.5%</b></td><td>{{REF:car}}</td></tr>
+<tr><td>7 Standardise</td><td>Full-sample CAR mean and SD (the paper's −0.148 and 8.974 for illustration)</td><td>(7.5 + 0.148) / 8.974</td><td>CAR_z ≈ 0.85</td><td>{{REF:zscore}}</td></tr>
+<tr><td>8 Regression</td><td>Table 2 (8): β = 0.849</td><td>0.849 × 0.85</td><td>Adjustment explained by CAR ≈ +0.72 points (actual adjustment +23.2%)</td><td>{{REF:hdfe_ols}}</td></tr>
+</tbody></table></div>
+<p>Step 8 also shows what the paper's result means: the market reaction explains only part of an individual adjustment, but that part is systematic across 17,577 forecasts, and it appears only where the forecast draws informed trading (Table 3).</p>
+</section>
+
+<!-- ============================================================= 4 -->
+<section class="sec" id="s4" data-title="Raw data">
+<h2><span class="no">4</span>Raw data: nine WRDS tables</h2>
+<p>Tables 1–3 need nine tables, and <code>pull_wrds.py</code> downloads only these in Tables 1–3 mode. I/B/E/S Guidance is the critical subscription: without it none of the tables can be built.</p>
+<div class="tw"><table>
+<thead><tr><th>WRDS table</th><th>Fields used</th><th>Download range</th><th>Used for</th></tr></thead>
+<tbody>
+<tr><td><code>ibes.det_guidance</code></td><td>ticker, measure, pdicity, prd_yr, prd_mon, anndats, anntims, val_1, val_2, range_desc, units, curr</td><td>measure ∈ {CPX, SAL, EPS}, announced 2002–2016</td><td>Capex forecasts; sales forecasts (SF_CAR); EPS forecasts (to drop same-day forecasts)</td></tr>
+<tr><td><code>wrdsapps_link_crsp_ibes.ibcrsphist</code></td><td>ticker, permno, sdate, edate, score</td><td>all</td><td>I/B/E/S ticker → PERMNO</td></tr>
+<tr><td><code>crsp.ccmxpf_lnkhist</code></td><td>gvkey, lpermno, linktype, linkprim, linkdt, linkenddt</td><td>LU/LC, P/C</td><td>PERMNO → GVKEY</td></tr>
+<tr><td><code>comp.funda</code></td><td>gvkey, datadate, fyear, capx, prcc_f, csho, sich</td><td>standard industrial format, 1999–2018</td><td>Actual capex, LAG_CAPX, start-of-year market value, industry</td></tr>
+<tr><td><code>comp.fundq</code></td><td>gvkey, datadate, fyearq, fqtr, rdq, epspxq, ajexq, prccq, cshoq</td><td>standard industrial format, 1999–2017</td><td>SIZE, SURP, earnings announcement dates (EA_DUM)</td></tr>
+<tr><td><code>comp.company</code></td><td>gvkey, sic, state</td><td>all</td><td>Header SIC when historical SIC is missing; state (footnote 19)</td></tr>
+<tr><td><code>crsp.msenames</code></td><td>permno, ncusip, namedt, nameendt, shrcd</td><td>all</td><td>CUSIP history (checks)</td></tr>
+<tr><td><code>crsp.dsi</code></td><td>date, sprtrn</td><td>2001–2017</td><td>S&amp;P 500 daily return; trading calendar</td></tr>
+<tr><td><code>crsp.dsf</code></td><td>permno, date, ret, bid, ask, prc, shrout</td><td>sample firms, ±30 trading days around each event</td><td>CAR, CAR_PRE, SF_CAR; bid-ask spreads</td></tr>
+</tbody></table></div>
+<details class="src"><summary>Show download code: I/B/E/S Guidance and CRSP daily data</summary>{{CODE:pull_guidance}}{{CODE:pull_dsf}}</details>
+<p class="cite">CRSP's legacy (SIZ) files stopped updating on 31 December 2024 but remain queryable; the sample ends in 2016, so the legacy tables suffice.</p>
+</section>
+
+<!-- ============================================================= 5 -->
+<section class="sec" id="s5" data-title="Sample construction">
+<h2><span class="no">5</span>Sample construction: 40,785 → 17,577</h2>
+<p>Section 2.2 of the paper gives four sample counts. The code prints its own count at each step next to the paper's (<code>output/sample_waterfall.csv</code>).</p>
+<div class="wf" id="wf"></div>
+<div class="tw"><table>
+<thead><tr><th>Step</th><th class="n">Paper</th><th>Rule (condition)</th><th>Code</th></tr></thead>
+<tbody>
+<tr><td>0 Annual capex forecasts</td><td class="n">—</td><td>measure = CPX, pdicity = ANN; period end prd_end ∈ (anndats, anndats + 24 months]; per announcement date the nearest fiscal year and latest revision; then the first forecast per firm-quarter (D6)</td><td>{{REF:annual_forecasts}}; {{REF:collapse}}</td></tr>
+<tr><td>1 Matched to Compustat actual capex</td><td class="n">40,785</td><td>An I/B/E/S → PERMNO → GVKEY link valid on the announcement date exists, and funda has non-missing capx for (GVKEY, datadate year-month = prd_yr/prd_mon)</td><td>{{REF:link_actual}}</td></tr>
+<tr><td>2 Five-day market reaction available</td><td class="n">36,900</td><td>ret and sprtrn present on all five trading days of [−2, +2]</td><td>{{REF:waterfall_car}}</td></tr>
+<tr><td>3 Not on the day of an EPS forecast</td><td class="n">19,427</td><td>No EPS forecast for the same ticker with |anndats − anndats<sup>EPS</sup>| ≤ 0 days (D9)</td><td>{{REF:waterfall_eps}}</td></tr>
+<tr><td>4 Issued 2003–2015</td><td class="n">17,577</td><td>2003 ≤ year(anndats) ≤ 2015 (D2)</td><td>{{REF:waterfall_eps}}</td></tr>
+</tbody></table></div>
+<p><b>Two rules implied by the paper's arithmetic.</b> 36,900 − 17,473 − 1,850 = 17,577 holds exactly, so nothing else is removed after these steps. Hence (1) the collapse to one observation per firm-quarter must come before the count at step 1, or it would add a deletion the paper does not have; and (2) the initial sample starts in 2002 but the final one in 2003 while only 2016 is removed, so no 2002 forecast survives the earlier steps.</p>
+<p class="note info">Note the distinction: capex forecasts issued on the day of an <b>EPS forecast</b> are dropped; those issued with an <b>earnings announcement</b> are kept (55.9%) and controlled for with EA_DUM and SURP.</p>
+<details class="src"><summary>Show sample construction code (5 excerpts)</summary>{{CODE:annual_forecasts}}{{CODE:collapse}}{{CODE:link_actual}}{{CODE:waterfall_car}}{{CODE:waterfall_eps}}</details>
+<details class="src"><summary>Show link functions (2 excerpts)</summary>{{CODE:link_ibes}}{{CODE:link_ccm}}</details>
+</section>
+
+<!-- ============================================================= 6 -->
+<section class="sec" id="s6" data-title="Variable construction">
+<h2><span class="no">6</span>Variable construction: formulas and code</h2>
+<p>Notation: i is a forecast (firm-quarter), a the calendar quarter of the forecast, t the forecasted fiscal year, t₀ the event day (day 0). All variables except the dependent variable are known at or before the forecast date.</p>
+
+<h3 id="v-fore">6.1 Forecast value and type (CAPEX_FORE, FTYPE)</h3>
+<div class="fx">range ⇔ val_2 non-missing and val_2 ≠ val_1; other ⇔ not range and range_desc in the open-ended code set; otherwise point<br>L = min(val_1, val_2), H = max(val_1, val_2) (range); L = H = val_1 (point, open-ended); F = (L + H) / 2</div>
+<p>Amounts are first converted to $ million using <code>units</code> (D4). The open-ended code set is calibrated with <code>diagnose.py</code> once data arrive, so that the three shares approach Table 1 Panel C (D3).</p>
+<details class="src"><summary>Show code</summary>{{CODE:clean_guidance}}{{CODE:classify}}</details>
+
+<h3 id="v-adj">6.2 Dependent variable CAPEX_ADJ</h3>
+<div class="fx">CAPEX_ADJ<sub>i</sub> = 100 × (A<sub>i</sub> − H<sub>i</sub>) / F<sub>i</sub>   if A<sub>i</sub> &gt; H<sub>i</sub><br>
+CAPEX_ADJ<sub>i</sub> = 100 × (A<sub>i</sub> − L<sub>i</sub>) / F<sub>i</sub>   if A<sub>i</sub> &lt; L<sub>i</sub><br>
+CAPEX_ADJ<sub>i</sub> = 0   if L<sub>i</sub> ≤ A<sub>i</sub> ≤ H<sub>i</sub></div>
+<p>A is Compustat capx for the forecasted fiscal year. A range forecast met inside the range counts as 0, the paper's conservative treatment; the denominator is the range midpoint (D7; alternative: the violated bound).</p>
+<details class="src"><summary>Show code</summary>{{CODE:capex_adj}}</details>
+
+<h3 id="v-car">6.3 Market reaction CAR</h3>
+<div class="fx">ar<sub>i,d</sub> = ret<sub>i,d</sub> − sprtrn<sub>d</sub>; t₀ = the announcement date or the next trading day<br>
+CAR<sub>i</sub> = 100 × Σ<sub>k=−2</sub><sup>+2</sup> ar<sub>i, t₀+k</sub> (all five days required, D12)</div>
+<details class="src"><summary>Show code (4 excerpts)</summary>{{CODE:daily}}{{CODE:day0}}{{CODE:event_window}}{{CODE:car}}</details>
+
+<h3 id="v-mkt">6.4 Placebos MKTRET and CAR_PRE, and the spread split</h3>
+<div class="fx">MKTRET<sub>i</sub> = 100 × sprtrn<sub>t₀</sub><br>
+CAR_PRE<sub>i</sub> = the CAR formula with t₀ replaced by the last trading day on or before anndats − 14 calendar days</div>
+<p id="v-spread"><b>Spread split (Table 3).</b></p>
+<div class="fx">spread<sub>i,d</sub> = 100 × (ask<sub>d</sub> − bid<sub>d</sub>) / [(ask<sub>d</sub> + bid<sub>d</sub>) / 2], only if bid &gt; 0 and ask &gt; bid<br>
+HIGHER_SPREAD<sub>i</sub> = 1{ mean<sub>k∈[−2,+2]</sub> spread &gt; mean<sub>k∈[−10,−3]</sub> spread }, with at least 3 valid event days and 4 valid pre-event days</div>
+<details class="src"><summary>Show code</summary>{{CODE:event_vars}}</details>
+
+<h3 id="v-sf">6.5 Placebo SF_CAR</h3>
+<div class="fx">SF_CAR<sub>i</sub> = five-day CAR of the sales forecast (measure = SAL) for the same ticker and fiscal year that is closest in date among those whose window does not overlap the capex forecast's (|t₀ − t₀<sup>SAL</sup>| ≥ 5 trading days)</div>
+<p>The paper's subsample has 3,456 forecasts, with a median distance of 86 days (footnote 21). SF_CAR is standardised within this subsample.</p>
+<details class="src"><summary>Show code</summary>{{CODE:sf_car}}</details>
+
+<h3 id="v-size">6.6 SIZE</h3>
+<div class="fx">SIZE<sub>i</sub> = ln(PRCCQ × CSHOQ) at the latest fiscal quarter with datadate on or before the day before the forecast's calendar quarter starts (within 183 days)</div>
+<details class="src"><summary>Show code</summary>{{CODE:size}}{{CODE:load_fundq}}</details>
+
+<h3 id="v-lag">6.7 LAG_CAPX</h3>
+<div class="fx">Table 1: LAG_CAPX_MIL<sub>i</sub> = CAPX<sub>t−1</sub> ($ million)<br>
+Regressions: LAG_CAPX<sub>i</sub> = 100 × CAPX<sub>t−1</sub> / (PRCC_F × CSHO)<sub>t−1</sub><br>
+t−1 = the latest fiscal year ended before the forecast (within 400 days)</div>
+<p>Table 1 reports LAG_CAPX in $ million, while Table 2 defines it as scaled by start-of-year market value. Both versions are built, for the descriptive statistics and the regressions respectively (D15).</p>
+<details class="src"><summary>Show code</summary>{{CODE:lag_capx}}{{CODE:load_funda}}</details>
+
+<h3 id="v-surp">6.8 EA_DUM and SURP</h3>
+<div class="fx">EA_DUM<sub>i</sub> = 1{ some rdq with |anndats<sub>i</sub> − rdq| ≤ 1 calendar day } (D10)<br>
+SURP<sub>i</sub> = EPSPXQ<sub>q</sub> − EPSPXQ<sub>q−4</sub> × AJEXQ<sub>q</sub> / AJEXQ<sub>q−4</sub> if EA_DUM<sub>i</sub> = 1; 0 otherwise (D32: split adjustment)</div>
+<details class="src"><summary>Show code</summary>{{CODE:ea_surp}}</details>
+
+<h3 id="v-ind">6.9 Fixed-effect and cluster identifiers</h3>
+<p>Firm fixed effects use GVKEY; year-quarter fixed effects use YQ = year × 10 + quarter of the announcement; industry is the first two digits of each firm's modal historical SICH, with the header SIC when missing (D18). Each firm belongs to one industry, so firm fixed effects are nested within industry clusters.</p>
+<details class="src"><summary>Show code</summary>{{CODE:firm_industry}}{{CODE:fe_ids}}</details>
+
+<h3 id="v-std">6.10 Winsorising, standardising, CAR_POS and CAR_NEG</h3>
+<div class="fx">winsor(x) = min( max(x, q<sub>0.01</sub>), q<sub>0.99</sub> ), q = full-sample quantiles<br>
+z(x) = (x − x̄) / s, s = sample standard deviation (N − 1)<br>
+CAR_POS = max(CAR, 0), CAR_NEG = min(CAR, 0), each standardised (D35)</div>
+<p>Only ratios are winsorised (CAPEX_ADJ, CAR, CAR_PRE, SF_CAR, SURP, the scaled LAG_CAPX); dollar levels are not. The evidence is in Table 1: CAPEX_ACT and LAG_CAPX have a minimum of 0.000, while CAPEX_ADJ has a minimum of −77.05 (a point forecast followed by zero capex would give −100) (D14). Once data arrive, <code>table1_winsor_check.csv</code> tests this inference variable by variable.</p>
+<details class="src"><summary>Show code (3 excerpts)</summary>{{CODE:winsorize}}{{CODE:zscore}}{{CODE:winsor_z}}</details>
+</section>
+
+<!-- ============================================================= 7 -->
+<section class="sec" id="s7" data-title="Estimation">
+<h2><span class="no">7</span>Estimation</h2>
+<h3 id="s7-1">7.1 The regression</h3>
+<div class="fx">CAPEX_ADJ<sub>i,a,t</sub> = α + β · CAR_z<sub>i</sub> + γ′X<sub>i</sub> + μ<sub>firm</sub> + τ<sub>a</sub> + ε<sub>i,a,t</sub></div>
+<p>β reads: for a market reaction one standard deviation (8.974 points) higher, actual capex is revised upward relative to the forecast by β percentage points more. Each column's X, fixed effects and clustering are in §9.</p>
+<h3 id="s7-2">7.2 Coefficients, standard errors and p-values</h3>
+<ol>
+<li><b>Absorbing fixed effects</b>: alternating projections demean y and each x by firm and year-quarter in turn until the change is below 1e−10.</li>
+<li><b>Coefficients</b>: β̂ = (X̃′X̃)<sup>−1</sup>X̃′ỹ on the demeaned data; a constant is added when there are no fixed effects.</li>
+<li><b>Cluster-robust variance</b>: V̂ = c · (X̃′X̃)<sup>−1</sup> [Σ<sub>g</sub> S<sub>g</sub>′S<sub>g</sub>] (X̃′X̃)<sup>−1</sup>, S<sub>g</sub> = Σ<sub>i∈g</sub> x̃<sub>i</sub>û<sub>i</sub>, c = G/(G−1) · (N−1)/(N−K).</li>
+<li><b>Degrees of freedom K</b>: regressors plus the degrees of freedom of fixed effects <b>not nested</b> in the cluster variable (the reghdfe convention, D26). Firm fixed effects are nested in firm or industry clusters and do not enter K.</li>
+<li><b>p-values</b>: t = β̂ / SE, p = 2 · Pr(t<sub>G−1</sub> &gt; |t|). This is why CAR_POS with t = 1.96 earns only one star in the paper.</li>
+<li><b>Adj. R²</b> = 1 − (1 − R²)(N − 1)/(N − k), with k including all fixed-effect degrees of freedom; singletons are kept (D25: Table 2 reports the same N with and without firm fixed effects).</li>
+</ol>
+<details class="src"><summary>Show estimator code (3 excerpts)</summary>{{CODE:demean}}{{CODE:fe_dof}}{{CODE:hdfe_ols}}</details>
+<h3 id="s7-3">7.3 Difference tests in Table 3</h3>
+<div class="fx">t = (β̂<sub>Higher</sub> − β̂<sub>Lower</sub>) / √(V̂<sub>11</sub> + V̂<sub>00</sub> − 2V̂<sub>10</sub>), p = 2 · Pr(t<sub>G−1</sub> &gt; |t|)</div>
+<p>The paper does not say how the differences were tested. The two groups are pooled in one regression in which every regressor is multiplied by the group indicator and the firm and year-quarter fixed effects are split by group. The point estimates then equal the separate regressions, while the covariance is joint and industry-clustered, the analogue of Stata's <code>suest</code>.</p>
+<details class="src"><summary>Show code</summary>{{CODE:diff_test}}</details>
+<h3 id="s7-4">7.4 Calls for each table and the Stata cross-check</h3>
+<p>The Table 1 statistics, the 8 models of Table 2, and the 4 models and 7 difference tests of Table 3 call the functions above in the three excerpts below. Once data arrive, <code>stata/tables_2_3.do</code> re-estimates Tables 2–3 with <code>reghdfe</code> on the identical sample, and <code>compare_stata.py</code> compares coefficients, standard errors and sample sizes cell by cell.</p>
+<details class="src"><summary>Show the calls for Tables 1–3 (3 excerpts)</summary>{{CODE:table1}}{{CODE:table2}}{{CODE:table3}}</details>
+</section>
+
+<!-- ============================================================= 8 -->
+<section class="sec" id="s8" data-title="Table 1 cell by cell">
+<h2><span class="no">8</span>Table 1: descriptive statistics, cell by cell</h2>
+<p>Table 1 tests no hypothesis. It tells the reader how large the sample is, the units and distribution of each variable, and how long “one standard deviation” is in the regressions. The numbers shown are the paper's (May 2019 working paper); once data arrive, the code reports the replicated value under each cell.</p>
+<p class="hint">Click any number, row name or column name to see its meaning, formula, data path and code below the table.</p>
+<h3 id="s8-1">8.1 Panel A: descriptive statistics</h3>
+<div class="tw">{{TABLE_T1A}}</div><div class="explain" data-for="T1A" aria-live="polite"></div>
+<p><b>Reading the panel.</b> The mean of CAPEX_FORE (586.5) far exceeds its median (120): the distribution is right-skewed, which is why the dependent variable is a percentage rather than a dollar difference. The mean of CAPEX_ADJ, 7.421, is the denominator of the economic magnitudes in the text (1.193 / 7.421 = 16.1%); its median of 0 comes from range forecasts met inside the range. The standard deviation of CAR, 8.974, is the unit of every CAR coefficient in Tables 2 and 3.</p>
+<h3 id="s8-2">8.2 Panel B: forecasts by year</h3>
+<div class="tw">{{TABLE_T1B}}</div><div class="explain" data-for="T1B" aria-live="polite"></div>
+<h3 id="s8-3">8.3 Panel C: forecast types</h3>
+<div class="tw">{{TABLE_T1C}}</div><div class="explain" data-for="T1C" aria-live="polite"></div>
+</section>
+
+<!-- ============================================================= 9 -->
+<section class="sec" id="s9" data-title="Table 2 cell by cell">
+<h2><span class="no">9</span>Table 2: capex adjustments and the market reaction, cell by cell</h2>
+<p>Read from left to right: each column adds a control, and the question is whether the CAR coefficient survives. (1) and (2) give the raw relation; (3) adds year-quarter fixed effects to remove aggregate shocks; (4) adds firm fixed effects, comparing forecasts within the same firm; (5) clusters by industry, leaving the coefficient unchanged and the standard error larger; (6) and (7) add three placebos; (8) adds all controls and is the baseline for Table 3.</p>
+<p class="hint">Click a coefficient to see how to read it, its t-statistic and confidence interval, the column's equation, the computation steps and the line of code. The bottom rows (fixed effects, clusters, N, Adj. R²) can be clicked too.</p>
+<div class="tw">{{TABLE_T2}}</div><div class="explain" data-for="T2" aria-live="polite"></div>
+<p><b>Reading the table.</b> CAR is positive in all eight columns and significant at 1% in seven; firm fixed effects lower it from 1.196 to 0.975, but it stays significant; the three placebos (SF_CAR, MKTRET, CAR_PRE) are all insignificant. The coefficients in (4) and (5) must be identical, the simplest check in the replication that the sample and fixed effects agree.</p>
+</section>
+
+<!-- ============================================================= 10 -->
+<section class="sec" id="s10" data-title="Table 3 cell by cell">
+<h2><span class="no">10</span>Table 3: information asymmetry and the sign of the reaction, cell by cell</h2>
+<p>Table 2 shows that the relation exists; Table 3 shows why. If managers learn from the market, the effect should appear only for forecasts that draw informed trading (spreads rise around the announcement), and mainly for positive reactions (the limits to arbitrage of Edmans, Goldstein &amp; Jiang 2015). Omitted variables or reverse causality would instead produce similar effects in both groups.</p>
+<p class="hint">Click a coefficient, a difference p-value in the last column, or a bottom row.</p>
+<div class="tw">{{TABLE_T3}}</div><div class="explain" data-for="T3" aria-live="polite"></div>
+<p><b>Reading the table.</b> 1.206** where spreads rise against −0.295 where they do not, difference p = 0.019; after the split only CAR_POS in the rising-spread group (0.893*) is significant. MKTRET and CAR_PRE are insignificant in both groups and do not differ, so the rising-spread firms are not simply more sensitive to all information.</p>
+</section>
+
+<!-- ============================================================= 11 -->
+<section class="sec" id="s11" data-title="How the tables connect">
+<h2><span class="no">11</span>How the numbers in the three tables connect</h2>
+<p>The three tables are not independent: the sample shrinks from table to table, and Table 1 provides the units for the coefficients in Tables 2 and 3. The relations below can be checked directly in the replication.</p>
+<div class="tw"><table>
+<thead><tr><th>Relation</th><th>Numbers</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>Table 1 → Table 2 (1)–(5), (7)</td><td class="n">17,577</td><td>One sample; comparing these columns holds the sample fixed</td></tr>
+<tr><td>Table 2 (8)</td><td class="n">17,577 − 72 = 17,505</td><td>Missing controls: LAG_CAPX ($ million version) misses 31; the other 41 probably reflect missing start-of-year market value</td></tr>
+<tr><td>Table 2 (6)</td><td class="n">3,456</td><td>Forecasts with a same-fiscal-year sales forecast whose window does not overlap</td></tr>
+<tr><td>Table 3</td><td class="n">7,770 + 9,570 = 17,340</td><td>165 fewer than Table 2 (8) (no quotes); rising spreads in 55.2%</td></tr>
+<tr><td>Table 1 SD of CAR</td><td class="n">8.974</td><td>Unit of every CAR coefficient in Tables 2 and 3</td></tr>
+<tr><td>Table 1 mean CAPEX_ADJ</td><td class="n">7.421</td><td>Denominator of the economic magnitudes: 16.1% (T2 (1)), 11.4% (T2 (8)), 16.2% (T3 (2))</td></tr>
+<tr><td>Table 2 (8) and Table 3</td><td class="n">−0.295 &lt; 0.849 &lt; 1.206</td><td>The full-sample coefficient mixes a group with no effect and a group with a strong one</td></tr>
+<tr><td>Table 1 Panel C and Panel A</td><td class="n">34.48% ranges → median 0.000</td><td>Range forecasts met inside the range count as 0</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================= 12 -->
+<section class="sec" id="s12" data-title="Choices the paper leaves open">
+<h2><span class="no">12</span>Choices the paper leaves open</h2>
+<p>The paper leaves 37 choices unstated, 14 of which affect Tables 1–3. Each is a switch in <code>config.py</code>; the evidence column gives the clue in the paper that supports the choice, and <b>inferred from N</b> marks evidence from the paper's own sample sizes. The full log is in <code>REPLICATION_NOTES.md</code>.</p>
+<div class="tw"><table>
+<thead><tr><th>ID</th><th>Question</th><th>Choice</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td>D2</td><td>Sample years</td><td>Forecasts issued 2003–2015</td><td><b>Inferred from N</b>: the waterfall arithmetic is exact and the final sample starts in 2003</td></tr>
+<tr><td>D3</td><td>Which range_desc codes mark open-ended forecasts</td><td>Calibrated with <code>diagnose.py</code> once data arrive</td><td>Target shares 55.30 / 34.48 / 10.22%</td></tr>
+<tr><td>D4</td><td>Units of forecast values</td><td>Converted to $ million</td><td>Median actual-to-forecast ratio near 1 for each unit code</td></tr>
+<tr><td>D6</td><td>Several forecasts in one firm-quarter</td><td>Keep the first; collapse before the step-1 count</td><td><b>Inferred from N</b>: the waterfall arithmetic leaves no extra deletion</td></tr>
+<tr><td>D7</td><td>Denominator for range forecasts</td><td>Range midpoint</td><td>“scaled by the forecast”; alternative: the violated bound</td></tr>
+<tr><td>D8</td><td>CAPEX_ADJ for open-ended forecasts</td><td>Treated as a point at val_1</td><td>Footnote 17's robustness check keeps only point and range forecasts</td></tr>
+<tr><td>D9</td><td>“Concurrent with an earnings forecast”</td><td>An EPS forecast on the same calendar day</td><td><b>Inferred from N</b>: about 47% must be removed (17,473 / 36,900)</td></tr>
+<tr><td>D10</td><td>“With” an earnings announcement</td><td>Within ±1 calendar day</td><td>EA_DUM mean of 0.559</td></tr>
+<tr><td>D13</td><td>Which sales forecast for SF_CAR</td><td>Same fiscal year, non-overlapping window, nearest</td><td><b>Inferred from N</b>: N = 3,456, median distance 86 days</td></tr>
+<tr><td>D14</td><td>Which variables are winsorised</td><td>Ratios at 1% / 99%; dollar levels not</td><td><b>Inferred from extremes</b>: CAPEX_ACT and LAG_CAPX have a minimum of 0; CAPEX_ADJ has −77.05, not −100</td></tr>
+<tr><td>D15</td><td>Units of LAG_CAPX</td><td>$ million in Table 1; scaled by market value in regressions</td><td>Table 1 and Table 2 define it differently</td></tr>
+<tr><td>D17</td><td>Spread units</td><td>Percent</td><td>A median non-event spread of 0.073 is plausible only in percent</td></tr>
+<tr><td>D18</td><td>Industry for clustering</td><td>Two-digit SIC, fixed per firm</td><td>Keeps firm fixed effects nested in the cluster variable</td></tr>
+<tr><td>D25</td><td>Singletons</td><td>Kept</td><td><b>Inferred from N</b>: Table 2 has N = 17,577 with and without firm fixed effects</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================= 13 -->
+<section class="sec" id="s13" data-title="Verification before data">
+<h2><span class="no">13</span>Verification completed before data</h2>
+<p>The eight checks below ran and passed without WRDS data. The only piece not yet run is the Stata script, because Stata is not available in the development environment; the Python results do not depend on it.</p>
+<div class="tw"><table>
+<thead><tr><th>Check</th><th>What it verifies</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Estimator test <code>tests/test_hdfe.py</code></td><td>Fixed-effects regression and clustered standard errors against brute-force least squares with firm and quarter dummies, clustering by firm and by industry</td><td>Coefficients identical; areg-convention standard errors equal the brute-force ones; a planted group difference of 0.6 is detected (p = 4.6e−7)</td></tr>
+<tr><td>End-to-end synthetic run <code>tests/run_synthetic.py</code></td><td>Every step from WRDS-shaped raw tables to Tables 1–3 and the report, with an effect planted only where spreads rise</td><td>Table 3: 1.672*** (SE 0.448) where spreads rise, −0.004 (SE 0.794) where they do not; full run in 34 seconds</td></tr>
+<tr><td>Sample-size consistency</td><td>Table 2 (1)–(5), (7) share one sample; (8) ≤ (7); the Table 3 groups come from the (8) sample; the collapse precedes the waterfall</td><td>All assertions pass</td></tr>
+<tr><td>Report inputs</td><td>Every number the results report needs is produced; reports built on synthetic data carry a DEMO watermark</td><td>Pass</td></tr>
+<tr><td>WRDS access check <code>check_wrds.py</code></td><td>A table without permission, a missing column, a renamed library</td><td>All three reported correctly</td></tr>
+<tr><td>Download resilience <code>pull_wrds.py</code></td><td>A failed table is logged and skipped, the rest download, and a re-run command is printed</td><td>Pass</td></tr>
+<tr><td>Stata comparison <code>compare_stata.py</code></td><td>Whether a gap between Stata and Python estimates is detected</td><td>The one planted discrepancy among 53 coefficients is flagged and the program exits with failure</td></tr>
+<tr><td>Pre-flight <code>preflight.py</code></td><td>Environment, packages, configuration, both test suites, data status</td><td>Verdict: READY FOR DATA</td></tr>
+</tbody></table></div>
+<p class="cite">The synthetic data plant an effect of 3.0 percentage points per standard deviation, for point forecasts only. The recovered 1.67 is smaller because zeros from range forecasts, winsorising and the measured spread split dilute it. The test checks that the pattern Table 3 relies on can be recovered, not the size of the number.</p>
+</section>
+
+<!-- ============================================================= 14 -->
+<section class="sec" id="s14" data-title="Calibration and success criteria">
+<h2><span class="no">14</span>Calibration targets and success criteria</h2>
+<p>Once data arrive, the coding switches are set against sample characteristics before any regression is read, so that results cannot steer the choices.</p>
+<div class="tw"><table>
+<thead><tr><th>Calibration target</th><th>Paper</th><th>Switches</th></tr></thead>
+<tbody>
+<tr><td>Sample waterfall</td><td>40,785 → 36,900 → 19,427 → 17,577</td><td>D1, D2, D5, D6, D9</td></tr>
+<tr><td>Point / range / other shares</td><td>55.30 / 34.48 / 10.22%</td><td>D3</td></tr>
+<tr><td>Share removed as same-day with an EPS forecast</td><td>47.4%</td><td>D9</td></tr>
+<tr><td>EA_DUM mean</td><td>0.559</td><td>D10</td></tr>
+<tr><td>Median CAPEX_ADJ</td><td>0.000</td><td>D3, D7</td></tr>
+<tr><td>CAR mean / SD / min / max</td><td>−0.148 / 8.974 / −31.359 / 25.350</td><td>D11, D12, D14</td></tr>
+<tr><td>Sales-forecast subsample; median distance</td><td>3,456; 86 days</td><td>D13</td></tr>
+<tr><td>Share with rising spreads</td><td>55.2%</td><td>D17</td></tr>
+</tbody></table></div>
+<p><b>The replication will be judged successful if:</b></p>
+<ol>
+<li>The final sample is within 10% of 17,577 and the gap at each waterfall step is explained.</li>
+<li>The CAR coefficient is positive and significant in all eight Table 2 models, with similar magnitudes (paper: 0.672–1.207).</li>
+<li>The three placebos (SF_CAR, MKTRET, CAR_PRE) are insignificant.</li>
+<li>In Table 3 the effect appears only where spreads rise, the difference is significant, and it comes from positive reactions.</li>
+<li>Every coefficient more than one paper standard error away is listed with the choice most likely responsible (done automatically by the report generator).</li>
+</ol>
+</section>
+
+<!-- ============================================================= 15 -->
+<section class="sec" id="s15" data-title="Risks and open issues">
+<h2><span class="no">15</span>Risks and open issues</h2>
+<div class="tw"><table>
+<thead><tr><th>Risk</th><th>Consequence</th><th>Response</th></tr></thead>
+<tbody>
+<tr><td>The WRDS account lacks I/B/E/S Guidance</td><td>None of Tables 1–3 can be built</td><td><code>check_wrds.py</code> confirms within two minutes; resolve the subscription before downloading anything else</td></tr>
+<tr><td>Target numbers come from the May 2019 working paper</td><td>Published tables may differ</td><td>Check <code>paper_targets.py</code> against the RFS version and Internet Appendix</td></tr>
+<tr><td>Databases revised since 2019</td><td>Counts and coefficients will not match exactly</td><td>Judge on sign, significance and magnitude (§14); pull dates logged</td></tr>
+<tr><td>I/B/E/S coding of open-ended forecasts differs from the authors'</td><td>Panel C shares and CAPEX_ADJ shift</td><td>Calibrate D3 to the paper's shares before estimation</td></tr>
+<tr><td>CRSP closing quotes are a coarse spread measure</td><td>The Table 3 split may differ from the paper's</td><td>Calibrate to the 55.2% rising-spread share; report the sensitivity</td></tr>
+<tr><td>The paper does not state its difference-test method</td><td>Table 3 p-values may differ slightly</td><td>Interacted-model method documented; cross-checked in Stata with <code>reghdfe</code> and <code>test</code></td></tr>
+<tr><td>Stata script not yet run</td><td>A syntax slip could surface on first use</td><td>Run on the first real build; Python results do not depend on it</td></tr>
+</tbody></table></div>
+<p><b>For discussion:</b> whether to extend the sample beyond 2016 after the replication. The year window is set in <code>config.py</code>; data after 2024 would also need the CRSP queries in <code>pull_wrds.py</code> moved to CRSP's new (CIZ) format.</p>
+</section>
+
+<!-- ============================================================= A -->
+<section class="sec" id="sA" data-title="Appendix A: after WRDS access">
+<h2><span class="no">A</span>Appendix A: steps after WRDS access</h2>
+<p>Twelve steps, each with its command, what success looks like and what to do if it fails. Details on the WRDS account, Duo two-factor login and error handling are in <code>WRDS_GUIDE.md</code>.</p>
+<ol class="steps">
+<li><h4>Confirm the targets</h4><p>Download the published RFS article and its Internet Appendix; update <code>paper_targets.py</code> wherever Tables 1–3 differ from the working paper.</p></li>
+<li><h4>Account and two-factor login</h4><p>Register the WRDS account and enrol in Duo; every Python connection then sends one push to approve.</p></li>
+<li><h4>Pre-flight</h4><pre class="cmd">pip install -r requirements.txt
+export WRDS_USERNAME=your_username     # Windows: setx WRDS_USERNAME "your_username"
+python preflight.py</pre><p>Success: every line ok except the data line; verdict READY FOR DATA.</p></li>
+<li><h4>First connection</h4><p>Run <code>wrds.Connection()</code> once in Python, approve the Duo push, and answer <code>y</code> when asked to save the password file.</p></li>
+<li><h4>Access check</h4><pre class="cmd">python check_wrds.py                  # about 2 minutes → output/wrds_check.md</pre><p>Success: all nine tables OK and I/B/E/S has records with measure = CPX. If I/B/E/S Guidance shows NO ACCESS, stop and resolve the subscription first. Keep the table of <code>range_desc</code> codes from the report; step 7 uses it.</p></li>
+<li><h4>Download</h4><pre class="cmd">python pull_wrds.py                   # 9 tables, one Duo push; log in data/raw/_pull_log.csv</pre><p>Success: no FAILED line in the log. After a dropped connection, re-run only the failed tables, e.g. <code>python pull_wrds.py dsf</code>.</p></li>
+<li><h4>Calibrate</h4><pre class="cmd">python diagnose.py</pre><p>Without looking at any regression, set <code>config.py</code> against §14: for D3, add the range_desc codes meaning “at least / at most” to the open-ended set until the shares approach 55 / 34 / 10%; for D4, rescale unit codes with a median ratio near 1,000; confirm the 47% for D9 and the 0.559 for D10. Record each change under its ID in <code>REPLICATION_NOTES.md</code>.</p></li>
+<li><h4>Build and estimate</h4><pre class="cmd">python run_all.py                     # sample, Tables 1–3, results report → output/</pre></li>
+<li><h4>Read the results in order</h4><p><code>sample_waterfall.csv</code> → Table 1 and <code>table1_winsor_check.csv</code> → numbers quoted in the text → Tables 2 and 3 → <code>replication_report.html</code>. If the winsorisation check disagrees with D14 for a variable, update <code>WINSOR_VARS</code> and repeat step 8.</p></li>
+<li><h4>Stata cross-check</h4><pre class="cmd">ssc install ftools
+ssc install reghdfe
+cd stata
+do tables_2_3.do
+* back in the package root:
+python compare_stata.py               # → output/stata_crosscheck.md</pre><p>Success: all coefficients agree to rounding error and N is identical in every model.</p></li>
+<li><h4>Robustness</h4><p>Switch D7, D9, D10, D14 and D18 one at a time, repeat step 8 each time, and record whether the conclusions of Tables 2 and 3 change.</p></li>
+<li><h4>Report</h4><p>Explain every flagged deviation in the last section of the results report; print <code>replication_report.html</code> to PDF from the browser; share only the results in <code>output/</code>, never the raw data in <code>data/</code>.</p></li>
+</ol>
+</section>
+
+<!-- ============================================================= B -->
+<section class="sec" id="sB" data-title="Appendix B: package map">
+<h2><span class="no">B</span>Appendix B: package map</h2>
+<div class="tw"><table>
+<thead><tr><th>File</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><code>preflight.py</code></td><td>Pre-flight check: environment, packages, configuration, both test suites, data status, next command</td></tr>
+<tr><td><code>check_wrds.py</code></td><td>WRDS permissions, column names and I/B/E/S coding, before any download</td></tr>
+<tr><td><code>pull_wrds.py</code></td><td>Downloads the nine tables and logs each pull's date and row count</td></tr>
+<tr><td><code>diagnose.py</code></td><td>Prints the sample characteristics used to calibrate the coding switches</td></tr>
+<tr><td><code>run_all.py</code></td><td>Builds the sample, estimates Tables 1–3, writes the results report</td></tr>
+<tr><td><code>build_capex_sample.py</code></td><td>Sample construction and every variable (§5, §6)</td></tr>
+<tr><td><code>tables.py</code></td><td>Tables 1–3, text figures, robustness, winsorisation check, Stata export</td></tr>
+<tr><td><code>hdfe.py</code></td><td>Fixed-effects OLS, clustered standard errors, difference tests (§7)</td></tr>
+<tr><td><code>report.py</code></td><td>Results report (HTML / Markdown): scorecard and deviation diagnosis</td></tr>
+<tr><td><code>stata/tables_2_3.do</code>, <code>compare_stata.py</code></td><td>Stata <code>reghdfe</code> re-estimation and cell-by-cell comparison</td></tr>
+<tr><td><code>config.py</code></td><td>Every switch, tagged with its decision ID</td></tr>
+<tr><td><code>paper_targets.py</code></td><td>Every number from the paper, for comparison</td></tr>
+<tr><td><code>tests/</code></td><td>Estimator test, synthetic data generator, end-to-end test</td></tr>
+<tr><td><code>REPLICATION_NOTES.md</code>, <code>WRDS_GUIDE.md</code>, <code>GUIDE.html</code></td><td>Decision log D1–D37; WRDS manual; study guide</td></tr>
+<tr><td><code>docs/build_report_en.py</code>, <code>docs/build_report_zh.py</code></td><td>Generate this report (English and Chinese); code excerpts and line numbers are cut from the source files, so re-running after a code change keeps them in sync</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================= C -->
+<section class="sec" id="sC" data-title="Appendix C: inconsistencies">
+<h2><span class="no">C</span>Appendix C: inconsistencies in the working paper</h2>
+<div class="tw"><table>
+<thead><tr><th>Location</th><th>Issue</th><th>Reading adopted</th></tr></thead>
+<tbody>
+<tr><td>Table 3 note</td><td>Refers to “Model (9) of Table 2”; Table 2 has eight models</td><td>Model (8) controls</td></tr>
+<tr><td>Tables 1 and 2</td><td>LAG_CAPX in $ million in Table 1, scaled by market value in Table 2</td><td>Both versions built (D15)</td></tr>
+<tr><td>Table 3</td><td>CAR_POS = 0.893 with SE 0.455 (t = 1.96) carries one star</td><td>Consistent with t(G − 1) p-values under industry clustering, which the code uses</td></tr>
+<tr><td>Section 2.2</td><td>The initial sample spans 2002–2016, only 2016 forecasts are removed, yet the final sample starts in 2003</td><td>No 2002 forecast in the final sample (D2)</td></tr>
+<tr><td>Appendix 1</td><td>A November 2014 capex forecast is described as “for fiscal year 2016”</td><td>Probably fiscal 2015; does not affect estimation</td></tr>
+</tbody></table></div>
+</section>
+
+</div>
+</main>
+</div>
+<script id="cards" type="application/json">{{CARDS_JSON}}</script>
+<script>
+(function(){"use strict";
+function $(s,r){return (r||document).querySelector(s);}
+var store={get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},set:function(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+var t=store.get("jw-rep-theme");if(t)document.documentElement.setAttribute("data-theme",t);
+$("#themeBtn").addEventListener("click",function(){var c=document.documentElement.getAttribute("data-theme");
+  var dark=c?c==="dark":matchMedia("(prefers-color-scheme: dark)").matches;var n=dark?"light":"dark";
+  document.documentElement.setAttribute("data-theme",n);store.set("jw-rep-theme",n);});
+/* table of contents */
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+var toc=$("#toc"),mtoc=$("#mtoc"),links=[];
+document.querySelectorAll("section.sec").forEach(function(s){var no=s.querySelector("h2 .no").textContent;
+  var li='<li><a href="#'+s.id+'"><span style="color:var(--rule2);margin-right:6px">'+no+'</span>'+esc(s.dataset.title)+'</a>';
+  var sub="";s.querySelectorAll("h3[id]").forEach(function(h){sub+='<li><a href="#'+h.id+'">'+esc(h.textContent)+'</a></li>';});
+  if(sub)li+="<ol>"+sub+"</ol>";li+="</li>";toc.insertAdjacentHTML("beforeend",li);mtoc.insertAdjacentHTML("beforeend",li);});
+mtoc.addEventListener("click",function(e){if(e.target.closest("a"))mtoc.parentNode.removeAttribute("open");});
+links=[].slice.call(toc.querySelectorAll(":scope > li > a"));
+if("IntersectionObserver" in window){var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting)
+  links.forEach(function(l){l.classList.toggle("on",l.getAttribute("href")==="#"+en.target.id);});});},{rootMargin:"-15% 0px -75% 0px"});
+  document.querySelectorAll("section.sec").forEach(function(s){io.observe(s);});}
+/* waterfall */
+var wf=[["Annual I/B/E/S capex forecasts matched to Compustat",40785,0],["Five-day market reaction available",36900,3885],["Not on the day of an EPS forecast",19427,17473],["Issued 2003–2015 (final sample)",17577,1850]],h="";
+wf.forEach(function(r){h+='<div class="row"><div>'+r[0]+'</div><div class="track"><div class="fill" style="width:'+(r[1]/40785*100).toFixed(1)+'%">'+
+  r[1].toLocaleString("en-US")+(r[2]?'<span class="minus">−'+r[2].toLocaleString("en-US")+'</span>':'')+'</div></div></div>';});
+$("#wf").innerHTML=h;
+/* links to code excerpts: open the folded <details> first, then jump */
+function openTo(id){var el=document.getElementById(id);if(!el)return;var d=el.closest("details");if(d)d.open=true;
+  el.scrollIntoView({block:"start",behavior:"smooth"});}
+document.addEventListener("click",function(e){var a=e.target.closest('a[href^="#code-"]');if(!a)return;
+  e.preventDefault();var id=a.getAttribute("href").slice(1);openTo(id);history.replaceState(null,"","#"+id);});
+if(location.hash.indexOf("#code-")===0)openTo(location.hash.slice(1));
+/* cell cards */
+var CARDS=JSON.parse($("#cards").textContent);
+document.querySelectorAll("table.anno").forEach(function(tab){
+  var box=tab.closest(".tw").nextElementSibling;
+  function show(c){tab.querySelectorAll(".sel").forEach(function(x){x.classList.remove("sel");});c.classList.add("sel");
+    box.innerHTML=CARDS[c.dataset.k]||'<p class="hint">(no note)</p>';}
+  tab.addEventListener("click",function(e){var c=e.target.closest(".cx");if(!c)return;show(c);
+    var r=box.getBoundingClientRect();if(r.top>innerHeight-80||r.bottom<0)box.scrollIntoView({block:"nearest",behavior:"smooth"});});
+  tab.addEventListener("keydown",function(e){var c=e.target.closest(".cx");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();show(c);}});
+  var first=tab.querySelector('[data-k="t1a-2-1"]')||tab.querySelector('[data-k="t2-CAR-8"]')||tab.querySelector('[data-k="t3-CAR-2"]')||tab.querySelector("td.cx");
+  if(first)show(first);});
+})();
+</script>
+</body>
+</html>

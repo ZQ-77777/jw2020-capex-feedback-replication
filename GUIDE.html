@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jayaraman &amp; Wu (2020) Tables 1–3 学习与复现指南</title>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F1F4F8; --sheet:#FFFFFF; --ink:#15223A; --muted:#55667E; --rule:#D4DCE6; --rule-strong:#AEBBCC;
+  --accent:#1D5BA6; --accent-soft:#E2EBF7; --up:#A6650F; --up-soft:#F7ECDA; --down:#A23A3A; --down-soft:#F7E3E3;
+  --green:#1F7A4D; --green-soft:#E1F1E8; --code-bg:#EDF1F6; --mark:#FFF0B8;
+  --serif:"Noto Serif SC","Songti SC","STSong","Source Han Serif SC",Georgia,serif;
+  --sans:"PingFang SC","Noto Sans SC","Microsoft YaHei","Hiragino Sans GB","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0D1520; --sheet:#141F2E; --ink:#E2E8F0; --muted:#9CABBF; --rule:#293A50; --rule-strong:#3D5170;
+    --accent:#80AEEA; --accent-soft:#1B2D46; --up:#E3B465; --up-soft:#382D19; --down:#E88B8B; --down-soft:#3A2020;
+    --green:#74CF9F; --green-soft:#17322A; --code-bg:#1A283B; --mark:#4D4118;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0D1520; --sheet:#141F2E; --ink:#E2E8F0; --muted:#9CABBF; --rule:#293A50; --rule-strong:#3D5170;
+  --accent:#80AEEA; --accent-soft:#1B2D46; --up:#E3B465; --up-soft:#382D19; --down:#E88B8B; --down-soft:#3A2020;
+  --green:#74CF9F; --green-soft:#17322A; --code-bg:#1A283B; --mark:#4D4118;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.78 var(--sans);-webkit-text-size-adjust:100%}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+code{font-family:var(--mono);font-size:.87em;background:var(--code-bg);padding:.08em .35em;border-radius:3px}
+pre{position:relative;background:var(--code-bg);padding:14px 16px;border-radius:6px;overflow-x:auto;font:13.5px/1.6 var(--mono);margin:12px 0}
+pre code{background:none;padding:0;font-size:inherit}
+.copy{position:absolute;top:8px;right:8px;font:12px var(--sans);border:1px solid var(--rule);background:var(--sheet);color:var(--muted);border-radius:4px;padding:2px 8px;cursor:pointer}
+
+/* layout */
+.layout{display:grid;grid-template-columns:268px minmax(0,1fr);max-width:1240px;margin:0 auto;gap:36px;padding:0 22px}
+nav.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;padding:28px 0}
+.brand b{display:block;font:600 15.5px/1.4 var(--serif)}
+.brand span{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+nav.toc ol{list-style:none;margin:14px 0 0;padding:0}
+nav.toc ol ol{margin:2px 0 6px 18px}
+nav.toc a{display:block;padding:3px 10px;border-left:2px solid transparent;color:var(--muted);text-decoration:none;font-size:14px;line-height:1.5}
+nav.toc ol ol a{font-size:13px}
+nav.toc a:hover,nav.toc a.on{color:var(--ink);border-left-color:var(--accent)}
+nav.toc .n{color:var(--rule-strong);margin-right:6px;font-variant-numeric:tabular-nums}
+.side-tools{margin-top:18px;display:grid;gap:8px;font-size:13px;color:var(--muted)}
+.btn{font:14px var(--sans);padding:6px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--sheet);color:var(--ink);cursor:pointer}
+.bar{height:4px;background:var(--rule);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+details.mtoc{display:none}
+main{padding:34px 0 120px;min-width:0}
+.sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:34px 42px}
+
+/* type */
+h1{font:600 clamp(28px,4vw,40px)/1.25 var(--serif);margin:6px 0 12px}
+h2{font:600 26px/1.35 var(--serif);margin:0 0 10px}
+h2 .no{color:var(--accent);margin-right:.45em;font-variant-numeric:tabular-nums}
+h2 .en,h3 .en{display:block;font:15px/1.4 var(--sans);color:var(--muted);margin-top:2px}
+h3{font:600 19px/1.45 var(--sans);margin:34px 0 8px;scroll-margin-top:14px}
+h4{font:600 16px/1.5 var(--sans);margin:20px 0 4px}
+p{margin:10px 0;max-width:48em}
+ul,ol{max-width:48em}
+li{margin:3px 0}
+section.sec{padding-top:56px;margin-top:56px;border-top:1px solid var(--rule);scroll-margin-top:0}
+section.sec:first-of-type{border-top:0;margin-top:20px;padding-top:20px}
+.lead{color:var(--muted);font-size:16.5px}
+.cite{color:var(--muted);font-size:14px}
+.key{border-left:3px solid var(--accent);padding:4px 0 4px 14px;font-weight:600;max-width:46em}
+.note{border-left:3px solid var(--up);background:var(--up-soft);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;max-width:48em}
+.note.info{border-left-color:var(--accent);background:var(--accent-soft)}
+.note.ok{border-left-color:var(--green);background:var(--green-soft)}
+.pos{color:var(--up);font-weight:600}.flat{color:var(--muted)}.neg{color:var(--down);font-weight:600}
+
+/* tables */
+.tw{overflow-x:auto;margin:12px 0;border:1px solid var(--rule);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:7px 11px;border-bottom:1px solid var(--rule)}
+thead th{font-weight:600;color:var(--muted);font-size:13.5px;background:var(--bg)}
+tbody th{font-weight:600}
+tr:last-child td,tr:last-child th{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.paper td{font-variant-numeric:tabular-nums}
+table.paper td.c{text-align:center;white-space:nowrap}
+sup.m{color:var(--up);font-weight:700;font-size:.72em;margin-left:1px}
+.se{display:block;color:var(--muted);font-size:12.5px}
+tr.hl td{background:var(--accent-soft)}
+
+/* lessons */
+.firm{border:1px dashed var(--rule-strong);border-radius:8px;padding:12px 16px;margin:14px 0;background:var(--bg)}
+.lesson{border:1px solid var(--rule);border-radius:8px;margin:18px 0;padding:6px 18px 14px;scroll-margin-top:14px}
+.lesson h3{margin-top:14px}
+.lesson .ln{display:inline-block;min-width:2.4em;color:var(--accent);font-variant-numeric:tabular-nums}
+.lesson dl{display:grid;grid-template-columns:5.6em minmax(0,1fr);gap:6px 14px;margin:8px 0 0}
+.lesson dt{color:var(--muted);font-size:14px;padding-top:1px}
+.lesson dt.ex{color:var(--up)}
+.lesson dd{margin:0;min-width:0}
+details.check{border:1px solid var(--rule);border-radius:6px;padding:6px 12px;margin:6px 0;background:var(--sheet)}
+details.check summary{cursor:pointer;font-weight:600;font-size:14.5px}
+details.check[open] summary{margin-bottom:6px}
+.calc{font-family:var(--mono);font-size:13.5px;background:var(--code-bg);padding:8px 12px;border-radius:6px;margin:6px 0;overflow-x:auto;white-space:pre}
+
+/* widgets */
+.widget{border:1px solid var(--rule-strong);border-radius:10px;padding:16px 18px;margin:18px 0;background:var(--bg)}
+.widget h4{margin:0 0 4px}
+.widget .sub{color:var(--muted);font-size:14px;margin:0 0 10px}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;margin:8px 0}
+.ctrls label{display:grid;gap:3px;font-size:13.5px;color:var(--muted)}
+.ctrls input,.ctrls select{font:15px var(--sans);padding:5px 8px;border:1px solid var(--rule-strong);border-radius:5px;background:var(--sheet);color:var(--ink);width:120px}
+.ctrls select{width:auto}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{font:13.5px var(--sans);padding:4px 11px;border-radius:15px;border:1px solid var(--rule-strong);background:var(--sheet);color:var(--ink);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--sheet)}
+.out{font-size:15px;margin-top:8px}
+.out b.big{font:600 26px/1.2 var(--serif);margin-right:8px}
+svg.fig{width:100%;height:auto;display:block;margin:8px 0}
+svg text{font-family:var(--sans);fill:var(--ink)}
+svg .mut{fill:var(--muted)}
+svg .ax{stroke:var(--rule-strong);stroke-width:1}
+svg .grid{stroke:var(--rule);stroke-width:1}
+figure{margin:18px 0}
+figcaption{color:var(--muted);font-size:13.5px;margin-top:4px;max-width:48em}
+
+/* flow & tree */
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0}
+.flow span{border:1px solid var(--rule-strong);background:var(--sheet);border-radius:6px;padding:5px 10px;font-size:14px}
+.flow i{font-style:normal;color:var(--accent)}
+.dtree{display:grid;gap:8px;margin:12px 0}
+.dt-row{display:grid;grid-template-columns:minmax(160px,260px) 1fr;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.dt-if{padding:8px 12px;background:var(--accent-soft);font-weight:600;font-size:14px}
+.dt-then{padding:8px 12px;font-size:14px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+input[type=search]{font:15px var(--sans);padding:7px 12px;border:1px solid var(--rule-strong);border-radius:6px;background:var(--sheet);color:var(--ink);min-width:220px;flex:1;max-width:360px}
+.count{font-size:13.5px;color:var(--muted)}
+mark{background:var(--mark);color:inherit;padding:0 1px}
+.dcard{border:1px solid var(--rule);border-radius:6px;padding:10px 14px;margin:8px 0;background:var(--sheet)}
+.dcard.inferred{border-left:3px solid var(--up)}
+.dcard header{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.dcard .id{font:600 14.5px var(--mono);color:var(--accent);min-width:2.8em}
+.dcard dl{display:grid;grid-template-columns:4.2em minmax(0,1fr);gap:2px 10px;margin:6px 0 0;font-size:14.5px}
+.dcard dt{color:var(--muted)}
+.dcard dd{margin:0}
+.check-list{list-style:none;padding:0}
+.check-list li{padding:6px 0;border-bottom:1px dashed var(--rule)}
+.check-list label{display:flex;gap:10px;cursor:pointer;align-items:flex-start}
+.check-list input{margin-top:6px;width:16px;height:16px;accent-color:var(--accent);flex:none}
+.check-list input:checked+span{color:var(--muted);text-decoration:line-through}
+.check-list .grp{font-weight:600;border:0;padding-top:16px}
+.timeline-steps{list-style:none;padding:0;counter-reset:st}
+.timeline-steps>li{counter-increment:st;position:relative;padding:2px 0 16px 46px;border-left:1px solid var(--rule);margin-left:15px}
+.timeline-steps>li:last-child{border-left-color:transparent}
+.timeline-steps>li::before{content:counter(st);position:absolute;left:-16px;top:0;width:31px;height:31px;border-radius:50%;background:var(--sheet);border:1.5px solid var(--accent);color:var(--accent);font:600 14px/28px var(--sans);text-align:center}
+.status{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.status div{border-top:3px solid var(--sc);background:var(--bg);padding:10px 12px;font-size:14px}
+.status b{display:block;margin-bottom:2px}
+.line3{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:8px;align-items:stretch;margin:14px 0}
+.line3 .st{border:1px solid var(--rule);border-radius:8px;padding:10px 12px;background:var(--bg);font-size:14px}
+.line3 .st.now{border:2px solid var(--accent)}
+.line3 .st b{display:block}
+.line3 .st small{display:block;color:var(--muted);font-size:12.5px;margin-top:4px}
+.line3 .ar{align-self:center;color:var(--muted)}
+footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--rule);color:var(--muted);font-size:13.5px}
+
+
+/* annotated tables (section 8) */
+.anno-wrap{margin:14px 0 18px}
+table.anno td.cx,table.anno th.cx{cursor:pointer}
+table.anno td.cx:hover,table.anno th.cx:hover{background:var(--accent-soft)}
+table.anno .sel{outline:2px solid var(--accent);outline-offset:-2px;background:var(--accent-soft)}
+table.anno td{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.anno td.lab,table.anno th.lab{text-align:left}
+table.anno tr.sep td{border-top:1.5px solid var(--rule-strong)}
+.explain{border:1px solid var(--rule-strong);border-left:4px solid var(--accent);border-radius:6px;padding:12px 16px;background:var(--sheet);margin:10px 0;scroll-margin-top:60px}
+.explain h5{margin:0 0 8px;font:600 16.5px/1.45 var(--sans)}
+.explain dl{display:grid;grid-template-columns:6.5em minmax(0,1fr);gap:5px 14px;margin:0}
+.explain dt{color:var(--muted);font-size:14px;padding-top:1px}
+.explain dt.ex{color:var(--up)}
+.explain dd{margin:0}
+.hint{color:var(--muted);font-size:13.5px;margin:4px 0 0}
+.flow span small{display:block;color:var(--muted);font-size:12.5px;line-height:1.45}
+@media (max-width:980px){.explain dl{grid-template-columns:minmax(0,1fr)}.explain dt{padding-top:6px}}
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr;padding:0 10px;gap:0}
+  nav.toc{display:none}
+  details.mtoc{display:block;position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--rule);padding:10px 4px}
+  details.mtoc summary{cursor:pointer;font-weight:600}
+  details.mtoc ol{margin:8px 0;padding-left:1.4em;font-size:14.5px;max-height:70vh;overflow-y:auto}
+  main{padding-top:12px}
+  .sheet{padding:22px 16px;border-radius:0;border-left:0;border-right:0}
+  .line3{grid-template-columns:1fr}.line3 .ar{transform:rotate(90deg);justify-self:center}
+  .status{grid-template-columns:1fr}
+  .lesson dl{grid-template-columns:minmax(0,1fr)}.lesson dt{padding-top:6px}
+  .dt-row{grid-template-columns:1fr}
+}
+@media print{nav.toc,details.mtoc,.copy,.side-tools,.tools,.widget .ctrls{display:none}.layout{display:block}.sheet{border:0;padding:0}details{open:open}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents（目录）">
+  <div class="brand"><b>Jayaraman &amp; Wu (2020) 学习与复现指南</b><span>Tables 1–3 · Zhang Qi，v3，2026-11-03</span></div>
+  <ol id="toc"></ol>
+  <div class="side-tools">
+    <span id="progText">Checklist（清单）0 / 0</span><div class="bar"><i id="progBar"></i></div>
+    <button class="btn" id="themeBtn" type="button">切换深色 / 浅色</button>
+    <span>离线单文件，直接用浏览器打开。</span>
+  </div>
+</nav>
+
+<main>
+<details class="mtoc"><summary>Contents（目录）</summary><ol id="mtoc"></ol></details>
+<div class="sheet">
+
+<header class="hero" id="top">
+  <p class="cite">Jayaraman, S. &amp; Wu, J. S. (2020). Should I Stay or Should I Grow? Using Voluntary Disclosure to Elicit Market Feedback. <i>Review of Financial Studies</i> 33(8): 3854–3888.</p>
+  <h1>公司公布资本支出计划，是为了听市场怎么说吗？</h1>
+  <p class="lead">陈老师布置的任务是复现 Table 1–3。本指南把这三张表拆到每一个数字：它在论文里说明什么、用什么数据和规则算出来、代码在哪里、对不上时先查哪里。按模板组织为三部分：读懂论文（§1–§13）、动手复现（§14）、术语与结果（§15–§18）。</p>
+
+  <svg class="fig" id="heroLoop" viewBox="0 0 760 250" role="img" aria-labelledby="hlT hlD">
+    <title id="hlT">Feedback loop（反馈回路）</title>
+    <desc id="hlD">管理层发布 capex 预测；知情交易者解读后交易，形成公告期股价反应 CAR；管理层据此在年末调整实际 capex。Table 2 检验这一关系是否存在，Table 3 检验它是否只在披露引来知情交易时出现。</desc>
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"/></marker>
+    <marker id="ahu" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--up)"/></marker></defs>
+    <rect x="4" y="30" width="226" height="86" rx="8" style="fill:var(--sheet);stroke:var(--accent);stroke-width:2"/>
+    <text x="20" y="60" style="font-size:15px;font-weight:600">① Capex forecast</text>
+    <text x="20" y="82" class="mut" style="font-size:13px">资本支出预测，IBES CPX</text>
+    <text x="20" y="102" class="mut" style="font-size:13px">day 0 = 公告日</text>
+    <rect x="267" y="30" width="226" height="86" rx="8" style="fill:var(--sheet);stroke:var(--rule-strong);stroke-width:1.5"/>
+    <text x="283" y="60" style="font-size:15px;font-weight:600">② Market reaction</text>
+    <text x="283" y="82" class="mut" style="font-size:13px">市场反应 CAR[−2, +2]，自变量</text>
+    <text x="283" y="102" class="mut" style="font-size:13px">价差 spread 是否上升 → Table 3</text>
+    <rect x="530" y="30" width="226" height="86" rx="8" style="fill:var(--sheet);stroke:var(--accent);stroke-width:2"/>
+    <text x="546" y="60" style="font-size:15px;font-weight:600">③ Capex adjustment</text>
+    <text x="546" y="82" class="mut" style="font-size:13px">资本支出调整 CAPEX_ADJ</text>
+    <text x="546" y="102" class="mut" style="font-size:13px">实际 vs 预测，Table 2 因变量</text>
+    <path d="M232 73 L263 73" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+    <path d="M495 73 L526 73" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+    <path d="M380 120 C380 200, 640 200, 643 122" style="stroke:var(--up);stroke-width:2;fill:none;stroke-dasharray:6 5" marker-end="url(#ahu)"/>
+    <text x="420" y="210" style="font-size:13px;font-weight:600;fill:var(--up)">β &gt; 0：反应越正，实际 capex 上调越多</text>
+    <text x="4" y="240" class="mut" style="font-size:13px">Newfield Exploration 2010：反应 +7.5%，实际 capex 比预测高 23.2%</text>
+  </svg>
+
+  <div class="status">
+    <div style="--sc:var(--green)"><b>已完成</b>代码（Tables 1–3 模式）、模拟数据端到端测试、估计器验证、报告生成器、本指南</div>
+    <div style="--sc:var(--up)"><b>进行中</b>WRDS 下载与 IBES 编码校准（§14.3–14.5）</div>
+    <div style="--sc:var(--accent)"><b>计划中</b>正式数据结果与差异分析（§18）、核对 RFS 正式版</div>
+  </div>
+</header>
+
+<!-- =============================================================== 0 -->
+<section class="sec" id="s0">
+<h2><span class="no">0</span>How to use this guide<span class="en">怎么用这份指南</span></h2>
+<div class="tw"><table>
+<thead><tr><th>Part（部分）</th><th>Sections（章节）</th><th>Content（内容）</th><th>建议</th></tr></thead>
+<tbody>
+<tr><td>I. The paper（论文）</td><td>§1–§13</td><td>定位、13 节零基础课、研究问题、方法演示、设计、证据链、Table 1–3 逐格精读、理论、写作逻辑、比较、局限、应用</td><td>第一次按顺序读；§2 每课末尾有自测题</td></tr>
+<tr><td>II. Replication（复现）</td><td>§14</td><td>环境、WRDS、运行顺序、每个变量的代码规则、决策日志、校准、偏差诊断、清单</td><td>动手时直接跳到这里；配合 <code>WRDS_GUIDE.md</code></td></tr>
+<tr><td>III. Reference（参考）</td><td>§15–§18</td><td>扩展方向、双语术语表、结果与分析、更新记录</td><td>写报告和汇报前看 §16.3“用英文讲这篇论文”</td></tr>
+</tbody></table></div>
+<p class="note info">论文数字取自 2019 年 5 月工作论文（working paper），这是能公开拿到全文的最新版本。RFS 正式版于 2019-07-08 接收、2019-10-31 上线，表格可能有改动。交报告前，请用图书馆账号下载正式版，逐项核对 <code>paper_targets.py</code>（§14.10 清单第 1 项）。</p>
+</section>
+
+<!-- =============================================================== 1 -->
+<section class="sec" id="s1">
+<h2><span class="no">1</span>Positioning<span class="en">定位：这篇论文在学术地图的哪里</span></h2>
+<p>这篇论文站在两支文献的交叉点上：</p>
+<div class="tw"><table>
+<thead><tr><th>Literature（文献）</th><th>核心问题</th><th>本文借用什么</th></tr></thead>
+<tbody>
+<tr><td>Feedback effect（反馈效应）<br><span class="cite">Bond, Edmans &amp; Goldstein 2012; Chen, Goldstein &amp; Jiang 2007</span></td><td>股价不只是反映公司决策，还会把投资者手里的信息“传回”给管理层，影响真实决策 (real decisions)</td><td>“管理层从股价学习”这一机制，以及检验它的思路：外部人越知情、管理层越不知情，学习效应越强</td></tr>
+<tr><td>Voluntary disclosure（自愿披露）<br><span class="cite">Diamond 1985; Fishman &amp; Hagerty 1989; Dye &amp; Sridhar 2002</span></td><td>公司为什么、在什么时候主动披露信息</td><td>一个新的披露动机：不是为了降低信息不对称，而是为了<b>征求</b>市场意见 (elicit feedback)</td></tr>
+</tbody></table></div>
+<p>它的新意在于把两者连起来：以往的反馈文献研究管理层<b>被动地</b>从日常股价中学习，本文问管理层能不能<b>主动</b>用一次披露去“提问”，再从市场的回答中学习。</p>
+
+<h3>和我前几篇复现的关系<span class="en">Where it sits in my replication path</span></h3>
+<div class="line3">
+  <div class="st"><b>Geertsema &amp; Lu (2023)</b>Relative valuation with ML<small>报表 → 价值：机器学习估值</small></div><div class="ar">→</div>
+  <div class="st"><b>Kennedy et al. (2026)</b>Corporate tax cuts<small>对照组思维：识别因果</small></div><div class="ar">→</div>
+  <div class="st"><b>Bao et al. (2020)</b>Fraud detection<small>报表本身可不可信</small></div><div class="ar">→</div>
+  <div class="st now"><b>Jayaraman &amp; Wu (2020)</b>Disclosure and feedback<small>披露 → 股价 → 真实决策</small></div>
+</div>
+<p>前三篇关心“报表数字能告诉我们什么”，这一篇把方向反过来：<b>市场对公司披露的反应，能不能反过来改变公司的决策</b>。方法上，它没有外生冲击，而是用“机制细节”一条条排除替代解释（§10）；这是会计实证论文里非常典型、也非常值得学习的写法。</p>
+</section>
+
+<!-- =============================================================== 2 -->
+<section class="sec" id="s2">
+<h2><span class="no">2</span>Prerequisite lessons<span class="en">零基础预备课：读 Table 1–3 需要的 13 个概念</span></h2>
+<p class="lead">每课包括：一句话要点、类比、贯穿全篇的同一个例子、在论文中的位置、自测题。</p>
+<div class="firm"><b>Running example（贯穿例子）：Newfield Exploration（NFX，得州的石油天然气公司，论文附录 1 的真实案例）</b><br>
+2010 年 4 月 26 日，Newfield 公布当年计划资本支出 16 亿美元，股价相对大盘涨了 7.5%；年底实际支出 19.71 亿美元，比计划高 23.2%。<br>
+2014 年 11 月，它又公布了 16 亿美元的计划（论文写“for fiscal year 2016”，应是 2015），股价相对大盘跌了 2.4%；实际支出 13.71 亿美元，比计划低 14.3%。<br>
+<b>市场叫好 → 多投；市场不买账 → 少投。</b>整篇论文就是在 17,577 个这样的预测上检验这个模式。</div>
+
+<article class="lesson" id="L1"><h3><span class="ln">L1</span>Capital expenditure and capex guidance<span class="en">资本支出与资本支出指引</span></h3><dl>
+<dt>一句话</dt><dd>Capital expenditure（资本支出，capex）是买厂房、设备、油井这类长期资产的支出；capex guidance（资本支出指引）是管理层事先公布的“今年打算花多少”。</dd>
+<dt>类比</dt><dd>家庭年初说“今年装修预算 20 万”，年底一算花了 24.6 万：预算是 guidance，实际花费是 actual capex。</dd>
+<dt class="ex">例子</dt><dd>Newfield 2010 年的指引是 16 亿美元（点预测 point forecast）。有的公司给区间（range forecast），例如“15–17 亿”；还有的说“不少于 15 亿”（open-ended，开放式）。论文 Table 1 Panel C：点预测 55.30%，区间 34.48%，其他 10.22%。</dd>
+<dt>论文位置</dt><dd>§2.1 场景选择；§2.2 数据。数据来自 IBES Guidance（<code>ibes.det_guidance</code>，<code>measure = 'CPX'</code>）；实际 capex 来自 Compustat 年度表的 <code>capx</code>。</dd>
+<dt>自测</dt><dd><details class="check"><summary>为什么论文选 capex 预测，而不是盈利预测 (earnings forecast)？</summary><p>反馈理论要求：(1) 披露完全自愿；(2) 披露的是一个<b>尚未执行、还能修改</b>的决策，这样市场的反应才有可能改变它。盈利预测是对结果的预告，管理层没法“根据市场反应改利润”；capex 是一个可以调整的决策，年末的实际 capex 恰好告诉我们改没改。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L2"><h3><span class="ln">L2</span>Voluntary disclosure<span class="en">自愿披露</span></h3><dl>
+<dt>一句话</dt><dd>法律不要求、公司自己选择公布的信息。传统观点认为自愿披露是为了降低信息不对称 (information asymmetry)、降低融资成本。</dd>
+<dt>类比</dt><dd>求职时主动附上作品集：没人要求，但你希望对方更了解你。本文提出另一种动机：把方案发出去，<b>是为了听反馈</b>，像把论文初稿发给同行征求意见。</dd>
+<dt class="ex">例子</dt><dd>Newfield 不必公布 16 亿美元的计划；它公布了，市场给了 +7.5% 的“好评”。</dd>
+<dt>论文位置</dt><dd>§1 引言，脚注 5；§2.1 解释为什么排除 10-K/Q 和 8-K（强制披露）、电话会议和分析师预测（不是管理层主动发起的决策披露）。</dd>
+<dt>自测</dt><dd><details class="check"><summary>如果自愿披露的作用是“降低信息不对称”，那么披露后买卖价差应该怎么变？本文预测的方向呢？</summary><p>传统观点：披露后价差下降。本文：如果披露引来知情交易者解读这条信息，公告期价差反而<b>上升</b>；而反馈效应应该恰恰出现在价差上升的预测里（Table 3）。论文脚注 5 特别点出了这个“反直觉”的方向。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L3"><h3><span class="ln">L3</span>Event study and cumulative abnormal return<span class="en">事件研究与累计超额收益</span></h3><dl>
+<dt>一句话</dt><dd>Event study（事件研究）比较公告前后几天股价的“非正常”变动。本文用最简单的 market-adjusted return（市场调整收益）：个股收益减 S&amp;P 500 指数收益，在 [−2, +2] 五个交易日上加总，得到 CAR（cumulative abnormal return，累计超额收益），单位是百分比。</dd>
+<dt>类比</dt><dd>考试那天全班平均涨了 5 分，你涨了 12 分：属于你自己的进步是 7 分。</dd>
+<dt class="ex">例子</dt><dd>Newfield 2010：五天个股累计收益减去五天指数累计收益 = +7.5%。代码里先逐日计算 <code>ret − sprtrn</code>，再求和、乘 100（<code>utils.car</code>）。</dd>
+<dt>论文位置</dt><dd>§2.2；Table 1 Panel A：CAR 均值 −0.148%，中位数 0.069%，标准差 8.974%。</dd>
+<dt>自测</dt><dd><details class="check"><summary>为什么用五天窗口而不是只看公告当天？代价是什么？</summary><p>公告日期可能有误差（例如盘后发布，市场第二天才反应），也可能有提前泄露，五天窗口更稳健。代价是窗口越长，混入的其他新闻越多，尤其是同时发布的盈余公告（55.9% 的预测和盈余公告同时发布），所以论文要控制 EA_DUM 和 SURP。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L4"><h3><span class="ln">L4</span>Feedback effect and managerial learning<span class="en">反馈效应与管理层学习</span></h3><dl>
+<dt>一句话</dt><dd>管理层并不知道关于自家项目的一切（例如油价走势、竞争对手动向、下游需求），这些信息分散在众多投资者手里；投资者通过交易把信息“写进”股价，管理层再从股价里读出来，这叫 feedback effect（反馈效应）或 managerial learning（管理层学习）。</dd>
+<dt>类比</dt><dd>餐馆推出新菜，先挂“试营业”，看排队的人多不多再决定要不要正式上菜单。</dd>
+<dt class="ex">例子</dt><dd>Newfield 的管理层看到 +7.5% 的反应，推断“市场认为这个投资方向值得多投”，于是追加投资到 19.71 亿美元。</dd>
+<dt>论文位置</dt><dd>§1 引言（Hayek 1945；Bond et al. 2012）；本文的贡献是证明披露可以作为<b>主动</b>征求反馈的工具。</dd>
+<dt>自测</dt><dd><details class="check"><summary>同样的数据模式（反应越正 → 实际 capex 越高），还可以有哪两种非学习的解释？</summary><p>(1) Omitted variable（遗漏变量）：好消息（例如油价上涨）同时推高股价和投资需求，管理层根本没看股价也会多投；(2) Reverse causality（反向因果）：市场预见到管理层会多投，提前反映在股价里。Table 3 的设计正是为了排除这两种解释（§7、§10）。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L5"><h3><span class="ln">L5</span>Informed trading and the bid-ask spread<span class="en">知情交易与买卖价差</span></h3><dl>
+<dt>一句话</dt><dd>做市商不知道对面是不是知情交易者 (informed trader)，为了弥补和知情者交易的损失，会扩大买卖价差 (bid-ask spread)。所以价差是 information asymmetry（信息不对称）的常用代理变量：知情交易越活跃，价差越大。</dd>
+<dt>类比</dt><dd>二手车商在“懂车的人突然变多”的时候，会把收车价压低、卖车价抬高。</dd>
+<dt class="ex">例子</dt><dd>相对价差 = (ask − bid) / 中间价 × 100。本文比较公告期 [−2, +2] 与公告前 [−10, −3] 的平均价差：上升说明这次披露吸引了知情交易者来解读，这类预测就是 Table 3 的 “Higher spreads” 组（9,570 个），否则是 “Lower spreads” 组（7,770 个）。</dd>
+<dt>论文位置</dt><dd>§3.2.1；理论依据是 Kim &amp; Verrecchia (1994, 1997)、Lee, Mucklow &amp; Ready (1993)：公告期价差常常上升，因为有人比别人更会解读公开信息。</dd>
+<dt>自测</dt><dd><details class="check"><summary>为什么反馈效应应该只出现在 “Higher spreads” 组？</summary><p>管理层要从股价学到<b>自己不知道的东西</b>，前提是有人带着私人信息或更好的判断来交易。如果一次披露没有引来知情交易（价差下降），股价反应里就没有管理层需要的新信息，自然也不该有学习效应。论文结果：Higher 组 1.206**，Lower 组 −0.295，差异 p = 0.019。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L6"><h3><span class="ln">L6</span>Limits to arbitrage from feedback<span class="en">反馈导致的套利限制（Edmans, Goldstein &amp; Jiang 2015）</span></h3><dl>
+<dt>一句话</dt><dd>如果知情交易者卖空一家公司，管理层看到股价下跌后撤回坏项目，公司价值反而回升，卖空者就亏了。预见到这一点，知情交易者不太愿意去挖掘和交易<b>坏消息</b>；好消息则没有这个问题，管理层追加投资还会让做多者赚得更多。所以反馈效应应该主要来自<b>正的</b>市场反应。</dd>
+<dt>类比</dt><dd>你提醒朋友“这家店要倒闭了”，他听了劝及时改进，店没倒，你的预言就落空了。</dd>
+<dt class="ex">例子</dt><dd>Newfield 2010（+7.5%）属于论文预测反馈最强的情形；2014（−2.4%）属于理论上反馈较弱的情形。</dd>
+<dt>论文位置</dt><dd>§3.2.2；Table 3 第 (3)(4) 列：Higher 组 CAR_POS 0.893*，CAR_NEG 0.185（不显著）。脚注 6 引用了 Coca-Cola 收购 Quaker Oats 的例子。</dd>
+<dt>自测</dt><dd><details class="check"><summary>如果结果反过来，CAR_NEG 显著而 CAR_POS 不显著，更支持什么解释？</summary><p>更像 disciplining（约束）渠道：公开宣布计划后，负面反应让管理层不敢继续做价值毁损的项目。论文用“正反应才显著”的结果把反馈渠道和约束渠道区分开（§3.2.2 末段）。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L7"><h3><span class="ln">L7</span>Fixed effects<span class="en">固定效应</span></h3><dl>
+<dt>一句话</dt><dd>Firm fixed effects（公司固定效应）给每家公司一个自己的截距，相当于只比较<b>同一家公司</b>不同预测之间的差异；year-quarter fixed effects（年季固定效应）去掉同一季度所有公司共同的冲击（例如 2008 年金融危机）。</dd>
+<dt>类比</dt><dd>比较一个学生“这次比他平时考得好多少”，而不是比较学霸和学渣的绝对分数。</dd>
+<dt class="ex">例子</dt><dd>Newfield 的两次预测（2010、2014）在公司固定效应下互相比较：+7.5% 那次上调 23.2%，−2.4% 那次下调 14.3%。§5.3 的交互演示展示了加入公司固定效应前后斜率如何变化。</dd>
+<dt>论文位置</dt><dd>Table 2 模型 (3) 只加年季固定效应，(4)–(8) 同时加公司和年季固定效应；Adj. R² 从 0.007 跳到 0.523，说明 CAPEX_ADJ 的大部分差异来自公司之间的固定差别。</dd>
+<dt>自测</dt><dd><details class="check"><summary>加入公司固定效应后，CAR 系数从 1.196 降到 0.975，说明什么？</summary><p>部分关联来自公司之间的差异：经常获得正面反应的公司，本身也倾向于多投（例如成长型公司）。去掉这部分后，同一公司内部的关联仍然显著，这才更接近“学习”的解释。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L8"><h3><span class="ln">L8</span>Clustered standard errors<span class="en">聚类标准误</span></h3><dl>
+<dt>一句话</dt><dd>同一组（公司或行业）的观测误差往往相关，普通标准误会低估不确定性。Cluster-robust standard errors（聚类稳健标准误）允许组内任意相关，只假设组间独立。</dd>
+<dt>类比</dt><dd>调查一个班 40 人的意见，其实不等于 40 个独立样本：他们互相影响。</dd>
+<dt class="ex">例子</dt><dd>Table 2 模型 (4) 和 (5) 的系数完全相同（0.975），只是 (4) 按公司聚类（SE 0.294），(5) 按行业聚类（SE 0.322）。行业更少、组更大，标准误略大。</dd>
+<dt>论文位置</dt><dd>Table 2 表注：(1)–(4) 按公司聚类，(5)–(8) 按行业聚类；脚注 19：之后的投资回归都按行业聚类。论文没说“行业”的定义，本复现用两位 SIC（决策 D18）。</dd>
+<dt>自测</dt><dd><details class="check"><summary>为什么行业聚类时 p 值用 t(G−1) 分布，而不是正态分布？</summary><p>聚类数 G 不大时（两位 SIC 大约 60–70 个行业），正态近似会让结论过于乐观。Stata 的惯例是用 G−1 个自由度的 t 分布。这也是论文 Table 3 中 CAR_POS 0.893/0.455 = 1.96 却只标一颗星的原因。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L9"><h3><span class="ln">L9</span>Standardized coefficients and economic magnitude<span class="en">标准化系数与经济显著性</span></h3><dl>
+<dt>一句话</dt><dd>CAR 被标准化为均值 0、标准差 1，所以系数直接读作“市场反应高一个标准差（8.974 个百分点），CAPEX_ADJ 高多少个百分点”。Economic magnitude（经济显著性）再把它除以 CAPEX_ADJ 的均值 7.421%。</dd>
+<dt>类比</dt><dd>“多睡一个标准差的时间，成绩高 1.2 分”，比“多睡 1 分钟，成绩高 0.01 分”好理解得多。</dd>
+<dt class="ex">例子</dt><dd><div class="calc">Table 2 (1):  1.193 / 7.421 = 16.1%   ← 论文 §1 引用的数字
+Table 2 (8):  0.849 / 7.421 = 11.4%
+美元口径:     0.849% × 平均预测 586.5 百万美元 ≈ 5.0 百万美元</div>§5.4 有可交互的换算器。</dd>
+<dt>论文位置</dt><dd>Table 2 表注；§3.1 正文；§3.2.1 的 16.2% 与 3.9%。</dd>
+<dt>自测</dt><dd><details class="check"><summary>复现时如果在分样本内重新标准化 CAR，Table 3 的系数会怎么变？</summary><p>子样本内 CAR 的标准差不同，同样的效应换算出的系数大小也会变，就不能和论文直接比较。论文的写法（“CAR … standardized”，脚注 25）暗示全样本只标准化一次，本复现照此处理（决策 D27）。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L10"><h3><span class="ln">L10</span>Falsification and placebo tests<span class="en">证伪检验与安慰剂检验</span></h3><dl>
+<dt>一句话</dt><dd>如果机制是“从 capex 预测的反应中学习 capex”，那么其他事件的反应就不应该有同样的预测力。这类检验叫 falsification test（证伪检验）或 placebo test（安慰剂检验）。</dd>
+<dt>类比</dt><dd>怀疑某种药有效，就给对照组吃外观相同的糖丸。</dd>
+<dt class="ex">例子</dt><dd>Table 2 有三个“糖丸”：同一财年销售预测的反应 SF_CAR（模型 6，0.039，不显著）；公告日的大盘收益 MKTRET（模型 7，−0.252）；公告前两周伪事件日的反应 CAR_PRE（模型 7，0.305）。三者都不显著，而 CAR 依然显著。</dd>
+<dt>论文位置</dt><dd>§3.1 第 3 段，脚注 20、21；模型 (6) 样本只有 3,456 个（需要有同期的销售预测），所以 Adj. R² 不能和其他列直接比较。</dd>
+<dt>自测</dt><dd><details class="check"><summary>如果 SF_CAR 和 CAR 发布在同一天会怎样？复现时怎么处理？</summary><p>两者的五日窗口完全重合，SF_CAR 就等于 CAR，两个变量完全共线，证伪就失去意义。论文说这两个预测的中位距离是 86 天，说明作者选的是另一天发布的销售预测。代码要求两个窗口相隔至少 5 个交易日（决策 D13）。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L11"><h3><span class="ln">L11</span>Winsorization<span class="en">缩尾</span></h3><dl>
+<dt>一句话</dt><dd>把低于 1% 分位数的值设为 1% 分位数、高于 99% 分位数的值设为 99% 分位数，防止极端值主导回归。</dd>
+<dt>类比</dt><dd>评委打分去掉最高分和最低分，这里是把它们“拉回”到正常范围。</dd>
+<dt class="ex">例子</dt><dd>论文没说缩尾了哪些变量，但 Table 1 留下了线索：CAPEX_ACT 和 LAG_CAPX 的最小值是 0.000。在近 1.8 万个 capex 预测中，第 1 百分位恰好为 0 不太可能，所以金额变量大概率没有缩尾。CAPEX_ADJ 最小值是 −77.05，而实际 capex 为 0 的点预测会给出 −100，所以 CAPEX_ADJ 被缩尾了。</dd>
+<dt>论文位置</dt><dd>没有明说，只能从 Table 1 的极值推断（决策 D14）。代码会输出一张核对表，自动判断每个变量的论文极值更接近原始值还是缩尾后的值。</dd>
+<dt>自测</dt><dd><details class="check"><summary>CAR 的最大值是 25.35%、最小值是 −31.36%，为什么看起来像缩尾过？</summary><p>17,577 个五日窗口里，原始 CAR 几乎一定会出现 ±50% 以上的极端值（例如生物科技公司、破产传闻）；最大值和最小值不对称，又都只在 ±30% 左右，最符合 1%/99% 缩尾的结果。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L12"><h3><span class="ln">L12</span>Comparing coefficients across subsamples<span class="en">分样本系数差异检验</span></h3><dl>
+<dt>一句话</dt><dd>“A 组显著、B 组不显著”不等于“A、B 两组的系数显著不同”，必须直接检验差异。</dd>
+<dt>类比</dt><dd>甲考了 61 分（及格），乙考了 59 分（不及格），不能说明两人水平有显著差别。</dd>
+<dt class="ex">例子</dt><dd>Table 3：CAR 在 Higher 组为 1.206，Lower 组为 −0.295，差异的 p 值为 0.019。代码把两组合并成一个模型，所有变量和固定效应都与分组交互，再用联合的聚类协方差检验差异，相当于 Stata 的 <code>suest</code>。</dd>
+<dt>论文位置</dt><dd>Table 3 底部的 “p. value of diff. in” 一栏，共 7 个 p 值；脚注 24 说明 MKTRET 和 CAR_PRE 在两组之间没有显著差异。</dd>
+<dt>自测</dt><dd><details class="check"><summary>为什么合并模型里固定效应也要和分组交互？</summary><p>分开回归时，每组有自己的公司固定效应和时间固定效应。合并模型只有让固定效应也随分组变化，点估计才能与分开回归完全一致；否则就变成了另一个模型。</p></details></dd>
+</dl></article>
+
+<article class="lesson" id="L13"><h3><span class="ln">L13</span>Database linking: IBES, CRSP and Compustat<span class="en">数据库链接</span></h3><dl>
+<dt>一句话</dt><dd>三个数据库各有自己的公司代码：IBES 用 ticker，CRSP 用 PERMNO，Compustat 用 GVKEY。要通过两张随时间变化的链接表接起来，而且必须用“公告日当天有效”的链接。</dd>
+<dt>类比</dt><dd>同一个人在学校用学号、在医院用病历号、在银行用卡号；还会换卡、换号，所以要看“当时”用的是哪个号码。</dd>
+<dt class="ex">例子</dt><dd><div class="calc">IBES ticker "NFX" ── ibcrsphist（公告日在 sdate–edate 之间）→ PERMNO
+PERMNO ── ccmxpf_lnkhist（LU/LC 链接）→ GVKEY
+GVKEY + 财年末（prd_yr/prd_mon = datadate 的年月）→ funda.capx = 实际 capex</div></dd>
+<dt>论文位置</dt><dd>§2.2 第一段只有一句“match these firms to Compustat using the IBES link file”。实际步骤见 §14.4。</dd>
+<dt>自测</dt><dd><details class="check"><summary>为什么不能直接用 IBES 的 CUSIP 去匹配 Compustat？</summary><p>CUSIP 会随公司更名、重组而变，IBES 记录的是历史 CUSIP，Compustat 头文件里往往是当前 CUSIP，直接匹配会漏掉或匹配错。WRDS 的链接表专门处理了这些历史变化。</p></details></dd>
+</dl></article>
+</section>
+
+<!-- =============================================================== 3 -->
+<section class="sec" id="s3">
+<h2><span class="no">3</span>Research question<span class="en">研究问题</span></h2>
+<p class="key">管理层会不会用自愿披露去征求市场反馈 (elicit market feedback)，并据此调整真实的投资决策？</p>
+<p>理论上答案不确定，这正是值得实证检验的原因：</p>
+<div class="tw"><table>
+<thead><tr><th>Theory（理论）</th><th>披露和知情交易的关系</th><th>对反馈的含义</th></tr></thead>
+<tbody>
+<tr><td>Substitutes（替代）<br><span class="cite">Diamond 1985; Gao &amp; Liang 2013; Dierker &amp; Subrahmanyam 2017</span></td><td>公开披露挤出 (crowd out) 私人信息的收集</td><td>股价里管理层不知道的信息变少，反馈<b>减弱</b></td></tr>
+<tr><td>Complements（互补）<br><span class="cite">Fishman &amp; Hagerty 1989; Bai, Philippon &amp; Savov 2016; Dye &amp; Sridhar 2002</span></td><td>知情交易者的优势在于<b>解读</b>披露，披露反而吸引他们交易</td><td>反馈<b>增强</b>：市场对拟议行动的反应能指导管理层</td></tr>
+</tbody></table></div>
+<p>论文围绕两个假设展开，本次复现只涉及第一个：</p>
+<ol>
+<li><b>H1（Tables 2–5）</b>：capex 预测的市场反应越正，实际 capex 相对预测上调越多；这一关系应集中在披露引来知情交易的预测中。<b>Table 2 检验关系是否存在，Table 3 检验机制。</b></li>
+<li>H2（Table 6）：当常规股价被非基本面噪音污染时，管理层更可能发布 capex 预测。<span class="flat">（不在本次范围）</span></li>
+</ol>
+<p>原假设 (null hypothesis) 是“没有关系”，论文脚注 3 和 12 给出了理由：正的反应也可能意味着“计划已经最优，不必调整”；负的反应也可能意味着“计划太保守，应该加码”，这会让系数偏向 0 甚至为负。</p>
+</section>
+
+<!-- =============================================================== 4 -->
+<section class="sec" id="s4">
+<h2><span class="no">4</span>Concept table<span class="en">概念对照表：理论概念 → 变量 → 数据 → 出现在哪张表</span></h2>
+<div class="tw"><table>
+<thead><tr><th>Concept（概念）</th><th>Variable（变量）</th><th>Measurement（度量）</th><th>Data（数据）</th><th>Table</th></tr></thead>
+<tbody>
+<tr><td>Disclosure of a proposed action（拟议行动的披露）</td><td>capex forecast</td><td>年度 capex 预测：点、区间或开放式</td><td>IBES Guidance</td><td>1</td></tr>
+<tr><td>Market feedback（市场反馈）</td><td>CAR</td><td>[−2, +2] 个股减 S&amp;P 500 的累计收益，标准化</td><td>CRSP dsf, dsi</td><td>1, 2, 3</td></tr>
+<tr><td>Managerial response（管理层响应）</td><td>CAPEX_ADJ</td><td>(实际 − 预测) / 预测 × 100；区间内记 0</td><td>Compustat funda</td><td>1, 2, 3</td></tr>
+<tr><td>Informed trading drawn in（引来的知情交易）</td><td>Higher / Lower spreads</td><td>[−2, +2] 平均价差是否高于 [−10, −3]</td><td>CRSP dsf bid/ask</td><td>3</td></tr>
+<tr><td>Direction of feedback（反馈方向）</td><td>CAR_POS, CAR_NEG</td><td>max(CAR, 0) 与 min(CAR, 0)</td><td>由 CAR 构造</td><td>3</td></tr>
+<tr><td>Placebo events（安慰剂事件）</td><td>SF_CAR, MKTRET, CAR_PRE</td><td>销售预测的反应；公告日大盘收益；前两周伪事件的反应</td><td>IBES (SAL), CRSP</td><td>2, 3</td></tr>
+<tr><td>Expectations about capex（对 capex 的预期）</td><td>LAG_CAPX</td><td>上年 capex / 年初市值</td><td>Compustat funda</td><td>1, 2, 3</td></tr>
+<tr><td>Confounding earnings news（混杂的盈余信息）</td><td>EA_DUM, SURP</td><td>是否与盈余公告同时发布；当季 EPS 减去年同季</td><td>Compustat fundq</td><td>1, 2, 3</td></tr>
+<tr><td>Firm size（规模）</td><td>SIZE</td><td>ln(上季末市值)</td><td>Compustat fundq</td><td>1, 2, 3</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- =============================================================== 5 -->
+<section class="sec" id="s5">
+<h2><span class="no">5</span>Method with interactive demos<span class="en">方法与交互演示：把四个关键计算亲手算一遍</span></h2>
+<p class="lead">Table 1–3 的每个数字都来自四类计算：capex 调整幅度、事件窗口收益、固定效应回归、经济显著性换算。下面每个演示都可以改输入，看输出怎么变。</p>
+
+<h3 id="s5-1">5.1 CAPEX_ADJ calculator<span class="en">资本支出调整计算器</span></h3>
+<p>规则（论文 §2.2，决策 D7、D8）：</p>
+<ul>
+<li><b>Point forecast（点预测）</b>：CAPEX_ADJ = (实际 − 预测) / 预测 × 100。</li>
+<li><b>Range forecast（区间预测）</b>：实际落在区间内记 0（论文称之为 conservative，保守处理）；高于上界时用 (实际 − 上界) 计算，低于下界时用 (实际 − 下界) 计算；分母用区间中点。</li>
+<li><b>Open-ended（开放式）</b>：“不少于 X”这类预测，本复现按 X 的点预测处理；稳健性检验会去掉这类预测（脚注 17）。</li>
+</ul>
+<div class="widget" id="adjW">
+  <h4>CAPEX_ADJ 计算器</h4><p class="sub">单位：百万美元。点一个预设，或者自己改数字。</p>
+  <div class="presets" id="adjPresets"></div>
+  <div class="ctrls">
+    <label>Forecast type（预测类型）<select id="adjType"><option value="point">point（点）</option><option value="range">range（区间）</option></select></label>
+    <label>Forecast / low（预测或下界）<input id="adjLo" type="number" step="any" value="1600"></label>
+    <label id="adjHiL">High（上界）<input id="adjHi" type="number" step="any" value="1700"></label>
+    <label>Actual（实际）<input id="adjAct" type="number" step="any" value="1971"></label>
+  </div>
+  <svg class="fig" id="adjSvg" viewBox="0 0 700 110" aria-label="数轴：预测与实际 capex"></svg>
+  <div class="out" id="adjOut"></div>
+</div>
+<details class="check"><summary>为什么区间内记 0 会让 CAPEX_ADJ 的中位数恰好是 0.000？</summary><p>34.48% 的预测是区间预测，其中很多的实际值落在区间内，全部记 0；再加上一些点预测的实际值恰好等于预测，0 就成了最常见的值。Table 1 中 CAPEX_ADJ 的中位数 0.000 正是这个规则的指纹：如果复现得到的中位数明显不是 0，先检查区间预测有没有识别对（决策 D3）。</p></details>
+
+<h3 id="s5-2">5.2 Event windows and CAR<span class="en">事件窗口与 CAR 计算器</span></h3>
+<p>一条预测会用到四个窗口，全部以<b>交易日</b>计（day 0 = 公告日，遇非交易日顺延到下一个交易日，决策 D11）：</p>
+<svg class="fig" id="winSvg" viewBox="0 0 760 170" role="img" aria-labelledby="winT"><title id="winT">Event windows（事件窗口）</title></svg>
+<div class="widget" id="carW">
+  <h4>CAR 计算器</h4><p class="sub">输入五个交易日的个股收益和 S&amp;P 500 收益（%）。预设数据按 Newfield 2010 的 +7.5% 虚构。</p>
+  <div class="presets" id="carPresets"></div>
+  <div class="tw"><table id="carT"><thead><tr><th>Day（交易日）</th><th class="n">Firm return %（个股）</th><th class="n">S&amp;P 500 %（大盘）</th><th class="n">Abnormal %（超额）</th></tr></thead><tbody></tbody></table></div>
+  <div class="out" id="carOut"></div>
+</div>
+<p>代码中这一步在 <code>utils.car()</code>：个股收益来自 <code>crsp.dsf.ret</code>，大盘收益来自 <code>crsp.dsi.sprtrn</code>，五天必须齐全（决策 D12）。MKTRET 就是表中 day 0 那一行的 S&amp;P 500 收益。</p>
+
+<h3 id="s5-3">5.3 What firm fixed effects do<span class="en">公司固定效应在做什么</span></h3>
+<div class="widget" id="feW">
+  <h4>Pooled OLS vs within estimator（混合回归 vs 组内估计）</h4>
+  <p class="sub">三家虚构公司，每家 6 个预测。公司 C 平均反应高、但平均调整低（例如成熟大公司）。切换看看斜率怎么变。</p>
+  <div class="presets"><button class="chip" type="button" data-fe="0" aria-pressed="true">Pooled OLS（不加固定效应）</button><button class="chip" type="button" data-fe="1" aria-pressed="false">Firm FE（加公司固定效应）</button></div>
+  <svg class="fig" id="feSvg" viewBox="0 0 700 330" role="img" aria-label="散点图：CAR 与 CAPEX_ADJ"></svg>
+  <div class="out" id="feOut"></div>
+</div>
+<p>这正是 Table 2 从模型 (3) 到模型 (4) 发生的事：系数从 1.196 降到 0.975，Adj. R² 从 0.007 升到 0.523。公司固定效应把“公司之间的差别”拿走，只用“同一家公司这次比平时反应好多少、多投多少”来识别。</p>
+
+<h3 id="s5-4">5.4 Economic magnitude converter<span class="en">经济显著性换算器</span></h3>
+<div class="widget" id="magW">
+  <h4>系数 → 占均值的百分比 → 美元</h4>
+  <div class="presets" id="magPresets"></div>
+  <div class="ctrls">
+    <label>Coefficient on CAR（系数）<input id="magB" type="number" step="any" value="0.849"></label>
+    <label>Mean CAPEX_ADJ %（均值）<input id="magM" type="number" step="any" value="7.421"></label>
+    <label>Mean forecast $m（平均预测）<input id="magF" type="number" step="any" value="586.539"></label>
+    <label>SD of CAR %（CAR 标准差）<input id="magS" type="number" step="any" value="8.974"></label>
+  </div>
+  <div class="out" id="magOut"></div>
+</div>
+
+<h3 id="s5-5">5.5 Linking walk-through<span class="en">数据链接逐步演示</span></h3>
+<div class="widget" id="linkW">
+  <h4>一条 IBES 预测如何拿到实际 capex 和 CAR</h4>
+  <p class="sub">以 Newfield 2010 为例，点“下一步”。PERMNO 和 GVKEY 只是示意，实际值以 WRDS 查询结果为准。</p>
+  <div class="presets"><button class="btn" type="button" id="linkPrev">上一步</button><button class="btn" type="button" id="linkNext">下一步</button><span class="count" id="linkN"></span></div>
+  <div class="tw"><table><thead><tr><th>Step（步骤）</th><th>Table（表）</th><th>Key（键）</th><th>Result（结果）</th></tr></thead><tbody id="linkBody"></tbody></table></div>
+  <p class="cite" id="linkNote"></p>
+</div>
+</section>
+
+<!-- =============================================================== 6 -->
+<section class="sec" id="s6">
+<h2><span class="no">6</span>Research design<span class="en">研究设计：数据、样本、时点和回归方程</span></h2>
+
+<h3 id="s6-1">6.1 Sample construction<span class="en">样本构建</span></h3>
+<p>论文 §2.2 给出的四个数字之间的算术是精确的：36,900 − 17,473 − 1,850 = 17,577。从这里可以推出两条论文没写的规则：</p>
+<ol>
+<li>“unit of observation is a firm-quarter”（一个公司-季度一条观测）的去重，必须在第一个数字 40,785 之前完成，否则就会多出一步论文里没有的删除（决策 D6）。</li>
+<li>初始样本写的是 2002–2016，最终样本是 2003–2015，但瀑布里只删了 2016 年：说明 2002 年的预测在前几步就已经没有了（决策 D2）。</li>
+</ol>
+<figure><svg class="fig" id="wfChart" viewBox="0 0 760 230" role="img" aria-label="样本瀑布"></svg>
+<figcaption>Sample waterfall（样本瀑布），论文 §2.2。删除与 EPS 预测同日发布的（concurrent with an earnings forecast）这一步去掉了近一半样本：同日发布时，股价反应分不清是对哪个预测的反应。</figcaption></figure>
+<p>注意：<b>与盈余公告 (earnings announcement) 同时发布的预测是保留的</b>，占 55.9%（EA_DUM 均值 0.559），论文用 EA_DUM 和 SURP 控制它（脚注 14）。“盈利预测 (earnings forecast)”和“盈余公告 (earnings announcement)”是两回事，复现时最容易混淆。</p>
+
+<h3 id="s6-2">6.2 Timing of every variable<span class="en">每个变量的时点</span></h3>
+<svg class="fig" id="timeSvg" viewBox="0 0 760 200" role="img" aria-labelledby="tmT"><title id="tmT">Timing（时点）</title>
+<line x1="30" y1="100" x2="740" y2="100" class="ax" style="stroke-width:2"/>
+<g style="font-size:13px">
+<rect x="30" y="86" width="180" height="28" rx="4" style="fill:var(--accent-soft)"/><text x="40" y="105">fiscal year t−1（上一财年）</text>
+<rect x="250" y="86" width="140" height="28" rx="4" style="fill:var(--bg);stroke:var(--rule-strong)"/><text x="262" y="105">quarter a−1（上季）</text>
+<rect x="400" y="86" width="120" height="28" rx="4" style="fill:var(--up-soft);stroke:var(--up)"/><text x="412" y="105">quarter a（本季）</text>
+<rect x="540" y="86" width="200" height="28" rx="4" style="fill:var(--accent-soft)"/><text x="552" y="105">end of fiscal year t（财年末）</text>
+<text x="40" y="60">LAG_CAPX：capx(t−1) / MV(t−1)</text>
+<line x1="120" y1="66" x2="120" y2="86" class="ax"/>
+<text x="250" y="160">SIZE：ln(市值)，上季末</text>
+<line x1="320" y1="114" x2="320" y2="146" class="ax"/>
+<text x="404" y="40">capex 预测发布，day 0</text>
+<text x="404" y="60">CAR, MKTRET, EA_DUM, SURP</text>
+<line x1="460" y1="66" x2="460" y2="86" class="ax"/>
+<text x="548" y="160">CAPEX_ACT = funda.capx(t)</text>
+<text x="548" y="180">→ CAPEX_ADJ</text>
+<line x1="640" y1="114" x2="640" y2="146" class="ax"/>
+</g></svg>
+<p>关键点：所有控制变量都在预测发布时或之前就已知，只有因变量 CAPEX_ADJ 来自之后（财年末）。论文 Table 1 对 LAG_CAPX 给的是“百万美元”，Table 2 回归里却说是“除以年初市值”。两个都实现了：<code>LAG_CAPX_MIL</code> 用于 Table 1，<code>LAG_CAPX</code> 用于回归（决策 D15）。</p>
+
+<h3 id="s6-3">6.3 Forecasts by year<span class="en">逐年分布</span></h3>
+<figure><svg class="fig" id="yearChart" viewBox="0 0 760 260" role="img" aria-label="Table 1 Panel B 柱状图"></svg>
+<figcaption>Table 1 Panel B。深色是每年的预测数，浅色是首次预测的公司数（每家公司只在第一次出现的年份计一次，13 年合计正好 1,790 家）。2008 年起发布数量翻倍，与 IBES Guidance 覆盖面扩大有关。</figcaption></figure>
+
+<h3 id="s6-4">6.4 The regression<span class="en">回归方程</span></h3>
+<div class="calc">CAPEX_ADJ(i,a,t) = α + β·CAR(i,a) + γ'·Controls + Firm FE(i) + Year-quarter FE(a) + ε
+  i = 公司，a = 预测发布的日历季度，t = 被预测的财年
+  β > 0  ⇔  反应越正，实际 capex 相对预测上调越多（H1）</div>
+<div class="tw"><table>
+<thead><tr><th>Model（列）</th><th>新加入了什么</th><th>为什么</th><th>FE</th><th>Cluster（聚类）</th></tr></thead>
+<tbody>
+<tr><td>(1)</td><td>只有 CAR</td><td>基本关系</td><td>无</td><td>公司</td></tr>
+<tr><td>(2)</td><td>+ SIZE</td><td>大公司反应和调整都可能不同</td><td>无</td><td>公司</td></tr>
+<tr><td>(3)</td><td>+ 年季 FE</td><td>去掉宏观共同冲击（例如 2008 年）</td><td>年季</td><td>公司</td></tr>
+<tr><td>(4)</td><td>+ 公司 FE</td><td>只比较同一公司内部（L7）</td><td>公司、年季</td><td>公司</td></tr>
+<tr><td>(5)</td><td>聚类改到行业</td><td>行业内的相关性（L8）；系数与 (4) 完全相同</td><td>公司、年季</td><td>行业</td></tr>
+<tr><td>(6)</td><td>+ SF_CAR，子样本 3,456</td><td>证伪：销售预测的反应（L10）</td><td>公司、年季</td><td>行业</td></tr>
+<tr><td>(7)</td><td>+ MKTRET、CAR_PRE</td><td>证伪：大盘和伪事件日</td><td>公司、年季</td><td>行业</td></tr>
+<tr><td>(8)</td><td>+ LAG_CAPX、SURP、EA_DUM</td><td>控制对 capex 的预期和盈余信息</td><td>公司、年季</td><td>行业</td></tr>
+</tbody></table></div>
+<p class="note info">从模型 (6) 和 (8) 的 SIZE 系数可以推断：模型 (6)–(8) 仍然控制 SIZE。Table 3 的所有列都用模型 (8) 的全部控制变量（表注写成了 “Model (9)”，是笔误）。</p>
+</section>
+
+<!-- =============================================================== 7 -->
+<section class="sec" id="s7">
+<h2><span class="no">7</span>Evidence chain<span class="en">证据链：五个问题，五个答案</span></h2>
+
+<h3 id="s7-1">Q1 Is there a relation at all?<span class="en">有没有关系？</span></h3>
+<p>有。CAR 系数在 8 个模型里都为正，除模型 (6) 外都在 1% 水平显著。加入公司固定效应和全部控制变量后从 1.193 降到 0.849，但仍然显著。</p>
+<figure><svg class="fig" id="c2Chart" viewBox="0 0 760 300" role="img" aria-label="Table 2 CAR 系数与 95% 置信区间"></svg>
+<figcaption>Table 2 中 CAR 的系数及 ±1.96 × SE 区间（论文数值）。模型 (6) 区间更宽，因为样本只有 3,456 个。</figcaption></figure>
+
+<h3 id="s7-2">Q2 Is it just any good news?<span class="en">是不是任何好消息都行？</span></h3>
+<p>不是。三个安慰剂变量都不显著；同时放进模型时，CAR 依然显著：</p>
+<figure><svg class="fig" id="plaChart" viewBox="0 0 760 220" role="img" aria-label="安慰剂变量的系数"></svg>
+<figcaption>模型 (6)、(7) 中 CAR 与三个安慰剂变量。SF_CAR 的系数只有 0.039：同一财年销售预测的反应，对 capex 调整几乎没有预测力。</figcaption></figure>
+
+<h3 id="s7-3">Q3 Does the market need to know something the manager doesn't?<span class="en">市场是否需要知道管理层不知道的东西？</span></h3>
+<p>是。只有公告期价差上升（引来了知情交易）的预测才有反馈效应：</p>
+<figure><svg class="fig" id="c3Chart" viewBox="0 0 760 300" role="img" aria-label="Table 3 分组系数"></svg>
+<figcaption>Table 3。左：CAR 按价差分组；右：CAR_POS 与 CAR_NEG。差异 p 值：CAR 0.019，CAR_POS 0.099，CAR_NEG 0.262。</figcaption></figure>
+
+<h3 id="s7-4">Q4 Which direction?<span class="en">哪个方向的反馈？</span></h3>
+<p>正的反应：Higher 组里 CAR_POS 0.893*、CAR_NEG 0.185（不显著）。这符合 Edmans, Goldstein &amp; Jiang (2015) 的套利限制（L6），也说明结果不像是“约束”渠道（负反应迫使管理层收手）。</p>
+
+<h3 id="s7-5">Q5 How big?<span class="en">效应有多大？</span></h3>
+<div class="tw"><table>
+<thead><tr><th>Coefficient（系数）</th><th class="n">Value</th><th class="n">/ mean 7.421</th><th class="n">≈ 美元（× 586.5 百万）</th><th>Source（出处）</th></tr></thead>
+<tbody>
+<tr><td>Table 2 (1)</td><td class="n">1.193</td><td class="n">16.1%</td><td class="n">7.0 百万</td><td>§1、§3.1</td></tr>
+<tr><td>Table 2 (4)</td><td class="n">0.975</td><td class="n">13.1%</td><td class="n">5.7 百万</td><td>§3.1</td></tr>
+<tr><td>Table 2 (8)</td><td class="n">0.849</td><td class="n">11.4%</td><td class="n">5.0 百万</td><td>§3.1</td></tr>
+<tr><td>Table 3 (2) Higher</td><td class="n">1.206</td><td class="n">16.2%</td><td class="n">7.1 百万</td><td>§3.2.1</td></tr>
+<tr><td>Table 3 (1) Lower</td><td class="n">−0.295</td><td class="n">−3.9%</td><td class="n">−1.7 百万</td><td>§3.2.1</td></tr>
+</tbody></table></div>
+<p class="cite">美元换算是本指南加的直观解读，论文没有给出；它用的是平均预测值，对单个公司只是数量级参考。</p>
+</section>
+
+
+<!-- =============================================================== 8 -->
+<section class="sec" id="s8">
+<h2><span class="no">8</span>Tables 1–3 annotated<span class="en">Table 1–3 逐行逐列逐格注解：每个数字是什么、为什么这样设、说明了什么</span></h2>
+<p class="lead">这一节是本指南的核心。先用一个贯穿全文的类比把三张表串起来（§8.0），再逐表讲解：每张表都可以<b>点击任意一格</b>，下方会显示这一格的完整解释；表格下面是按“列 → 行 → 横向比较”整理的文字说明。最后用样本量流向、数字地图、反事实和自测题把三张表和文章的整体逻辑连起来（§8.5–§8.8）。</p>
+
+<h3 id="s8-0">8.0 The big picture<span class="en">总体逻辑：三张表各回答一个问题</span></h3>
+<div class="flow"><span><b>Table 1</b>　我们有什么？<br><small>样本、变量的分布、变异是否足够</small></span><i>→</i><span><b>Table 2</b>　有没有关系？<br><small>反应越正 → 上调越多；加对照、做安慰剂后仍成立</small></span><i>→</i><span><b>Table 3</b>　为什么有关系？<br><small>只在引来知情交易时成立；主要来自正反馈</small></span></div>
+<p>用医学研究作类比：Table 1 是<b>化验单</b>（病人是谁、指标在什么范围）；Table 2 是<b>观察性研究</b>（吃药的人好得更快吗？控制年龄、医院、个人体质后呢？给安慰剂的人呢？）；Table 3 是<b>作用机制</b>（药只在体内有靶点时才起作用：如果在没有靶点的人身上也“有效”，那多半不是药的作用）。</p>
+
+<h4>Running analogy（贯穿类比）：餐馆试菜</h4>
+<p>后面所有注解都会用到这个类比。想象一家连锁餐馆，打算推出新菜，先对外预告“今年要进多少食材”，看反应，再决定最终进多少货。</p>
+<div class="tw"><table>
+<thead><tr><th>Paper（论文中的概念）</th><th>Analogy（餐馆类比）</th><th>出现在</th></tr></thead>
+<tbody>
+<tr><td>Capex forecast（资本支出预测）</td><td>对外预告“今年准备进 16 吨食材”</td><td>T1</td></tr>
+<tr><td>CAR（公告期市场反应）</td><td>预告那一周食客和评论家的口碑</td><td>T1–T3</td></tr>
+<tr><td>CAPEX_ADJ（实际相对预测的调整）</td><td>年底实际进了多少，比预告多或少百分之几</td><td>T1–T3（因变量）</td></tr>
+<tr><td>Informed traders / Higher spreads（知情交易者 / 价差上升）</td><td>来了懂行的美食评论家，认真研究了菜单</td><td>T3</td></tr>
+<tr><td>Lower spreads（价差下降）</td><td>只有路人随口评价，没人细看</td><td>T3</td></tr>
+<tr><td>SF_CAR（销售预测的反应）</td><td>对“今年营业额目标”的口碑，而不是对进货计划</td><td>T2 (6)</td></tr>
+<tr><td>MKTRET（公告日大盘收益）</td><td>那天整条美食街的人流</td><td>T2 (7)(8)、T3</td></tr>
+<tr><td>CAR_PRE（伪事件日的反应）</td><td>预告前两周随便一天的口碑</td><td>T2 (7)(8)、T3</td></tr>
+<tr><td>Firm FE（公司固定效应）</td><td>每家店自己的习惯：有的店总是多备货</td><td>T2 (4)–(8)、T3</td></tr>
+<tr><td>Year-quarter FE（年季固定效应）</td><td>节假日、疫情这种所有店一起受的影响</td><td>T2 (3)–(8)、T3</td></tr>
+<tr><td>Industry clusters（行业聚类）</td><td>同一条美食街的店互相影响，不能当作独立样本</td><td>T2 (5)–(8)、T3</td></tr>
+<tr><td>SIZE / LAG_CAPX</td><td>店面大小 / 去年实际进货量</td><td>T1–T3（控制变量）</td></tr>
+<tr><td>EA_DUM / SURP</td><td>同一天还公布了上季度营业额 / 营业额比去年同期好了多少</td><td>T1–T3（控制变量）</td></tr>
+<tr><td>CAR_POS / CAR_NEG</td><td>好评 / 差评</td><td>T3 (3)(4)</td></tr>
+</tbody></table></div>
+<p>整篇论文要说明的就是：<b>餐馆会根据评论家（而不是路人）的好评追加进货</b>；对营业额目标的口碑、整条街的人流、平常日子的口碑都不能预测进货的调整。</p>
+
+<!-- ---------------------------------------------------------- 8.1 -->
+<h3 id="s8-1">8.1 Table 1 Panel A: descriptive statistics<span class="en">描述性统计：点击任意一格</span></h3>
+<p>Table 1 不检验任何假设，它的作用是让读者知道：样本有多大、每个变量的单位和量级、分布是否偏斜、有没有极端值，以及后面回归里“一个标准差”到底有多大。读后面的回归系数时，经常要回到这张表找“尺子”。</p>
+<div class="anno-wrap"><div class="tw"><table class="anno" id="annoT1"></table></div>
+<div class="explain" id="expT1" aria-live="polite"></div></div>
+
+<h4>Columns（列）：六个统计量各告诉你什么</h4>
+<div class="tw"><table>
+<thead><tr><th>Column（列）</th><th>含义</th><th>为什么要报告</th><th>类比</th></tr></thead>
+<tbody>
+<tr><td>Obs.（观测数）</td><td>该变量非缺失的预测个数</td><td>告诉读者样本有多大、哪个变量有缺失；和 Table 2 的 N 对照，就能知道回归丢了哪些观测</td><td>点名册上实到的人数</td></tr>
+<tr><td>Mean（均值）</td><td>平均水平</td><td>经济显著性的分母（CAPEX_ADJ 均值 7.421）；容易被极端值拉动</td><td>全班平均分</td></tr>
+<tr><td>Median（中位数）</td><td>一半观测低于它</td><td>不受极端值影响；和均值对比可以判断分布是否偏斜（均值 ≫ 中位数 = 右偏）</td><td>排在正中间那个同学的分数</td></tr>
+<tr><td>S.D.（标准差）</td><td>分散程度</td><td>回归里标准化变量的“一个单位”就是它；也说明因变量有多少变异可以解释</td><td>分数是挤在一起，还是拉得很开</td></tr>
+<tr><td>Min / Max（最小 / 最大值）</td><td>范围</td><td>检查异常值、单位错误；也是判断有没有缩尾的线索（L11）</td><td>最低分和最高分</td></tr>
+</tbody></table></div>
+
+<h4>Rows（行）：八个变量分别扮演什么角色</h4>
+<div class="tw"><table>
+<thead><tr><th>Row（行）</th><th>是什么（单位）</th><th>在回归里的角色</th><th>大白话：这一行说明了什么</th><th>类比</th></tr></thead>
+<tbody>
+<tr><td>CAPEX_FORE</td><td>预测的当年资本支出（百万美元；区间取中点）</td><td>CAPEX_ADJ 的分母</td><td>平均 5.9 亿、中位数 1.2 亿：这些都是动辄上亿美元的真金白银决策，管理层有足够的动力去“听意见”</td><td>餐馆预告的进货量</td></tr>
+<tr><td>CAPEX_ACT</td><td>年底实际资本支出（百万美元）</td><td>CAPEX_ADJ 的分子</td><td>平均比预测高 11.5%，中位数只高 2.9%：典型公司大体按计划花，大公司多花得多</td><td>年底实际进货量</td></tr>
+<tr><td>CAPEX_ADJ</td><td>实际相对预测的调整（%）</td><td><b>因变量</b></td><td>平均上调 7.4%，但一半以上“说到做到”（中位数 0），而且差异极大（标准差 48.5）：有很多变异等着被解释</td><td>进货比预告多或少百分之几</td></tr>
+<tr><td>CAR</td><td>[−2, +2] 五日市场调整收益（%）</td><td><b>关键自变量</b>（回归中标准化）</td><td>平均略负，典型反应接近 0，但一个标准差有 9 个百分点：市场对不同公司的计划评价分歧很大</td><td>预告那周的口碑</td></tr>
+<tr><td>SIZE</td><td>ln(上季末市值，百万美元)</td><td>控制变量</td><td>典型公司市值约 16 亿美元；取对数后分布接近对称</td><td>店面大小</td></tr>
+<tr><td>LAG_CAPX</td><td>上一财年实际资本支出（百万美元）</td><td>控制变量（回归中除以年初市值）</td><td>上年 611 → 今年计划 586.5 → 今年实际 654.1：计划比去年保守，实际比去年多</td><td>去年实际进货量</td></tr>
+<tr><td>SURP</td><td>当季 EPS 减去年同季 EPS（美元/股；不同时发布盈余公告时为 0）</td><td>控制变量</td><td>中位数 0，均值接近 0：多数预测时并没有大的盈余新闻</td><td>营业额比去年同期好了多少</td></tr>
+<tr><td>EA_DUM</td><td>是否与盈余公告同日发布（0/1）</td><td>控制变量</td><td>55.9% 在发布财报时一起给 capex 指引：公告期的反应可能混入了对盈利的反应，所以要控制</td><td>同一天还公布了上季度营业额</td></tr>
+</tbody></table></div>
+
+<h4>Cross comparisons（横向比较）</h4>
+<div class="tw"><table>
+<thead><tr><th>比较</th><th>数字</th><th>说明了什么</th></tr></thead>
+<tbody>
+<tr><td>CAPEX_FORE vs CAPEX_ACT（均值）</td><td class="n">586.5 → 654.1（+11.5%）</td><td>平均而言实际支出超过预测。但这是“先平均再算比例”，被大公司主导</td></tr>
+<tr><td>上面的 +11.5% vs CAPEX_ADJ 均值 7.4%</td><td class="n">11.5% ≠ 7.4%</td><td>CAPEX_ADJ 是“先逐个算比例再平均”，每个公司权重相同；区间内记 0；又经过缩尾。类比：全班总分涨了 11.5%，不等于每个人平均涨了 11.5%</td></tr>
+<tr><td>LAG_CAPX → CAPEX_FORE → CAPEX_ACT（中位数）</td><td class="n">118.3 → 120.0 → 123.5</td><td>典型公司每一步都小幅增长：计划 ≈ 去年，实际略多于计划</td></tr>
+<tr><td>CAR 均值 vs 中位数</td><td class="n">−0.148 vs 0.069</td><td>均值被少数大幅负面反应拉低；典型预测几乎没有反应。负的均值在 5% 水平显著（脚注 15）</td></tr>
+<tr><td>CAPEX_ADJ 的 S.D. vs 均值</td><td class="n">48.5 vs 7.4</td><td>调整的差异远大于平均调整：真正有意思的是“谁上调、谁下调”，这正是 Table 2 要解释的</td></tr>
+<tr><td>EA_DUM 的 S.D.</td><td class="n">0.497 = √(0.559 × 0.441)</td><td>0/1 变量的标准差完全由均值决定，可以用来核对数据</td></tr>
+<tr><td>LAG_CAPX 的 Obs. vs 其他变量</td><td class="n">17,546 vs 17,577</td><td>只有这个变量有缺失（31 个），后面回归 N 的变化要从这里找原因（§8.5）</td></tr>
+</tbody></table></div>
+
+<!-- ---------------------------------------------------------- 8.2 -->
+<h3 id="s8-2">8.2 Table 1 Panels B and C: when and how firms forecast<span class="en">逐年分布与预测类型</span></h3>
+<div class="anno-wrap"><div class="tw"><table class="anno" id="annoT1B"></table></div>
+<div class="explain" id="expT1B" aria-live="polite"></div></div>
+<div class="tw"><table>
+<thead><tr><th>Row / column（行 / 列）</th><th>含义</th><th>为什么要报告</th><th>说明了什么</th></tr></thead>
+<tbody>
+<tr><td>Year（年份）</td><td>预测<b>发布</b>的日历年，不是被预测的财年</td><td>检查样本是否集中在某个时期</td><td>2003–2007 年逐年增长，2008 年翻倍，2009 年后稳定在每年约 1,800–2,050 个</td></tr>
+<tr><td>Number of capex forecasts（预测数）</td><td>该年的公司-季度预测数</td><td>样本的时间分布；年季固定效应正是为了去掉时间上的差异</td><td>结论不是由某一两年驱动的；2008–2009 金融危机期间样本较多，脚注 23 专门检验了 2009 年以后的子样本</td></tr>
+<tr><td>Number of first-time forecasters（首次预测的公司数）</td><td>该年第一次出现在样本中的公司数</td><td>说明披露政策是否“粘性”：公司开始披露后会不会继续</td><td>13 年合计正好 1,790 家（= 公司总数）；后期新公司越来越少，样本主要由“回头客”构成</td></tr>
+</tbody></table></div>
+<p><b>横向比较</b>：17,577 / 1,790 ≈ 9.8，平均每家公司约 10 个预测；而 2015 年 1,777 个预测中只有 64 家新公司。类比：一家健身房，早年会员快速增长，后来主要靠老会员每月来打卡。这意味着同一家公司会多次出现，所以需要公司固定效应和按公司聚类（L7、L8）。</p>
+
+<div class="anno-wrap"><div class="tw"><table class="anno" id="annoT1C"></table></div>
+<div class="explain" id="expT1C" aria-live="polite"></div></div>
+<p><b>为什么要报告 Panel C</b>：预测类型决定 CAPEX_ADJ 怎么算（§5.1），而区间预测“落在区间内记 0”会制造大量零值。<b>横向比较</b>：34.48% 的区间预测，加上恰好说到做到的点预测，正好解释了 Panel A 中 CAPEX_ADJ 的中位数为什么是 0.000。类比天气预报：“明天 25 度”（点）、“23–27 度”（区间）、“不低于 20 度”（开放式）；实际 26 度时，第一种算错 1 度，第二种算全对。</p>
+
+<!-- ---------------------------------------------------------- 8.3 -->
+<h3 id="s8-3">8.3 Table 2: is there a relation, and does it survive?<span class="en">资本支出调整与市场反应：点击任意一格</span></h3>
+<p>Table 2 回答“反应越正，实际 capex 上调越多吗”。读法是<b>从左往右</b>：每往右一列就多加一层“对照”，看 CAR 的系数会不会消失。类比医学研究：先看“吃药的人是否好得快”（1），再控制体重（2）、季节（3）、每个人自己的体质（4），换一种算误差的方式（5），再看安慰剂有没有同样效果（6）（7），最后把所有控制都加上（8）。</p>
+<div class="anno-wrap"><div class="tw"><table class="anno" id="annoT2"></table></div>
+<div class="explain" id="expT2" aria-live="polite"></div></div>
+
+<h4>How to read one cell（怎么读一个格子）：以 0.849*** (0.304) 为例</h4>
+<div class="calc">0.849      系数：CAR 高一个标准差（8.974 个百分点），CAPEX_ADJ 高 0.849 个百分点
+(0.304)    标准误：估计的不确定性
+***        1% 水平显著（论文按行业聚类，用 t(G−1) 分布）
+t = 0.849 / 0.304 = 2.79
+95% CI ≈ 0.849 ± 1.96 × 0.304 = [0.25, 1.45]   ← 区间不含 0，最保守也是正的
+0.849 / 7.421 = 11.4%                         ← 相当于平均调整幅度的 11.4%</div>
+
+<h4>Columns（列）：每一列多做了什么，CAR 系数怎么变</h4>
+<div class="tw"><table>
+<thead><tr><th>Column（列）</th><th>相对前一列的变化</th><th>为什么这样设</th><th class="n">CAR</th><th>说明了什么</th><th>类比</th></tr></thead>
+<tbody>
+<tr><td>(1)</td><td>只有 CAR，没有控制和固定效应</td><td>先看最原始的关系</td><td class="n">1.193***</td><td>关系存在：反应高一个标准差，上调多 1.19 个百分点（均值的 16.1%）</td><td>只看“吃药的人是否好得快”</td></tr>
+<tr><td>(2)</td><td>+ SIZE</td><td>大公司的反应和调整可能都不同</td><td class="n">1.207***</td><td>几乎不变：CAR 不是在替“公司规模”说话</td><td>控制体重</td></tr>
+<tr><td>(3)</td><td>+ 年季固定效应</td><td>去掉宏观冲击（如 2008 年危机时所有公司股价下跌、同时削减投资）</td><td class="n">1.196***</td><td>几乎不变：不是“大环境好 → 股价涨、投资多”造成的</td><td>控制季节</td></tr>
+<tr><td>(4)</td><td>+ 公司固定效应</td><td>只比较同一公司的不同预测（L7）</td><td class="n">0.975***</td><td>下降 18% 但仍显著；Adj. R² 从 0.007 跳到 0.523：调整幅度主要由“公司是谁”决定，但同一公司内部反应越好、上调越多</td><td>和病人自己的过去比</td></tr>
+<tr><td>(5)</td><td>聚类从公司改为行业</td><td>同行业公司受共同冲击，误差可能相关（L8）</td><td class="n">0.975***</td><td>系数完全相同、SE 从 0.294 变成 0.322：只改变了“有多确定”，没改变估计本身</td><td>换一种更保守的方式算误差</td></tr>
+<tr><td>(6)</td><td>+ SF_CAR，只用有同期销售预测的 3,456 个</td><td>安慰剂：对销售预测的反应是否也能预测 capex 调整（L10）</td><td class="n">0.672*</td><td>SF_CAR 只有 0.039 且不显著：只有对 capex 计划本身的反应才有用。CAR 变小部分是因为样本换了</td><td>对饮料单的口碑能否预测进货？不能</td></tr>
+<tr><td>(7)</td><td>回到全样本，+ MKTRET、CAR_PRE</td><td>安慰剂：大盘涨跌、平常日子的反应</td><td class="n">1.006***</td><td>两个安慰剂都不显著，CAR 几乎不变：不是“大盘好”或“公司本来就在涨”</td><td>整条街的人流、两周前的口碑都不能预测进货</td></tr>
+<tr><td>(8)</td><td>+ LAG_CAPX、SURP、EA_DUM</td><td>控制对 capex 的既有预期和同时发布的盈余信息</td><td class="n">0.849***</td><td>最严格的设定下仍然显著，是后面 Table 3、5 的基准模型</td><td>所有对照都加上</td></tr>
+</tbody></table></div>
+
+<h4>Rows（行）：每个变量预期什么、结果如何</h4>
+<div class="tw"><table>
+<thead><tr><th>Row（行）</th><th>为什么放进来</th><th>预期符号</th><th>结果</th><th>大白话</th></tr></thead>
+<tbody>
+<tr><td>CAR</td><td>检验 H1</td><td>+</td><td>8 列全部为正，7 列 1% 显著</td><td>市场叫好 → 管理层多投</td></tr>
+<tr><td>SF_CAR</td><td>安慰剂（只在 (6)）</td><td>0</td><td>0.039，不显著</td><td>对销售目标的看法和 capex 调整无关</td></tr>
+<tr><td>MKTRET</td><td>安慰剂：大盘</td><td>0</td><td>−0.252、−0.202，不显著</td><td>管理层不是跟着大盘调整投资</td></tr>
+<tr><td>CAR_PRE</td><td>安慰剂：伪事件日</td><td>0</td><td>0.305、0.230，不显著</td><td>不是公司本来就处于上升期</td></tr>
+<tr><td>SIZE</td><td>控制规模</td><td>?</td><td>(2)(3) 显著为正；加公司固定效应后不显著</td><td>大公司平均上调更多，但同一公司市值变大并不会让它上调更多：规模效应是“公司之间”的</td></tr>
+<tr><td>LAG_CAPX</td><td>控制对 capex 的预期</td><td>?</td><td>−0.160***</td><td>去年投入占市值越高，今年越倾向少于计划：均值回归 (mean reversion)</td></tr>
+<tr><td>SURP</td><td>控制盈余新闻</td><td>?</td><td>0.213，不显著</td><td>同期盈利好坏不能解释调整，说明 CAR 不是在替盈余新闻说话（脚注 22）</td></tr>
+<tr><td>EA_DUM</td><td>控制是否同日发布财报</td><td>?</td><td>−0.108，不显著</td><td>和财报一起发布的预测，调整幅度没有系统性不同</td></tr>
+</tbody></table></div>
+
+<h4>Bottom rows（底部各行）</h4>
+<div class="tw"><table>
+<thead><tr><th>Row（行）</th><th>含义</th><th>读法</th></tr></thead>
+<tbody>
+<tr><td>Controls</td><td>本列包含哪些控制变量</td><td>(8) 的 “All” 是 SIZE、LAG_CAPX、SURP、EA_DUM，再加上 MKTRET 和 CAR_PRE</td></tr>
+<tr><td>Fixed effects</td><td>吸收掉的固定效应</td><td>它们不显示系数，但决定了“和谁比”（L7）</td></tr>
+<tr><td>Clusters</td><td>标准误按什么分组</td><td>只影响括号里的 SE 和星号，不影响系数（比较 (4) 和 (5)）</td></tr>
+<tr><td>Obs.</td><td>回归样本量</td><td>17,577 → (6) 3,456（需要有销售预测）→ (8) 17,505（控制变量缺失 72 个）</td></tr>
+<tr><td>Adj. R²</td><td>模型解释了因变量多少方差（扣除变量个数的惩罚）</td><td>(1) 只有 0.001：CAR 只解释调整的极小部分，但这不影响因果解读，因为我们关心的是系数是否为正、是否稳健，而不是能否完美预测。类比：吸烟只能解释肺癌差异的一小部分，但吸烟致癌的结论依然成立</td></tr>
+</tbody></table></div>
+
+<!-- ---------------------------------------------------------- 8.4 -->
+<h3 id="s8-4">8.4 Table 3: why is there a relation?<span class="en">信息不对称与反应方向：点击任意一格</span></h3>
+<p>Table 2 证明了关系存在，但没有回答“为什么”。Table 3 把样本按<b>公告期价差是否上升</b>分成两组：价差上升说明这次披露吸引了知情交易者来解读（L5）。如果真是“学习”，效应应该只出现在价差上升的组；如果是遗漏变量或反向因果，两组应该差不多。</p>
+<div class="anno-wrap"><div class="tw"><table class="anno" id="annoT3"></table></div>
+<div class="explain" id="expT3" aria-live="polite"></div></div>
+
+<h4>Columns（列）</h4>
+<div class="tw"><table>
+<thead><tr><th>Column（列）</th><th>样本</th><th>关键自变量</th><th>为什么这样设</th><th>类比</th></tr></thead>
+<tbody>
+<tr><td>(1) Lower spreads</td><td>7,770 个价差没有上升的预测</td><td>CAR</td><td>没有引来知情交易：市场反应里没有管理层不知道的信息</td><td>只有路人随口评价</td></tr>
+<tr><td>(2) Higher spreads</td><td>9,570 个价差上升的预测</td><td>CAR</td><td>引来了知情交易：反应里可能有管理层想要的信息</td><td>来了懂行的美食评论家</td></tr>
+<tr><td>(3) Lower spreads</td><td>同 (1)</td><td>CAR_POS、CAR_NEG</td><td>把反应拆成好评和差评，看哪一种起作用</td><td>路人的好评 / 差评</td></tr>
+<tr><td>(4) Higher spreads</td><td>同 (2)</td><td>CAR_POS、CAR_NEG</td><td>同上</td><td>评论家的好评 / 差评</td></tr>
+</tbody></table></div>
+
+<h4>Rows（行）</h4>
+<div class="tw"><table>
+<thead><tr><th>Row（行）</th><th>Lower</th><th>Higher</th><th>差异 p</th><th>大白话</th></tr></thead>
+<tbody>
+<tr><td>CAR</td><td class="n">−0.295</td><td class="n">1.206**</td><td class="n">0.019</td><td>只有评论家来了的时候，口碑才影响进货；而且两组的差别本身显著</td></tr>
+<tr><td>CAR_POS</td><td class="n">−0.203</td><td class="n">0.893*</td><td class="n">0.099</td><td>评论家的<b>好评</b>让餐馆追加进货</td></tr>
+<tr><td>CAR_NEG</td><td class="n">−0.045</td><td class="n">0.185</td><td class="n">0.262</td><td>差评没有显著影响。注意 CAR_NEG ≤ 0，正系数的意思是“反应越负 → 下调越多”，但不显著</td></tr>
+<tr><td>MKTRET</td><td class="n">0.103 / 0.104</td><td class="n">−0.327 / −0.323</td><td class="n">0.656 / 0.658</td><td>两组都不显著、也没有差别：Higher 组不是“对什么都更敏感”</td></tr>
+<tr><td>CAR_PRE</td><td class="n">0.452 / 0.451</td><td class="n">0.124 / 0.130</td><td class="n">0.540 / 0.549</td><td>同上：平常日子的口碑在两组都没有作用</td></tr>
+</tbody></table></div>
+
+<h4>Cross comparisons（横向比较）</h4>
+<div class="tw"><table>
+<thead><tr><th>比较</th><th>数字</th><th>说明了什么</th></tr></thead>
+<tbody>
+<tr><td>T3 (1)(2) vs T2 (8)</td><td class="n">−0.295 &lt; 0.849 &lt; 1.206</td><td>全样本的 0.849 是“Lower 组没有效应 + Higher 组效应很强”混合出来的。类比：全班平均提高 8 分，其实是上了辅导课的一半人提高 12 分、没上的人原地不动</td></tr>
+<tr><td>CAR (2) vs CAR_POS (4)</td><td class="n">1.206 vs 0.893</td><td>拆分后系数变小，是因为原来的变异被分到两个变量上（脚注 25），不是效应变弱</td></tr>
+<tr><td>(1) vs (3)，(2) vs (4) 的 MKTRET 与 CAR_PRE</td><td class="n">0.103 vs 0.104 …</td><td>把 CAR 拆成正负两部分，几乎不影响其他系数</td></tr>
+<tr><td>Adj. R²：(1)(3) vs (2)(4)</td><td class="n">0.512 vs 0.531</td><td>拆分正负几乎不增加解释力；两组的拟合程度相近</td></tr>
+<tr><td>N：7,770 + 9,570 vs 17,505</td><td class="n">17,340</td><td>少了 165 个缺报价的观测；Higher 组占 55.2%：一半以上的 capex 预测吸引了知情交易</td></tr>
+<tr><td>差异 p：CAR 0.019 vs MKTRET 0.656</td><td class="n">—</td><td>两组的区别<b>只</b>在于对 capex 计划本身的反应，而不在于对其他信息的敏感度（脚注 24）</td></tr>
+</tbody></table></div>
+
+<!-- ---------------------------------------------------------- 8.5 -->
+<h3 id="s8-5">8.5 How the N flows across tables<span class="en">样本量在三张表之间怎么流动</span></h3>
+<svg class="fig" id="nFlow" viewBox="0 0 760 250" role="img" aria-labelledby="nfT"><title id="nfT">样本量流向</title></svg>
+<p>每一个数字的变化都有原因。复现时这张图是最好的检查清单：如果某一步的减少量和论文差很多，问题就在那一步。</p>
+
+<h3 id="s8-6">8.6 The number map<span class="en">数字地图：一个数字在哪里出现、在哪里被使用</span></h3>
+<div class="tw"><table>
+<thead><tr><th class="n">Number（数字）</th><th>首次出现</th><th>在哪里被用到</th><th>关系</th></tr></thead>
+<tbody>
+<tr><td class="n">8.974</td><td>T1：CAR 的 S.D.</td><td>T2、T3 所有 CAR 类系数</td><td>标准化的“尺子”：系数 = CAR 每高 8.974 个百分点时 CAPEX_ADJ 的变化</td></tr>
+<tr><td class="n">7.421</td><td>T1：CAPEX_ADJ 的均值</td><td>正文的 16.1%、13.1%、11.4%、16.2%、−3.9%</td><td>经济显著性的分母</td></tr>
+<tr><td class="n">0.000</td><td>T1：CAPEX_ADJ 的中位数</td><td>T1 Panel C</td><td>34.48% 的区间预测“落在区间内记 0”的结果</td></tr>
+<tr><td class="n">0.559</td><td>T1：EA_DUM 的均值</td><td>T1 SURP 中位数 0；T2 (8) 控制变量</td><td>44.1% 的预测不同时发布财报，SURP 记为 0</td></tr>
+<tr><td class="n">17,577</td><td>T1 Obs.</td><td>T2 (1)–(5)、(7)</td><td>同一个样本：比较这些列时样本没有变</td></tr>
+<tr><td class="n">17,546</td><td>T1 LAG_CAPX 的 Obs.</td><td>T2 (8) 的 17,505</td><td>LAG_CAPX 缺失 31 个，回归还少了 41 个（推测是年初市值缺失）</td></tr>
+<tr><td class="n">3,456</td><td>T2 (6) Obs.</td><td>脚注 21</td><td>有同期销售预测的子样本，中位距离 86 天</td></tr>
+<tr><td class="n">0.849</td><td>T2 (8)</td><td>T3 所有列沿用其控制变量；T5 的基准</td><td>T3 的 −0.295 和 1.206 夹住了它</td></tr>
+<tr><td class="n">0.523</td><td>T2 (4) Adj. R²</td><td>T3 的 0.512 / 0.531</td><td>都有公司固定效应，所以 R² 在同一量级</td></tr>
+<tr><td class="n">17,340</td><td>T3：7,770 + 9,570</td><td>—</td><td>比 T2 (8) 少 165 个（缺买卖报价）</td></tr>
+</tbody></table></div>
+
+<h3 id="s8-7">8.7 What if the numbers were different?<span class="en">反事实：如果这个数不一样，故事会怎么变</span></h3>
+<p>理解一张表最好的办法，是问“作者为什么需要这个结果”。下面每一行都是一个审稿人可能提出的质疑，以及论文用哪个数字回答了它。</p>
+<div class="tw"><table>
+<thead><tr><th>如果……</th><th>那么故事会变成</th><th>实际结果</th></tr></thead>
+<tbody>
+<tr><td>T2 (1) 的 CAR 系数是 0</td><td>没有关系，论文无从谈起</td><td>1.193***</td></tr>
+<tr><td>加入公司固定效应后 CAR 不显著</td><td>关系只来自“公司之间”的差别（成长型公司反应好、投得也多），不是学习</td><td>0.975***</td></tr>
+<tr><td>SF_CAR 也显著</td><td>任何好消息都能预测多投 → 更像行业景气这类遗漏变量</td><td>0.039，不显著</td></tr>
+<tr><td>MKTRET 显著</td><td>管理层只是跟着大盘调整投资</td><td>不显著</td></tr>
+<tr><td>CAR_PRE 显著</td><td>公司本来就处在上升趋势中，和预测无关</td><td>不显著</td></tr>
+<tr><td>T3 两组的 CAR 系数一样</td><td>知情交易不重要 → 反向因果、遗漏变量的解释更可信</td><td>−0.295 vs 1.206，p = 0.019</td></tr>
+<tr><td>CAR_NEG 显著而 CAR_POS 不显著</td><td>更像约束渠道：差评迫使管理层收手</td><td>只有 CAR_POS 显著</td></tr>
+<tr><td>Higher 组的 MKTRET 也显著</td><td>Higher 组的公司只是对一切都更敏感</td><td>不显著，差异 p = 0.656</td></tr>
+<tr><td>Panel B 集中在一两年</td><td>结论可能只是某个时期的现象</td><td>分布在 13 年；脚注 23：2009 年后的子样本也成立</td></tr>
+</tbody></table></div>
+
+<h3 id="s8-8">8.8 Self-check<span class="en">自测题</span></h3>
+<details class="check"><summary>1. Table 2 模型 (4) 和 (5) 的 CAR 系数都是 0.975，为什么还要报告两列？</summary><p>两列只差聚类层级。(5) 证明结论在更保守的行业聚类下依然成立，并为后面所有按行业聚类的模型提供衔接。复现时如果这两列的系数不同，说明样本或固定效应在两列之间不一致。</p></details>
+<details class="check"><summary>2. 模型 (6) 的 CAR 系数（0.672*）比其他列小，是不是说明效应在这个子样本中较弱？</summary><p>不能直接这样比较。(6) 只用 3,456 个有同期销售预测的观测，样本不同；而且小样本的标准误更大。这一列的目的是检验 SF_CAR（0.039），不是比较 CAR 的大小。</p></details>
+<details class="check"><summary>3. Adj. R² 只有 0.001，能说 CAR 不重要吗？</summary><p>不能。R² 衡量的是预测力，不是因果效应的有无。CAR 每高一个标准差，调整幅度高 1.19 个百分点（均值的 16%），这在经济上是可观的，只是调整幅度还受很多其他因素影响。</p></details>
+<details class="check"><summary>4. CAR_NEG 的系数为正（0.185），是不是说明差评让公司多投？</summary><p>不是。CAR_NEG = min(CAR, 0) ≤ 0，反应越负，CAR_NEG 越小。正系数意味着“反应越负 → CAPEX_ADJ 越低”，方向是下调，只是不显著。</p></details>
+<details class="check"><summary>5. 为什么 CAPEX_ADJ 的均值（7.4%）和“实际均值 / 预测均值 − 1”（11.5%）不一样？</summary><p>CAPEX_ADJ 先对每个预测算比例再平均，每个预测权重相同；均值之比则由金额大的公司主导。另外，区间预测落在区间内记 0，且 CAPEX_ADJ 经过缩尾。</p></details>
+<details class="check"><summary>6. Table 3 的 Higher 组系数 1.206 比 Table 2 (8) 的 0.849 大，为什么？</summary><p>全样本把“有知情交易”和“没有知情交易”两类预测混在一起；Lower 组几乎没有效应，把全样本的平均效应拉低了。只看 Higher 组，效应更集中、更大。</p></details>
+<details class="check"><summary>7. 用一句话把三张表的逻辑讲给老师听（英文）。</summary><p>Table 1 describes 17,577 capex forecasts and shows substantial variation in how actual capex deviates from the forecast; Table 2 shows that a more positive market reaction predicts an upward adjustment, robust to firm and time fixed effects and to three placebo reactions; Table 3 shows that the effect is confined to forecasts that attract informed trading and comes from positive reactions, consistent with managerial learning rather than omitted variables or reverse causality.</p></details>
+</section>
+
+<!-- =============================================================== 9 -->
+<section class="sec" id="s9">
+<h2><span class="no">9</span>Theory<span class="en">理论：为什么披露能“问出”信息</span></h2>
+<h3>9.1 Prices aggregate dispersed information<span class="en">价格汇总分散的信息</span></h3>
+<p>Hayek (1945) 的经典观点是：价格汇总了分散在众人手中的信息。Grossman &amp; Stiglitz (1980) 进一步指出，只有当收集信息有利可图时，才会有人去收集，所以价格只能“部分”反映私人信息。这两点合起来，就是反馈效应的前提：股价里有管理层<b>不知道</b>、而投资者知道的东西（Bond, Edmans &amp; Goldstein 2012）。</p>
+<h3>9.2 Disclosure as a question<span class="en">把披露当作提问</span></h3>
+<p>Dye &amp; Sridhar (2002)、Langberg &amp; Sivaramakrishnan (2010) 的模型中，管理层公开一个拟议的行动，投资者对它定价，管理层再根据价格修正行动。用一个两期框架来理解：</p>
+<div class="calc">t = 0  管理层宣布计划 K₀（capex 预测）
+t = 1  投资者交易：知情者 θ 的信号进入价格 P(K₀, θ)
+t = 2  管理层观察 P，更新对项目回报的估计，选择实际投资 K₁
+       若 ∂K₁/∂P > 0 且只在 θ 有信息含量时成立 → 学习（H1）</div>
+<p>关键在于“t = 1 的价格包含 θ”：如果没有知情交易者参与（价差没有上升），P 里只有公开信息，管理层学不到新东西，这就是 Table 3 的逻辑。</p>
+<h3>9.3 Why mostly positive feedback<span class="en">为什么主要是正反馈</span></h3>
+<p>Edmans, Goldstein &amp; Jiang (2015)：卖空者知道坏消息会让管理层撤回项目、修复价值，从而让自己的卖空失败，所以坏消息被交易进价格的程度较低。好消息则会被管理层“放大”（追加投资），做多者交易更积极。预测：反馈效应来自 CAR_POS 而非 CAR_NEG，对应 Table 3 第 (3)(4) 列。</p>
+<h3>9.4 Why spreads can rise after disclosure<span class="en">为什么披露后价差反而可能上升</span></h3>
+<p>Kim &amp; Verrecchia (1994, 1997)：公开信息需要解读，善于解读的交易者在公告期获得优势，信息不对称反而上升。Lee, Mucklow &amp; Ready (1993) 用盈余公告找到了公告期价差上升的证据。这为“价差上升 = 披露引来了知情交易”提供了依据。</p>
+</section>
+
+<!-- =============================================================== 10 -->
+<section class="sec" id="s10">
+<h2><span class="no">10</span>Contribution and writing logic<span class="en">贡献与写作逻辑：它如何说服审稿人</span></h2>
+<h3>10.1 Contribution<span class="en">贡献</span></h3>
+<ol>
+<li><b>Feedback literature（反馈文献）</b>：从“管理层被动学习股价”推进到“管理层主动征求反馈”。</li>
+<li><b>Disclosure literature（披露文献）</b>：提出一种新的自愿披露动机（该文献的综述见 Beyer et al. 2010）：不是为了减少信息不对称，而是为了<b>利用</b>知情交易。</li>
+<li><b>Real effects of disclosure（披露的实际后果）</b>：与作者的另一篇 Jayaraman &amp; Wu (2019, RFS)“Is Silence Golden?”呼应，那篇发现强制分部披露会挤出私人信息、削弱反馈。</li>
+</ol>
+<h3>10.2 Identification without an instrument<span class="en">没有工具变量时怎么识别</span></h3>
+<p>论文承认没有外生冲击，而是借用 Rajan &amp; Zingales (1998) 的思路：<b>如果是学习，效应应该恰好出现在理论预测的地方</b>。每一个横截面检验都是一次“预言”，遗漏变量和反向因果很难同时满足全部预言：</p>
+<div class="tw"><table>
+<thead><tr><th>替代解释</th><th>它会预测什么</th><th>哪个检验与之矛盾</th></tr></thead>
+<tbody>
+<tr><td>Omitted good news（遗漏的好消息）同时推高股价和投资</td><td>任何事件的正面反应都能预测 capex 上调</td><td>Table 2 (6)(7)：SF_CAR、MKTRET、CAR_PRE 都不显著</td></tr>
+<tr><td>Reverse causality（反向因果）：市场预见到管理层会多投</td><td>和是否有知情交易无关</td><td>Table 3：只在价差上升组显著</td></tr>
+<tr><td>Disciplining（约束）：负反应迫使管理层收手</td><td>负反应的系数更大</td><td>Table 3 (4)：CAR_NEG 不显著</td></tr>
+<tr><td>Empire building（帝国建造）：管理层借好评过度投资</td><td>上调后业绩变差</td><td>Table 4（不在本次范围）：上调提高未来现金流</td></tr>
+<tr><td>Catering（迎合）：为了推高股价而迎合市场</td><td>短期导向的 CEO 更强</td><td>Table 5 D（不在本次范围）：长期导向的 CEO 更强</td></tr>
+</tbody></table></div>
+<h3>10.3 How the paper is built<span class="en">文章结构</span></h3>
+<div class="flow"><span>一个生动的例子（Newfield，附录 1）</span><i>→</i><span>理论上不确定（替代 vs 互补）</span><i>→</i><span>为什么选 capex 预测</span><i>→</i><span>主结果（Table 2）</span><i>→</i><span>机制（Table 3、5）</span><i>→</i><span>是不是好的学习（Table 4）</span><i>→</i><span>反向：噪音期更多披露（Table 6）</span></div>
+<p>写作上值得学习的两点：一是在引言里就用脚注 3、5、12 主动交代“结果可能与直觉相反”，降低审稿人的疑虑；二是每一个替代解释都配一个具体的表格来回应，而不是笼统地说“结果稳健”。</p>
+</section>
+
+<!-- =============================================================== 11 -->
+<section class="sec" id="s11">
+<h2><span class="no">11</span>Comparisons<span class="en">横向比较</span></h2>
+<div class="tw"><table>
+<thead><tr><th>Paper（论文）</th><th>决策 / 信号</th><th>和本文的关系</th></tr></thead>
+<tbody>
+<tr><td>Luo (2005, JF)</td><td>并购：宣告后的股价反应 → 是否完成并购</td><td>最接近的前作；但并购宣告不一定是为了征求反馈，也可能有其他目的</td></tr>
+<tr><td>Chen, Goldstein &amp; Jiang (2007, RFS)</td><td>日常股价 → 投资；投资-价格敏感度随私人信息增加</td><td>被动学习；本文的价差、PIN 检验借鉴了它的思路</td></tr>
+<tr><td>Zuo (2016, JAE)</td><td>股价 → 管理层修正盈利预测</td><td>学习的对象是“预测”，本文是“真实投资”</td></tr>
+<tr><td>Bae, Biddle &amp; Park（2017 工作论文，后发表于 Management Science）</td><td>同一场景（capex 指引），反馈来自分析师</td><td>同一数据，信息来源不同；本文强调市场价格中的私人信息</td></tr>
+<tr><td>Jayaraman &amp; Wu (2019, RFS)</td><td>强制分部披露 → 投资-价格敏感度下降</td><td>同一作者的“反面”：强制披露挤出私人信息</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- =============================================================== 12 -->
+<section class="sec" id="s12">
+<h2><span class="no">12</span>Limitations and critical reading<span class="en">局限与批判性阅读</span></h2>
+<p>复现时要带着这些问题看结果；写复现报告时，“讨论”部分也可以从这里展开。</p>
+<ol>
+<li><b>Identification（识别）</b>：Table 2–3 没有外生冲击。“价差上升”本身也是事件的结果，可能与新闻的复杂程度、不确定性同时变化，而不确定性本身也可能影响投资调整。</li>
+<li><b>Spread as a proxy（价差作为代理变量）</b>：CRSP 的收盘价差比较粗糙；价差上升也可能来自存货风险 (inventory risk) 或流动性冲击，而不只是知情交易。用日内 TAQ 数据会更准确。</li>
+<li><b>Timing of capex（支出时点）</b>：实际 capex 是全年数，其中一部分在预测发布前已经花了（脚注 18）。第四季度发布的预测，留给“学习”的空间很小。</li>
+<li><b>Mechanical zeros（机械的零值）</b>：区间预测“落在区间内记 0”，会把一部分真实调整压成 0，使系数偏小；区间越宽，越不容易观测到调整。</li>
+<li><b>Repeated forecasts（重复预测）</b>：同一家公司同一财年可能有好几个季度的预测，它们共享同一个实际 capex，因变量机械相关。按公司或行业聚类部分解决了这一问题。</li>
+<li><b>Confounded windows（混杂的窗口）</b>：55.9% 的预测与盈余公告同日发布，SURP 用的是季节性 EPS 变化，而非分析师预期偏差，对盈余信息的控制比较粗糙。</li>
+<li><b>Selection（选择性）</b>：只有选择发布 capex 预测的公司进入样本，结论不一定能推广到不发布的公司；Table 6 部分回应了“为什么发布”。</li>
+<li><b>Undisclosed choices（未披露的选择）</b>：缩尾、行业定义、开放式预测的处理、差异检验的方法都没有写明，所以精确复现不可能，本复现记录了 D1–D37 共 37 个选择。</li>
+</ol>
+</section>
+
+<!-- =============================================================== 13 -->
+<section class="sec" id="s13">
+<h2><span class="no">13</span>Applications<span class="en">现实应用</span></h2>
+<div class="tw"><table>
+<thead><tr><th>Who（谁）</th><th>Use（用法）</th></tr></thead>
+<tbody>
+<tr><td>CFO / IR（投资者关系）</td><td>重大投资方案先以指引形式公布，观察市场反应和分析师追问，再定最终规模；尤其在行业前景不明时</td></tr>
+<tr><td>Investors（投资者）</td><td>公告期正面反应且价差上升的公司，后续更可能上调资本支出，这是一个可交易的信号</td></tr>
+<tr><td>Regulators（监管者）</td><td>强制披露并非越多越好：如果挤出私人信息，可能削弱价格对实体决策的指导作用</td></tr>
+<tr><td>Researchers（研究者）</td><td>“用机制细节识别”的范式，适用于很多找不到外生冲击的会计问题</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- =============================================================== 14 -->
+<section class="sec" id="s14">
+<h2><span class="no">14</span>Replication handbook<span class="en">复现手册：从零到 Table 1–3</span></h2>
+
+<h3 id="s14-1">14.1 Environment and files<span class="en">环境与文件</span></h3>
+<pre><code>conda create -n jw2020 python=3.11 -y
+conda activate jw2020
+cd jw2020
+pip install -r requirements.txt
+python tests/test_hdfe.py        # HDFE TESTS PASSED：估计器与虚拟变量 OLS 一致到 1e-8
+python tests/run_synthetic.py    # ALL SYNTHETIC CHECKS PASSED：Tables 1–3 全流程 + 报告</code></pre>
+<div class="tw"><table>
+<thead><tr><th>File（文件）</th><th>Role（作用）</th></tr></thead>
+<tbody>
+<tr><td><code>config.py</code></td><td>全部开关，<code>SCOPE = "t13"</code> 时只做 Table 1–3；每个开关标着决策编号 D#</td></tr>
+<tr><td><code>check_wrds.py</code> → <code>pull_wrds.py</code> → <code>diagnose.py</code> → <code>run_all.py</code></td><td>运行顺序（§14.3）</td></tr>
+<tr><td><code>build_capex_sample.py</code></td><td>样本构建和全部变量（§14.4）</td></tr>
+<tr><td><code>tables.py</code></td><td>Table 1–3、正文数字、稳健性、缩尾核对</td></tr>
+<tr><td><code>hdfe.py</code></td><td>高维固定效应 OLS + 聚类标准误（reghdfe 口径）</td></tr>
+<tr><td><code>report.py</code></td><td>生成英文复现报告 <code>replication_report.html / .md</code></td></tr>
+<tr><td><code>paper_targets.py</code></td><td>论文全部数字，用于逐格对照</td></tr>
+<tr><td><code>REPLICATION_NOTES.md</code>、<code>WRDS_GUIDE.md</code></td><td>决策日志全文；WRDS 操作手册</td></tr>
+</tbody></table></div>
+
+<h3 id="s14-2">14.2 WRDS<span class="en">WRDS 数据</span></h3>
+<p>Table 1–3 只需要 9 张表，<code>pull_wrds.py</code> 在 <code>SCOPE = "t13"</code> 时自动只下载这 9 张：</p>
+<div class="tw"><table>
+<thead><tr><th>Name（代码中的名字）</th><th>WRDS table</th><th>用来算</th></tr></thead>
+<tbody>
+<tr><td>guidance</td><td><code>ibes.det_guidance</code></td><td>capex 预测（CPX）、销售预测（SAL，用于 SF_CAR）、EPS 预测（用于删除同日发布的）</td></tr>
+<tr><td>ibcrsphist</td><td><code>wrdsapps_link_crsp_ibes.ibcrsphist</code></td><td>IBES ticker → PERMNO</td></tr>
+<tr><td>ccm</td><td><code>crsp.ccmxpf_lnkhist</code></td><td>PERMNO → GVKEY</td></tr>
+<tr><td>funda</td><td><code>comp.funda</code></td><td>实际 capex、LAG_CAPX、年初市值、<code>sich</code>（行业）</td></tr>
+<tr><td>fundq</td><td><code>comp.fundq</code></td><td>SIZE、SURP、盈余公告日 <code>rdq</code>（EA_DUM）</td></tr>
+<tr><td>company</td><td><code>comp.company</code></td><td>表头 SIC（缺历史 SIC 时补充）、州（脚注 19 的州 × 年固定效应）</td></tr>
+<tr><td>msenames</td><td><code>crsp.msenames</code></td><td>CUSIP 历史（核对用）</td></tr>
+<tr><td>dsi</td><td><code>crsp.dsi</code></td><td>S&amp;P 500 日收益 <code>sprtrn</code>、交易日历</td></tr>
+<tr><td>dsf</td><td><code>crsp.dsf</code></td><td>个股日收益、收盘买卖报价（只下载事件窗口附近）</td></tr>
+</tbody></table></div>
+<p>账号、Duo 双因素认证、下载、报错处理的完整步骤见 <code>WRDS_GUIDE.md</code>。第一步永远是 <code>python check_wrds.py</code>。</p>
+
+<h3 id="s14-3">14.3 Run order<span class="en">运行顺序</span></h3>
+<ol class="timeline-steps">
+<li><h4>Check access（检查权限）</h4><pre><code>export WRDS_USERNAME=你的用户名      # Windows: setx WRDS_USERNAME "你的用户名"
+python check_wrds.py               # → output/wrds_check.md</code></pre><p>输出里 9 张表都是 OK，并把 CPX 编码分布截图保存。</p></li>
+<li><h4>Download（下载）</h4><pre><code>python pull_wrds.py                # 9 张表，一次 Duo 推送 → data/raw/ 和 _pull_log.csv</code></pre></li>
+<li><h4>Calibrate（校准）</h4><pre><code>python diagnose.py</code></pre><p>按 §14.6 设定 D1、D3、D4、D9、D10。<b>只看样本特征，不看回归结果。</b></p></li>
+<li><h4>Build and estimate（构建与估计）</h4><pre><code>python run_all.py                  # → output/ 下的全部结果和报告</code></pre></li>
+<li><h4>Read in this order（按顺序读结果）</h4><p><code>sample_waterfall.csv</code> → <code>tables.md</code> 的 Table 1 和缩尾核对 → 正文数字 → Table 2、3 → <code>replication_report.html</code>。</p></li>
+</ol>
+<div class="tw"><table>
+<thead><tr><th>Output（输出）</th><th>Content（内容）</th></tr></thead>
+<tbody>
+<tr><td><code>output/sample_waterfall.csv</code></td><td>每一步的样本量，旁边是论文的数字</td></tr>
+<tr><td><code>output/tables.md</code></td><td>Table 1–3（每格下方是论文数字）、经济显著性、正文数字、稳健性、缩尾核对</td></tr>
+<tr><td><code>output/table1_winsor_check.csv</code></td><td>每个 Table 1 变量的原始极值、1% 和 99% 分位与论文极值的比较</td></tr>
+<tr><td><code>output/estimates_long.csv</code></td><td>所有系数的长表：表、列、变量、系数、SE、p、N、Adj. R²、论文值</td></tr>
+<tr><td><code>output/replication_report.html</code> / <code>.md</code></td><td>英文复现报告：记分卡、逐表对照、选择清单、差异诊断（可在浏览器打印成 PDF）</td></tr>
+</tbody></table></div>
+
+<h3 id="s14-4">14.4 Every variable, step by step<span class="en">每个变量的构造规则与代码位置</span></h3>
+<div class="tools"><input type="search" id="varQ" placeholder="搜索变量、字段或规则，例如 rdq、spread、ajexq" aria-label="Search variables（搜索变量）"><span class="count" id="varN"></span></div>
+<div class="tw"><table><thead><tr><th>Variable（变量）</th><th>Rule（规则）</th><th>WRDS fields（字段）</th><th>Code（代码）</th></tr></thead><tbody id="varBody"></tbody></table></div>
+
+<h3 id="s14-5">14.5 Decision log for Tables 1–3<span class="en">与 Table 1–3 相关的决策</span></h3>
+<p>论文没写清楚、但会影响 Table 1–3 的选择。橙色左边框标出的，是从论文报告的样本量 N 反推出来的选择，证据最强。完整日志见 <code>REPLICATION_NOTES.md</code>。</p>
+<div class="tools"><input type="search" id="dQ" placeholder="搜索，例如 EPS、range、winsor" aria-label="Search decisions（搜索决策）"><span id="dChips"></span><span class="count" id="dN"></span></div>
+<div id="dList"></div>
+
+<h3 id="s14-6">14.6 Calibration targets<span class="en">校准目标：先对样本，再看系数</span></h3>
+<div class="tw"><table>
+<thead><tr><th>Target（目标）</th><th class="n">Paper</th><th>Switch（开关）</th><th>Where（在哪里看）</th></tr></thead>
+<tbody>
+<tr><td>Waterfall（样本瀑布）</td><td class="n">40,785 → 36,900 → 19,427 → 17,577</td><td>D1, D2, D5, D6, D9</td><td><code>sample_waterfall.csv</code></td></tr>
+<tr><td>Point / range / other（预测类型比例）</td><td class="n">55.30 / 34.48 / 10.22%</td><td>D3</td><td>Table 1 Panel C</td></tr>
+<tr><td>Dropped as concurrent with EPS（同日删除比例）</td><td class="n">47.4%</td><td>D9</td><td><code>diagnose.py</code> [5]</td></tr>
+<tr><td>Actual / forecast by unit（实际 / 预测）</td><td class="n">≈ 1</td><td>D4</td><td><code>diagnose.py</code> [3]</td></tr>
+<tr><td>EA_DUM mean</td><td class="n">0.559</td><td>D10</td><td>Table 1 Panel A</td></tr>
+<tr><td>CAPEX_ADJ median（中位数）</td><td class="n">0.000</td><td>D3, D7</td><td>Table 1 Panel A</td></tr>
+<tr><td>CAR mean / SD / min / max</td><td class="n">−0.148 / 8.974 / −31.36 / 25.35</td><td>D11, D12, D14</td><td>Table 1，脚注 15</td></tr>
+<tr><td>corr(SURP, CAR); corr(SURP, CAPEX_ADJ)</td><td class="n">0.08; 0.001</td><td>D10, D32</td><td>脚注 22</td></tr>
+<tr><td>Sales-forecast sample / median distance</td><td class="n">3,456 / 86 days</td><td>D13</td><td>Table 2 (6)，脚注 21</td></tr>
+<tr><td>Median SF_CAR</td><td class="n">0.457%</td><td>D13</td><td>脚注 20</td></tr>
+<tr><td>Higher-spread share（价差上升组占比）</td><td class="n">55.2%</td><td>D17</td><td>Table 3 的 N</td></tr>
+</tbody></table></div>
+
+<h3 id="s14-7">14.7 Reading the report<span class="en">怎么读复现报告</span></h3>
+<p><code>replication_report.html</code> 按以下顺序组织（英文，可直接交给老师）：Summary（四个关键数字 + 记分卡）→ Data and sample（瀑布与数据版本）→ Table 1 → Table 2 → Table 3（含差异 p 值）→ Numbers quoted in the text（经济显著性与脚注）→ Robustness（脚注 17–19、23）→ Implementation choices → Where the replication differs, and why → Reproducibility。</p>
+<p>记分卡对 19 个关键系数逐一判断三件事：符号是否一致；10% 水平的显著性是否一致；与论文的差距是否在一个论文标准误以内（两个标准误以内记 partial）。用模拟数据生成的报告带红色 DEMO 水印，只用来看版式。</p>
+<p class="note">合理的复现标准：样本量在 ±5–10% 以内；核心系数符号相同、显著性格局相同、数量级接近；Table 3 “只在价差上升组成立”的模式能够重现。IBES Guidance 和 Compustat 自 2019 年以来都有回溯修订，逐位相同是不可能的。</p>
+
+<h3 id="s14-8">14.8 Diagnosing deviations<span class="en">偏差诊断决策树</span></h3>
+<div class="dtree">
+<div class="dt-row"><div class="dt-if">w0（原始预测数）远少于 40,785</div><div class="dt-then">检查 D1 的 measure 代码和 <code>pdicity</code>；<code>check_wrds.py</code> 逐年计数与 Table 1 Panel B 比较；早期年份少可能是 IBES 回溯修订</div></div>
+<div class="dt-row"><div class="dt-if">w3 这一步删得太多或太少（目标约 47%）</div><div class="dt-then">D9：EPS 预测同日的窗口；只算 EPS 还是也算其他指标（<code>DROP_CONCURRENT_MEASURES</code>）</div></div>
+<div class="dt-row"><div class="dt-if">最终样本里出现 2002 年</div><div class="dt-then">D2 的 <code>KEEP_FROM_YEAR</code>；同时检查 D5 的期限规则是否把 FY2003 的预测算成了 2002 年发布</div></div>
+<div class="dt-row"><div class="dt-if">Panel C 比例不对</div><div class="dt-then">D3：<code>diagnose.py</code> [2] 的 <code>range_desc</code> × <code>val_2</code> 缺失交叉表；把表示“不少于 / 不超过”的代码放进 <code>RANGE_DESC_OPEN_ENDED</code></div></div>
+<div class="dt-row"><div class="dt-if">CAPEX_ADJ 均值或标准差偏差大</div><div class="dt-then">D4 单位（中位数比值 ≈ 1000 即单位错）；D7 区间分母；D14 缩尾；fiscal year 匹配（<code>prd_mon</code> 与 <code>fyr</code>）</div></div>
+<div class="dt-row"><div class="dt-if">CAR 的极值比论文大很多</div><div class="dt-then">D14：CAR 是否缩尾；看 <code>table1_winsor_check.csv</code> 的 “paper closer to” 一列</div></div>
+<div class="dt-row"><div class="dt-if">EA_DUM 均值偏离 0.559</div><div class="dt-then">D10：±1 个日历日还是交易日；<code>rdq</code> 缺失比例</div></div>
+<div class="dt-row"><div class="dt-if">Table 2 (4) 与 (5) 系数不同</div><div class="dt-then">两列样本或固定效应不一致：检查行业变量是否有缺失（行业缺失会让 (5) 少观测）</div></div>
+<div class="dt-row"><div class="dt-if">(4) 的 N 小于 (1)</div><div class="dt-then">D25：singletons 被删了；论文的 N 说明它们被保留</div></div>
+<div class="dt-row"><div class="dt-if">LAG_CAPX 系数差几个数量级</div><div class="dt-then">D15：回归里用的是不是“capx / 市值 × 100”</div></div>
+<div class="dt-row"><div class="dt-if">Higher 组占比远离 55%</div><div class="dt-then">D17：价差单位与有效报价筛选；CRSP 的 <code>bid</code>、<code>ask</code> 有无零值或倒挂</div></div>
+<div class="dt-row"><div class="dt-if">CAR 系数符号对、但整体偏大或偏小</div><div class="dt-then">D27：标准化是否在全样本上做；D14：缩尾；D7：区间分母</div></div>
+</div>
+
+<h3 id="s14-9">14.9 Troubleshooting<span class="en">常见错误</span></h3>
+<div class="tw"><table>
+<thead><tr><th>Symptom（症状）</th><th>Cause（原因）</th><th>Fix（解决）</th></tr></thead>
+<tbody>
+<tr><td><code>PAM authentication failed</code></td><td>密码错误或未批准 Duo 推送</td><td>重新运行并在手机上批准；改过密码要更新 <code>.pgpass</code></td></tr>
+<tr><td><code>permission denied for schema ibes</code></td><td>学校未订阅 IBES Guidance</td><td>Table 1–3 无法进行，先找图书馆或老师</td></tr>
+<tr><td><code>FileNotFoundError ... data/raw</code></td><td>某张表没有下载成功</td><td>看 <code>data/raw/_pull_log.csv</code>，<code>python pull_wrds.py 表名</code> 单独重下</td></tr>
+<tr><td>瀑布第一步就是 0</td><td>measure 代码或 <code>pdicity</code> 不对</td><td><code>check_wrds.py</code> 的 measure 计数表</td></tr>
+<tr><td>CAPEX_ADJ 出现 ±10,000% 这类值</td><td>单位不一致（千 vs 百万）</td><td>D4；<code>diagnose.py</code> [3]</td></tr>
+<tr><td>SF_CAR 样本几乎为 0</td><td>销售预测都在同一天发布，被 D13 排除</td><td>核对 SAL 代码；考虑放宽 <code>SF_MIN_GAP_TDAYS</code> 并记录</td></tr>
+<tr><td>Table 3 的 N 远小于 17,340</td><td>CRSP 收盘报价缺失多</td><td>检查 <code>dsf</code> 是否下载了 <code>bid</code>、<code>ask</code>；放宽最少天数要记录</td></tr>
+<tr><td>报告显示 DEMO 水印</td><td><code>data/raw</code> 里有模拟数据的标记文件 <code>_SYNTHETIC</code></td><td>真实数据要放在新的目录，或删除该标记后重跑</td></tr>
+</tbody></table></div>
+
+<h3 id="s14-10">14.10 Checklist<span class="en">执行清单（勾选状态保存在本机浏览器）</span></h3>
+<ul class="check-list" id="checklist">
+<li class="grp">Before data（拿到数据前）</li>
+<li><label><input type="checkbox" data-k="k1"><span>下载 RFS 正式版和 Internet Appendix，核对 <code>paper_targets.py</code> 的 Table 1–3 数字</span></label></li>
+<li><label><input type="checkbox" data-k="k2"><span>读完 §2 的 13 节预备课，能回答每课的自测题</span></label></li>
+<li><label><input type="checkbox" data-k="k3"><span>本地环境通过 <code>test_hdfe.py</code> 和 <code>run_synthetic.py</code></span></label></li>
+<li class="grp">Data（数据）</li>
+<li><label><input type="checkbox" data-k="k4"><span><code>check_wrds.py</code>：9 张表全部 OK；CPX 编码截图存档</span></label></li>
+<li><label><input type="checkbox" data-k="k5"><span><code>pull_wrds.py</code> 完成，日志中没有 FAILED</span></label></li>
+<li><label><input type="checkbox" data-k="k6"><span><code>diagnose.py</code>：设定 D1、D3、D4、D9、D10，每次修改写进 REPLICATION_NOTES</span></label></li>
+<li class="grp">Results（结果）</li>
+<li><label><input type="checkbox" data-k="k7"><span>样本瀑布每一步与论文差距 ≤ 10%，或已写明原因</span></label></li>
+<li><label><input type="checkbox" data-k="k8"><span>Table 1：Panel C 比例、EA_DUM、CAPEX_ADJ 中位数、缩尾核对表</span></label></li>
+<li><label><input type="checkbox" data-k="k9"><span>Table 2：8 列逐格对照；(4)(5) 系数相同；三个安慰剂不显著</span></label></li>
+<li><label><input type="checkbox" data-k="k10"><span>Table 3：分组 N、Higher 组占比、7 个差异 p 值</span></label></li>
+<li><label><input type="checkbox" data-k="k11"><span>正文数字：16.1%、11.4%、16.2%、脚注 15、20–22</span></label></li>
+<li><label><input type="checkbox" data-k="k12"><span>稳健性：脚注 17–19、23（代码自动输出）；再各切换 D7、D9、D10、D14、D18 一次</span></label></li>
+<li class="grp">Delivery（交付）</li>
+<li><label><input type="checkbox" data-k="k13"><span>报告的 “Where the replication differs” 一节，每条差异都写出原因</span></label></li>
+<li><label><input type="checkbox" data-k="k14"><span>在浏览器把报告打印成 PDF；交付物中不含 WRDS 原始数据</span></label></li>
+</ul>
+<button class="btn" id="resetChecks" type="button">Clear checklist（清空勾选）</button>
+</section>
+
+<!-- =============================================================== 15 -->
+<section class="sec" id="s15">
+<h2><span class="no">15</span>Extensions<span class="en">扩展方向</span></h2>
+<div class="tw"><table>
+<thead><tr><th>Idea（想法）</th><th>Purpose（目的）</th><th>Feasibility（可行性）</th></tr></thead>
+<tbody>
+<tr><td>Extend to 2016–2024（延长样本）</td><td>检验结论在样本外是否成立；需用 CRSP 新格式 CIZ（<code>dsf_v2</code>）</td><td>高：只改 <code>pull_wrds.py</code> 和年份开关</td></tr>
+<tr><td>Intraday spreads from TAQ（日内价差）</td><td>比收盘价差更准确地度量知情交易</td><td>中：TAQ 体量大，需要 WRDS Cloud</td></tr>
+<tr><td>Analyst-based surprise（基于分析师的盈余意外）</td><td>用 IBES 预期替代季节性 EPS 变化，更好地剥离盈余信息</td><td>高</td></tr>
+<tr><td>Quarter of the forecast（预测所在季度）</td><td>第一季度发布的预测留给学习的空间最大，效应应更强</td><td>高：交互项即可</td></tr>
+<tr><td>Width of the range（区间宽度）</td><td>区间越宽，机械零值越多；按宽度分组检验 L11 中提到的偏差</td><td>高</td></tr>
+<tr><td>Text of the guidance（指引文本）</td><td>用 LLM 判断指引中对前景的描述，区分“信息”与“情绪”</td><td>中：需要新闻稿文本</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- =============================================================== 16 -->
+<section class="sec" id="s16">
+<h2><span class="no">16</span>Bilingual glossary<span class="en">双语术语表</span></h2>
+<h3 id="s16-1">16.1 Searchable glossary<span class="en">可搜索的中英对照表</span></h3>
+<div class="tools"><input type="search" id="gQ" placeholder="搜索英文或中文" aria-label="Search glossary（搜索术语）"><span class="count" id="gN"></span></div>
+<div class="tw"><table><thead><tr><th>English</th><th>中文</th><th>Note（说明）</th><th>Type（类别）</th></tr></thead><tbody id="gBody"></tbody></table></div>
+<h3 id="s16-2">16.2 Say it in English<span class="en">用英文讲这篇论文</span></h3>
+<div class="tw"><table><thead><tr><th>English</th><th>中文</th></tr></thead><tbody id="sBody"></tbody></table></div>
+</section>
+
+<!-- =============================================================== 17 -->
+<section class="sec" id="s17">
+<h2><span class="no">17</span>Results and analysis<span class="en">结果与分析</span></h2>
+<h3 id="s17-1">17.1 Status<span class="en">当前进度</span></h3>
+<p>代码和方法已经验证，<b>真实数据的结果尚未产生</b>：WRDS 下载完成后运行 <code>run_all.py</code>，结果会写进 <code>replication_report.html</code>，之后再把关键数字补到本节。</p>
+<div class="tw"><table>
+<thead><tr><th>Check（验证项）</th><th>Result（结果）</th></tr></thead>
+<tbody>
+<tr><td>HDFE estimator vs dummy-variable OLS（估计器对照）</td><td class="pos">系数一致到 1e-8；聚类标准误公式与 reghdfe 口径一致</td></tr>
+<tr><td>Synthetic pipeline（模拟数据全流程）</td><td class="pos">Tables 1–3 和报告全部生成；植入的 CAR 效应被还原</td></tr>
+<tr><td>Internal N checks（样本量内部一致性）</td><td class="pos">T2 (1)–(5)(7) 同一样本；(8) ≤ (7)；T3 两组之和 ≤ T2 (8)；去重在瀑布之前</td></tr>
+<tr><td>Real-data replication（真实数据复现）</td><td class="flat">待运行</td></tr>
+</tbody></table></div>
+<h3 id="s17-2">17.2 What to write once results arrive<span class="en">拿到结果后怎么写分析</span></h3>
+<ol>
+<li><b>Sample（样本）</b>：瀑布每一步的差距及原因；与 IBES 修订、链接表差异有关的部分单独说明。</li>
+<li><b>Table 1</b>：Panel C 比例、CAPEX_ADJ 中位数是否为 0、缩尾核对的结论（哪些变量论文缩尾了）。</li>
+<li><b>Table 2</b>：CAR 系数在 8 列中的符号、显著性和大小；安慰剂是否仍不显著；经济显著性与 16.1%、11.4% 的比较。</li>
+<li><b>Table 3</b>：Higher / Lower 的差异及 p 值；CAR_POS 与 CAR_NEG；如果模式不成立，用 D17、D35 的切换检验敏感性。</li>
+<li><b>Discussion（讨论）</b>：结合 §12 的局限，说明哪些差异来自数据修订，哪些来自论文未披露的选择。</li>
+</ol>
+</section>
+
+<!-- =============================================================== 18 -->
+<section class="sec" id="s18">
+<h2><span class="no">18</span>Changelog<span class="en">更新记录</span></h2>
+<div class="tw"><table>
+<thead><tr><th>Version</th><th>Date</th><th>Changes（改动）</th></tr></thead>
+<tbody>
+<tr><td>v3</td><td>2026-11-03</td><td>重写 §8：Table 1–3 每一格可点击，显示含义、读法（t 值、置信区间、占均值比例）、说明了什么和类比；新增贯穿类比“餐馆试菜”、列 / 行指南、横向比较、样本量流向图、数字地图、反事实表和 7 道自测题</td></tr>
+<tr><td>v2</td><td>2026-11-02</td><td>聚焦 Table 1–3；按学习指南模板重写；术语改为英文在前；新增 13 节预备课、5 个交互演示、Table 1–3 逐格精读、偏差诊断树；代码新增 Table 1–3 模式、缩尾核对和英文报告生成器</td></tr>
+<tr><td>v1</td><td>2026-11-02</td><td>覆盖全部 6 张表的复现手册与决策日志 D1–D37</td></tr>
+</tbody></table></div>
+</section>
+
+<footer>Zhang Qi · Jayaraman &amp; Wu (2020) Tables 1–3 学习与复现指南 v3。论文数字来自 2019 年 5 月工作论文，引用前请以 RFS 正式版为准。</footer>
+</div>
+</main>
+</div>
+
+<script>
+(function(){
+"use strict";
+var store={get:function(k){try{return window.localStorage.getItem(k);}catch(e){return null;}},set:function(k,v){try{window.localStorage.setItem(k,v);}catch(e){}}};
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function hi(s,q){var t=esc(s);if(!q)return t;var e=esc(q),i=t.toLowerCase().indexOf(e.toLowerCase());if(i<0)return t;return t.slice(0,i)+"<mark>"+t.slice(i,i+e.length)+"</mark>"+t.slice(i+e.length);}
+function fmt(x,d){return (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);}
+function svgEl(tag,attrs,text){var e=document.createElementNS("http://www.w3.org/2000/svg",tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e;}
+function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+
+/* ---------------- theme ---------------- */
+var th=store.get("jw-theme"); if(th) document.documentElement.setAttribute("data-theme",th);
+$("themeBtn").addEventListener("click",function(){
+  var cur=document.documentElement.getAttribute("data-theme");
+  var dark=cur? cur==="dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  var nx=dark?"light":"dark"; document.documentElement.setAttribute("data-theme",nx); store.set("jw-theme",nx); redraw();
+});
+
+/* ---------------- TOC ---------------- */
+var toc=$("toc"), mtoc=$("mtoc"), links=[];
+document.querySelectorAll("section.sec").forEach(function(s){
+  var h=s.querySelector("h2"), no=h.querySelector(".no").textContent, en=h.childNodes[1].textContent.trim(), zh=h.querySelector(".en").textContent;
+  var li='<li><a href="#'+s.id+'"><span class="n">'+no+'</span>'+esc(en)+'（'+esc(zh.split("：")[0])+'）</a>';
+  var subs=s.querySelectorAll("h3[id]"), sub="";
+  subs.forEach(function(x){var t=x.childNodes[0].textContent.trim();sub+='<li><a href="#'+x.id+'">'+esc(t)+'</a></li>';});
+  if(sub) li+="<ol>"+sub+"</ol>";
+  li+="</li>"; toc.insertAdjacentHTML("beforeend",li); mtoc.insertAdjacentHTML("beforeend",li);
+});
+mtoc.addEventListener("click",function(e){if(e.target.closest("a"))mtoc.parentNode.removeAttribute("open");});
+links=[].slice.call(toc.querySelectorAll(":scope > li > a"));
+if("IntersectionObserver" in window){
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){links.forEach(function(l){l.classList.toggle("on",l.getAttribute("href")==="#"+en.target.id);});}});},{rootMargin:"-15% 0px -75% 0px"});
+  document.querySelectorAll("section.sec").forEach(function(s){io.observe(s);});
+}
+
+/* ---------------- copy buttons ---------------- */
+document.querySelectorAll("pre").forEach(function(p){
+  var b=document.createElement("button");b.className="copy";b.type="button";b.textContent="复制";
+  b.addEventListener("click",function(){var t=p.querySelector("code").innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){b.textContent="已复制";setTimeout(function(){b.textContent="复制";},1500);},function(){b.textContent="请手动复制";});}else{b.textContent="请手动复制";}});
+  p.appendChild(b);
+});
+
+/* ---------------- 5.1 CAPEX_ADJ ---------------- */
+var adjPre=[["Newfield 2010（点）","point",1600,null,1971],["Newfield 2014（点）","point",1600,null,1371],["区间内","range",1500,1700,1650],["高于区间","range",1500,1700,1800],["低于区间","range",1500,1700,1300],["实际为 0","point",120,null,0]];
+adjPre.forEach(function(p,i){var b=document.createElement("button");b.className="chip";b.type="button";b.textContent=p[0];b.setAttribute("aria-pressed",i===0?"true":"false");
+  b.addEventListener("click",function(){$("adjType").value=p[1];$("adjLo").value=p[2];if(p[3]!=null)$("adjHi").value=p[3];$("adjAct").value=p[4];
+    $("adjPresets").querySelectorAll(".chip").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});adj();});
+  $("adjPresets").appendChild(b);});
+function adj(){
+  var t=$("adjType").value, lo=+$("adjLo").value, hiV=+$("adjHi").value, a=+$("adjAct").value;
+  $("adjHiL").style.display=t==="range"?"":"none";
+  if(t==="point") hiV=lo;
+  if(hiV<lo){var z=lo;lo=hiV;hiV=z;}
+  var fore=(lo+hiV)/2, v, how;
+  if(!(fore>0)){$("adjOut").innerHTML="预测值必须为正。";return;}
+  if(a>hiV){v=(a-hiV)/fore*100;how=t==="point"?"(实际 − 预测) / 预测":"(实际 − 上界) / 中点";}
+  else if(a<lo){v=(a-lo)/fore*100;how=t==="point"?"(实际 − 预测) / 预测":"(实际 − 下界) / 中点";}
+  else {v=0;how=t==="point"?"实际 = 预测":"落在区间内，记 0";}
+  var w=Math.max(Math.abs(v)*Math.abs(fore)/100,1);
+  $("adjOut").innerHTML='<b class="big '+(v>0?"pos":v<0?"neg":"")+'">'+(v>0?"+":"")+fmt(v,2)+'%</b>'+how+'。'+(t==="range"?' 分母 = 区间中点 '+fmt(fore,1)+'。':'')+(a===0?' 实际为 0 的点预测给出 −100%，而论文最小值是 −77.05，说明 CAPEX_ADJ 被缩尾了。':'');
+  var s=$("adjSvg"); s.innerHTML="";
+  var mn=Math.min(lo,a,hiV)*0.85, mx=Math.max(lo,a,hiV)*1.1+1; if(mn===mx)mx=mn+1;
+  function X(x){return 30+(x-mn)/(mx-mn)*640;}
+  s.appendChild(svgEl("line",{x1:30,y1:60,x2:670,y2:60,"class":"ax"}));
+  s.appendChild(svgEl("rect",{x:X(lo),y:48,width:Math.max(X(hiV)-X(lo),3),height:24,rx:3,style:"fill:var(--accent-soft);stroke:var(--accent)"}));
+  s.appendChild(svgEl("text",{x:X(lo),y:40,style:"font-size:12.5px"},t==="range"?"区间 "+lo+"–"+hiV:"预测 "+lo));
+  s.appendChild(svgEl("circle",{cx:X(a),cy:60,r:7,style:"fill:var(--up)"}));
+  s.appendChild(svgEl("text",{x:X(a),y:95,"text-anchor":"middle",style:"font-size:12.5px;fill:var(--up);font-weight:600"},"实际 "+a));
+}
+["adjType","adjLo","adjHi","adjAct"].forEach(function(id){$(id).addEventListener("input",adj);});
+
+/* ---------------- 5.2 windows + CAR ---------------- */
+function drawWin(){
+  var s=$("winSvg"); s.innerHTML="";
+  function X(d){return 40+(d+15)*26.5;}
+  s.appendChild(svgEl("line",{x1:X(-15),y1:110,x2:X(11),y2:110,"class":"ax"}));
+  for(var d=-14;d<=10;d+=2){s.appendChild(svgEl("line",{x1:X(d),y1:106,x2:X(d),y2:114,"class":"ax"}));s.appendChild(svgEl("text",{x:X(d),y:130,"text-anchor":"middle","class":"mut",style:"font-size:11.5px"},d));}
+  var bands=[[-12,-8,"CAR_PRE：伪事件日 ±2","var(--rule-strong)",20],[-10,-3,"pre spread [−10, −3]","var(--accent)",48],[-2,2,"CAR、event spread [−2, +2]","var(--up)",76],[3,10,"post [3, 10]（Table 5 用）","var(--rule-strong)",48]];
+  bands.forEach(function(b){s.appendChild(svgEl("rect",{x:X(b[0])-10,y:b[4]-14,width:X(b[1])-X(b[0])+20,height:22,rx:4,style:"fill:none;stroke:"+b[3]+";stroke-width:1.6"}));
+    s.appendChild(svgEl("text",{x:X(b[0])-6,y:b[4]+2,style:"font-size:12px"},b[2]));});
+  s.appendChild(svgEl("line",{x1:X(0),y1:96,x2:X(0),y2:124,style:"stroke:var(--up);stroke-width:2.5"}));
+  s.appendChild(svgEl("text",{x:X(0),y:152,"text-anchor":"middle",style:"font-size:12.5px;font-weight:600;fill:var(--up)"},"day 0 = 公告日（MKTRET）"));
+  s.appendChild(svgEl("text",{x:X(-10),y:166,"text-anchor":"middle","class":"mut",style:"font-size:11.5px"},"−14 个日历日 ≈ −10 个交易日"));
+}
+var carData={"Newfield 2010（虚构日收益）":[[0.4,0.2],[-0.3,-0.5],[5.1,0.6],[2.2,0.4],[0.9,0.2]],"同日大盘大跌":[[0.1,0.0],[0.2,0.1],[-2.5,-3.0],[0.4,0.2],[0.1,0.1]],"全部为 0":[[0,0],[0,0],[0,0],[0,0],[0,0]]};
+var carKeys=Object.keys(carData);
+carKeys.forEach(function(k,i){var b=document.createElement("button");b.className="chip";b.type="button";b.textContent=k;b.setAttribute("aria-pressed",i===0?"true":"false");
+  b.addEventListener("click",function(){fillCar(carData[k]);$("carPresets").querySelectorAll(".chip").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});});$("carPresets").appendChild(b);});
+function fillCar(rows){var tb=$("carT").querySelector("tbody");tb.innerHTML="";
+  rows.forEach(function(r,i){var d=i-2;tb.insertAdjacentHTML("beforeend",'<tr><td>'+(d>0?"+":"")+d+(d===0?"（公告日）":"")+'</td><td class="n"><input type="number" step="any" value="'+r[0]+'" style="width:90px"></td><td class="n"><input type="number" step="any" value="'+r[1]+'" style="width:90px"></td><td class="n ab"></td></tr>');});
+  tb.querySelectorAll("input").forEach(function(x){x.addEventListener("input",car);x.setAttribute("aria-label","return");}); car();}
+function car(){var tot=0, mk=0;$("carT").querySelectorAll("tbody tr").forEach(function(tr,i){var ins=tr.querySelectorAll("input"),f=+ins[0].value,m=+ins[1].value,ab=f-m;tot+=ab;if(i===2)mk=m;tr.querySelector(".ab").textContent=(ab>0?"+":"")+fmt(ab,2);});
+  $("carOut").innerHTML='<b class="big '+(tot>0?"pos":tot<0?"neg":"")+'">CAR = '+(tot>0?"+":"")+fmt(tot,2)+'%</b>MKTRET = '+fmt(mk,2)+'%。标准化后：CAR / 8.974 = '+fmt(tot/8.974,2)+' 个标准差。';}
+
+/* ---------------- 5.3 FE demo ---------------- */
+var feData=(function(){var pts=[],firms=[["A",-1.2,14,"var(--accent)"],["B",0,6,"var(--up)"],["C",1.3,-4,"var(--green)"]],noise=[[-1.1,0.5],[-0.4,-1.05],[0.2,1.0],[0.7,-0.9],[1.2,0.45],[-0.6,0.0]];
+  firms.forEach(function(f){noise.forEach(function(n){var x=f[1]+n[0];pts.push({f:f[0],c:f[3],x:x,y:f[2]+2.0*(x-f[1])+n[1]*2.2});});});return pts;})();
+function ols(xs,ys){var n=xs.length,mx=0,my=0;for(var i=0;i<n;i++){mx+=xs[i];my+=ys[i];}mx/=n;my/=n;var sxy=0,sxx=0;for(i=0;i<n;i++){sxy+=(xs[i]-mx)*(ys[i]-my);sxx+=(xs[i]-mx)*(xs[i]-mx);}var b=sxy/sxx;return {b:b,a:my-b*mx,mx:mx,my:my};}
+var feMode=0;
+function drawFE(){var s=$("feSvg");s.innerHTML="";
+  function X(x){return 60+(x+3)/6*600;} function Y(y){return 290-(y+10)/34*270;}
+  s.appendChild(svgEl("line",{x1:60,y1:290,x2:660,y2:290,"class":"ax"}));s.appendChild(svgEl("line",{x1:60,y1:20,x2:60,y2:290,"class":"ax"}));
+  s.appendChild(svgEl("text",{x:660,y:318,"text-anchor":"end","class":"mut",style:"font-size:12.5px"},"CAR（标准化）"));
+  s.appendChild(svgEl("text",{x:66,y:30,"class":"mut",style:"font-size:12.5px"},"CAPEX_ADJ（%）"));
+  feData.forEach(function(p){s.appendChild(svgEl("circle",{cx:X(p.x),cy:Y(p.y),r:5.5,style:"fill:"+p.c+";opacity:.85"}));});
+  var all=ols(feData.map(function(p){return p.x;}),feData.map(function(p){return p.y;})), txt;
+  if(feMode===0){s.appendChild(svgEl("line",{x1:X(-3),y1:Y(all.a-3*all.b),x2:X(3),y2:Y(all.a+3*all.b),style:"stroke:var(--ink);stroke-width:2.5"}));
+    txt='Pooled slope（混合斜率）= <b>'+fmt(all.b,2)+'</b>：公司 C 反应高、调整低，把整体斜率拉成了负的。';}
+  else{var xd=[],yd=[];["A","B","C"].forEach(function(f){var g=feData.filter(function(p){return p.f===f;}),o=ols(g.map(function(p){return p.x;}),g.map(function(p){return p.y;}));g.forEach(function(p){xd.push(p.x-o.mx);yd.push(p.y-o.my);});});
+    var w=ols(xd,yd);
+    ["A","B","C"].forEach(function(f){var g=feData.filter(function(p){return p.f===f;}),o=ols(g.map(function(p){return p.x;}),g.map(function(p){return p.y;}));
+      s.appendChild(svgEl("line",{x1:X(o.mx-1.6),y1:Y(o.my-1.6*w.b),x2:X(o.mx+1.6),y2:Y(o.my+1.6*w.b),style:"stroke:"+g[0].c+";stroke-width:2.5"}));
+      s.appendChild(svgEl("text",{x:X(o.mx+1.7),y:Y(o.my+1.6*w.b)+4,style:"font-size:13px;font-weight:600;fill:"+g[0].c},"公司 "+f));});
+    txt='Within slope（组内斜率）= <b>'+fmt(w.b,2)+'</b>：每家公司有自己的截距，只比较“这次比平时反应好多少、多调多少”。生成数据时设定的真实斜率是 2.0。';}
+  $("feOut").innerHTML=txt;}
+$("feW").querySelectorAll("[data-fe]").forEach(function(b){b.addEventListener("click",function(){feMode=+b.getAttribute("data-fe");$("feW").querySelectorAll("[data-fe]").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});drawFE();});});
+
+/* ---------------- 5.4 magnitudes ---------------- */
+var magPre=[["T2 (1)",1.193],["T2 (4)",0.975],["T2 (8)",0.849],["T3 Higher",1.206],["T3 Lower",-0.295]];
+magPre.forEach(function(p){var b=document.createElement("button");b.className="chip";b.type="button";b.textContent=p[0];b.addEventListener("click",function(){$("magB").value=p[1];mag();});$("magPresets").appendChild(b);});
+function mag(){var b=+$("magB").value,m=+$("magM").value,f=+$("magF").value,sd=+$("magS").value;
+  $("magOut").innerHTML='<b class="big">'+fmt(b/m*100,1)+'%</b>of the mean adjustment（占平均调整的比例）。<br>CAR 高一个标准差（'+fmt(sd,2)+' 个百分点）→ CAPEX_ADJ 高 '+fmt(b,3)+' 个百分点 → 对平均预测 '+fmt(f,1)+' 百万美元而言约 <b>'+fmt(b/100*f,1)+' 百万美元</b>。<br>换成原始单位：CAR 每高 1 个百分点，CAPEX_ADJ 高 '+fmt(b/sd,3)+' 个百分点。';}
+["magB","magM","magF","magS"].forEach(function(id){$(id).addEventListener("input",mag);});
+
+/* ---------------- 5.5 linking stepper ---------------- */
+var linkSteps=[
+ ["1 预测记录","ibes.det_guidance","ticker = NFX, measure = CPX, pdicity = ANN","anndats 2010-04-26；prd_yr 2010，prd_mon 12；val_1 = 1600","一个公司-季度只留第一条（D6）"],
+ ["2 是否同日有 EPS 预测","ibes.det_guidance","ticker + anndats, measure = EPS","若有 → 删除（D9）","这一步删除约 47%"],
+ ["3 IBES → CRSP","ibcrsphist","ticker, sdate ≤ anndats ≤ edate","PERMNO（示意）","score 越小越好"],
+ ["4 CRSP → Compustat","ccmxpf_lnkhist","lpermno, linkdt ≤ anndats ≤ linkenddt","GVKEY（示意）","只用 LU/LC，主链接优先"],
+ ["5 实际 capex","comp.funda","gvkey + datadate = 2010-12","capx = 1971 → CAPEX_ADJ = +23.2%","datadate 的年月 = prd_yr/prd_mon"],
+ ["6 市场反应","crsp.dsf + crsp.dsi","permno, 交易日 −2…+2","CAR = +7.5%；MKTRET = day 0 的 sprtrn","day 0 = 公告日或之后第一个交易日"],
+ ["7 控制变量","comp.fundq","gvkey, 上一季度","SIZE、SURP、EA_DUM（rdq 是否 ±1 天）","LAG_CAPX 来自 funda 的上一财年"]];
+var lk=0;
+function link(){var h="";for(var i=0;i<=lk;i++){var r=linkSteps[i];h+='<tr'+(i===lk?' class="hl"':'')+'><td>'+r[0]+'</td><td><code>'+r[1]+'</code></td><td>'+r[2]+'</td><td>'+r[3]+'</td></tr>';}
+  $("linkBody").innerHTML=h;$("linkNote").textContent=linkSteps[lk][4];$("linkN").textContent=(lk+1)+" / "+linkSteps.length;}
+$("linkNext").addEventListener("click",function(){if(lk<linkSteps.length-1){lk++;link();}});
+$("linkPrev").addEventListener("click",function(){if(lk>0){lk--;link();}});
+
+/* ---------------- 6 charts ---------------- */
+function drawWF(){var s=$("wfChart");s.innerHTML="";
+  var rows=[["IBES 年度 capex 预测，匹配 Compustat（2002–2016）",40785,0],["有 CRSP 五日市场反应",36900,3885],["删除与 EPS 预测同日发布的",19427,17473],["删除 2016 年 → 最终样本",17577,1850]];
+  rows.forEach(function(r,i){var y=14+i*54,w=r[1]/40785*440;
+    s.appendChild(svgEl("text",{x:0,y:y+22,style:"font-size:13px"},r[0]));
+    s.appendChild(svgEl("rect",{x:300,y:y,width:w,height:34,rx:4,style:"fill:var(--accent-soft);stroke:var(--accent)"}));
+    s.appendChild(svgEl("text",{x:310,y:y+22,style:"font-size:14px;font-weight:600"},r[1].toLocaleString("en-US")));
+    if(r[2])s.appendChild(svgEl("text",{x:300+w+8,y:y+22,style:"font-size:13px;fill:var(--down)"},"−"+r[2].toLocaleString("en-US")));});}
+var T1B=[[2003,22,22],[2004,226,121],[2005,488,181],[2006,874,235],[2007,841,197],[2008,1560,234],[2009,2064,225],[2010,1974,133],[2011,2048,122],[2012,1993,96],[2013,1931,87],[2014,1779,73],[2015,1777,64]];
+function drawYears(){var s=$("yearChart");s.innerHTML="";var H=200,bw=44;
+  [0,500,1000,1500,2000].forEach(function(v){var y=220-v/2100*H;s.appendChild(svgEl("line",{x1:40,y1:y,x2:750,y2:y,"class":"grid"}));s.appendChild(svgEl("text",{x:34,y:y+4,"text-anchor":"end","class":"mut",style:"font-size:11px"},v));});
+  T1B.forEach(function(r,i){var x=50+i*54,h1=r[1]/2100*H,h2=r[2]/2100*H;
+    s.appendChild(svgEl("rect",{x:x,y:220-h1,width:bw,height:h1,style:"fill:var(--accent)"}));
+    s.appendChild(svgEl("rect",{x:x+8,y:220-h2,width:bw-16,height:h2,style:"fill:var(--up-soft);stroke:var(--up)"}));
+    s.appendChild(svgEl("text",{x:x+bw/2,y:238,"text-anchor":"middle","class":"mut",style:"font-size:11.5px"},"'"+String(r[0]).slice(2)));
+    s.appendChild(svgEl("text",{x:x+bw/2,y:214-h1,"text-anchor":"middle",style:"font-size:10.5px"},r[1]));});
+  s.appendChild(svgEl("text",{x:50,y:256,"class":"mut",style:"font-size:12px"},"深色：预测数；浅色：首次预测的公司数"));}
+
+/* ---------------- paper numbers ---------------- */
+var T2={CAR:[[1.193,.372,"***"],[1.207,.371,"***"],[1.196,.377,"***"],[.975,.294,"***"],[.975,.322,"***"],[.672,.370,"*"],[1.006,.326,"***"],[.849,.304,"***"]],
+ SF_CAR:[null,null,null,null,null,[.039,.061,""],null,null],
+ MKTRET:[null,null,null,null,null,null,[-.252,.308,""],[-.202,.322,""]],
+ CAR_PRE:[null,null,null,null,null,null,[.305,.200,""],[.230,.197,""]],
+ SIZE:[null,[1.485,.632,"**"],[1.411,.653,"**"],[.419,1.302,""],[.419,1.128,""],[3.351,2.203,""],[.444,1.131,""],[-1.513,1.415,""]],
+ LAG_CAPX:[null,null,null,null,null,null,null,[-.160,.032,"***"]],
+ SURP:[null,null,null,null,null,null,null,[.213,.385,""]],
+ EA_DUM:[null,null,null,null,null,null,null,[-.108,.619,""]]};
+var T2N=["17,577","17,577","17,577","17,577","17,577","3,456","17,577","17,505"],T2R=[".001",".003",".007",".523",".523",".648",".523",".526"];
+var T2FE=["None","None","Yr-qtr","Firm, yr-qtr","Firm, yr-qtr","Firm, yr-qtr","Firm, yr-qtr","Firm, yr-qtr"],T2CL=["Firm","Firm","Firm","Firm","Industry","Industry","Industry","Industry"];
+var T3={CAR:[[-.295,.372,""],[1.206,.497,"**"],null,null],CAR_POS:[null,null,[-.203,.419,""],[.893,.455,"*"]],CAR_NEG:[null,null,[-.045,.176,""],[.185,.129,""]],
+ MKTRET:[[.103,.539,""],[-.327,.654,""],[.104,.538,""],[-.323,.655,""]],CAR_PRE:[[.452,.375,""],[.124,.302,""],[.451,.376,""],[.130,.305,""]]};
+function cell(c){return c?'<td class="c">'+fmt(c[0],3)+c[2]+'<span class="se">('+fmt(c[1],3)+')</span></td>':'<td class="c"></td>';}
+function paperTables(){var h="";
+  Object.keys(T2).forEach(function(v){h+='<tr><td>'+v+'</td>'+T2[v].map(cell).join("")+'</tr>';});
+  h+='<tr><td>Controls</td><td class="c">—</td>'+'<td class="c">SIZE</td>'.repeat(5)+'<td class="c">SIZE</td><td class="c">All</td></tr>';
+  h+='<tr><td>Fixed effects</td>'+T2FE.map(function(x){return '<td class="c">'+x+'</td>';}).join("")+'</tr>';
+  h+='<tr><td>Clusters</td>'+T2CL.map(function(x){return '<td class="c">'+x+'</td>';}).join("")+'</tr>';
+  h+='<tr><td>Obs.</td>'+T2N.map(function(x){return '<td class="c">'+x+'</td>';}).join("")+'</tr>';
+  h+='<tr><td>Adj. R²</td>'+T2R.map(function(x){return '<td class="c">'+x+'</td>';}).join("")+'</tr>';
+  $("t2body").innerHTML=h;
+  h="";Object.keys(T3).forEach(function(v){h+='<tr><td>'+v+'</td>'+T3[v].map(cell).join("")+'</tr>';});
+  h+='<tr><td>Controls / FE / Clusters</td><td class="c" colspan="4">All（Table 2 (8)）/ Firm, yr-qtr / Industry</td></tr>';
+  h+='<tr><td>Obs.</td><td class="c">7,770</td><td class="c">9,570</td><td class="c">7,770</td><td class="c">9,570</td></tr>';
+  h+='<tr><td>Adj. R²</td><td class="c">.512</td><td class="c">.531</td><td class="c">.512</td><td class="c">.531</td></tr>';
+  h+='<tr><td>p of difference</td><td class="c" colspan="2">CAR .019 · MKTRET .656 · CAR_PRE .540</td><td class="c" colspan="2">CAR_POS .099 · CAR_NEG .262 · MKTRET .658 · CAR_PRE .549</td></tr>';
+  $("t3body").innerHTML=h;}
+
+/* ---------------- 7 coefficient plots ---------------- */
+function coefPlot(id,items,lo,hiV,W,rowH){var s=$(id);s.innerHTML="";var L=210,R=W-30,top=20;
+  function X(v){return L+(v-lo)/(hiV-lo)*(R-L);}
+  for(var g=Math.ceil(lo);g<=hiV;g+=1){s.appendChild(svgEl("line",{x1:X(g),y1:top-6,x2:X(g),y2:top+items.length*rowH,"class":g===0?"ax":"grid",style:g===0?"stroke-width:1.6":""}));
+    s.appendChild(svgEl("text",{x:X(g),y:top+items.length*rowH+18,"text-anchor":"middle","class":"mut",style:"font-size:11.5px"},g));}
+  items.forEach(function(it,i){var y=top+i*rowH+rowH/2,c=it.col||"var(--accent)";
+    s.appendChild(svgEl("text",{x:L-12,y:y+4,"text-anchor":"end",style:"font-size:13px"},it.lab));
+    s.appendChild(svgEl("line",{x1:X(it.b-1.96*it.se),y1:y,x2:X(it.b+1.96*it.se),y2:y,style:"stroke:"+c+";stroke-width:3;opacity:.55"}));
+    s.appendChild(svgEl("circle",{cx:X(it.b),cy:y,r:6,style:"fill:"+c}));
+    s.appendChild(svgEl("text",{x:X(it.b+1.96*it.se)+8,y:y+4,style:"font-size:12px;fill:var(--muted)"},fmt(it.b,3)+(it.st||"")));});}
+function drawCoefs(){
+  coefPlot("c2Chart",T2.CAR.map(function(c,i){return {lab:"("+(i+1)+") "+["无 FE","+SIZE","+年季 FE","+公司 FE","行业聚类","销售子样本","+安慰剂","全部控制"][i],b:c[0],se:c[1],st:c[2]};}),-1,3,760,32);
+  coefPlot("plaChart",[{lab:"(6) CAR",b:.672,se:.370,st:"*"},{lab:"(6) SF_CAR",b:.039,se:.061,col:"var(--rule-strong)"},{lab:"(7) CAR",b:1.006,se:.326,st:"***"},{lab:"(7) MKTRET",b:-.252,se:.308,col:"var(--rule-strong)"},{lab:"(7) CAR_PRE",b:.305,se:.200,col:"var(--rule-strong)"}],-1,2,760,34);
+  coefPlot("c3Chart",[{lab:"CAR · Lower (1)",b:-.295,se:.372,col:"var(--rule-strong)"},{lab:"CAR · Higher (2)",b:1.206,se:.497,st:"**",col:"var(--up)"},{lab:"CAR_POS · Lower (3)",b:-.203,se:.419,col:"var(--rule-strong)"},{lab:"CAR_POS · Higher (4)",b:.893,se:.455,st:"*",col:"var(--up)"},{lab:"CAR_NEG · Lower (3)",b:-.045,se:.176,col:"var(--rule-strong)"},{lab:"CAR_NEG · Higher (4)",b:.185,se:.129,col:"var(--accent)"}],-2,3,760,40);}
+
+/* ---------------- 14.4 variables ---------------- */
+var VARS=[
+ ["CAPEX_FORE","点预测取 val_1；区间取 (val_1 + val_2)/2；统一换算为百万美元（D4）","guidance.val_1, val_2, units","build_capex_sample.classify"],
+ ["FTYPE","val_2 有值且不等于 val_1 → range；range_desc 属于开放式代码 → other；否则 point（D3）","guidance.val_2, range_desc","build_capex_sample.classify"],
+ ["CAPEX_ACT","被预测财年的 capx；datadate 的年月 = prd_yr / prd_mon","funda.capx, datadate","build_capex_sample.build"],
+ ["CAPEX_ADJ","(实际 − 预测)/预测 × 100；区间内记 0，区间外按越过的边界；分母为中点（D7）；缩尾（D14）","—","build_capex_sample.capex_adj"],
+ ["CAR","Σ_{−2..+2} (ret − sprtrn) × 100；day 0 为公告日或其后第一个交易日（D11）；5 天齐全（D12）；缩尾后标准化（D14、D27）","dsf.ret, dsi.sprtrn","utils.day0, utils.car"],
+ ["MKTRET","day 0 的 sprtrn × 100，标准化","dsi.sprtrn","build_capex_sample.build"],
+ ["CAR_PRE","以 anndats − 14 个日历日（之前最后一个交易日）为中心的五日 CAR，标准化","dsf, dsi","build_capex_sample.build"],
+ ["SF_CAR","同一财年、距离最近、窗口相隔 ≥ 5 个交易日的销售预测（measure = SAL）的五日 CAR（D13），在子样本内标准化","guidance (SAL), dsf, dsi","build_capex_sample.build（SF_CAR 段）"],
+ ["SIZE","ln(prccq × cshoq)，取公告季度之前最后一个财季","fundq.prccq, cshoq, datadate","build_capex_sample.build"],
+ ["LAG_CAPX","回归：capx(t−1) / (prcc_f × csho)(t−1) × 100；Table 1 报告 capx(t−1)（百万美元，LAG_CAPX_MIL）（D15）","funda.capx, prcc_f, csho","build_capex_sample.build"],
+ ["SURP","若与盈余公告同时发布：epspxq(q) − epspxq(q−4) × ajexq(q)/ajexq(q−4)（D32）；否则 0","fundq.epspxq, ajexq, rdq","build_capex_sample.build"],
+ ["EA_DUM","|anndats − rdq| ≤ 1 个日历日（D10）","fundq.rdq","build_capex_sample.build"],
+ ["SPREAD","日度相对价差 (ask − bid) / 中间价 × 100；剔除 bid ≤ 0、ask ≤ bid（D17）","dsf.bid, ask","utils.daily_with_tidx"],
+ ["HIGHER_SPREAD","[−2, +2] 平均价差 > [−10, −3] 平均价差；事件期 ≥ 3 天、公告前 ≥ 4 天有效","dsf.bid, ask","build_capex_sample.build（价差段）"],
+ ["CAR_POS / CAR_NEG","max(CAR, 0) 与 min(CAR, 0)，各自标准化（D35）","—","build_capex_sample.build"],
+ ["IND","两位 SIC，每家公司取历史 sich 的众数（D18），缺失时用表头 sic","funda.sich, company.sic","build_capex_sample.firm_industry"],
+ ["YQ","公告日所在的日历季度（年季固定效应）","guidance.anndats","build_capex_sample.build"]];
+function drawVars(){var q=$("varQ").value.trim(),ql=q.toLowerCase(),n=0,h="";
+  VARS.forEach(function(r){if(ql&&r.join(" ").toLowerCase().indexOf(ql)<0)return;n++;h+='<tr><td><code>'+hi(r[0],q)+'</code></td><td>'+hi(r[1],q)+'</td><td>'+hi(r[2],q)+'</td><td><code>'+hi(r[3],q)+'</code></td></tr>';});
+  $("varBody").innerHTML=h||'<tr><td colspan="4">没有匹配的变量。换个关键词，或清空搜索框。</td></tr>';$("varN").textContent=n+" / "+VARS.length;}
+$("varQ").addEventListener("input",drawVars);
+
+/* ---------------- 14.5 decisions ---------------- */
+var DEC=[
+ [1,"Sample（样本）","IBES Guidance 的 measure 代码","CPX / SAL / EPS，pdicity = ANN","check_wrds.py 与 diagnose.py [1] 打印实际代码","MEASURE_CAPEX",0],
+ [2,"Sample（样本）","初始 2002–2016，最终 2003–2015","只保留 2003–2015 年发布的","瀑布算术精确 → 2002 年的预测没有进入最终样本","KEEP_FROM_YEAR",1],
+ [3,"Sample（样本）","哪些 range_desc 代码是开放式","由 diagnose.py 交叉表设定","目标：55.30 / 34.48 / 10.22%","RANGE_DESC_OPEN_ENDED",0],
+ [4,"Variable（变量）","预测值单位","统一为百万美元","各单位下 实际/预测 的中位数 ≈ 1","UNITS_TO_MILLIONS",0],
+ [5,"Sample（样本）","预测期限；一次覆盖多个财年","财年末晚于公告日且 ≤ 24 个月；只留最近财年","论文未提","MAX_HORIZON_MONTHS",0],
+ [6,"Sample（样本）","同一季度多次预测","保留第一次，且在瀑布第一步之前去重","36,900 − 17,473 − 1,850 = 17,577 精确成立","ONE_PER_FIRM_QUARTER, COLLAPSE_AT_START",1],
+ [7,"Variable（变量）","区间预测的分母","区间中点","“scaled by the forecast”；备选：越过的边界","RANGE_SCALER",0],
+ [8,"Variable（变量）","开放式预测的 CAPEX_ADJ","按 val_1 的点预测处理","稳健性：只保留点和区间（脚注 17）","OTHER_RULE",0],
+ [9,"Sample（样本）","“与盈利预测同时发布”","同一日历日有 EPS 预测","删除比例应约为 47.4%","EPS_CONCURRENT_DAYS",1],
+ [10,"Variable（变量）","EA_DUM 的“同时”","|anndats − rdq| ≤ 1 个日历日","均值应为 0.559","EA_CONCURRENT_DAYS",0],
+ [11,"Variable（变量）","盘后发布是否顺延 day 0","不顺延","五日窗口已覆盖；可做稳健性","AFTER_CLOSE_SHIFT",0],
+ [12,"Variable（变量）","CAR 允许缺失几天","五天必须齐全","—","MIN_RET_OBS",0],
+ [13,"Variable（变量）","SF_CAR 用哪个销售预测","同财年、最近、窗口相隔 ≥ 5 个交易日","N = 3,456，中位距离 86 天","SF_MIN_GAP_TDAYS",1],
+ [14,"Variable（变量）","缩尾哪些变量","比率变量 1%/99%；金额变量不缩尾","Table 1：CAPEX_ACT 最小值 0，CAPEX_ADJ 最小值 −77.05","WINSOR_VARS, WINSOR_LEVELS",1],
+ [15,"Variable（变量）","LAG_CAPX 的单位","回归用 capx / 市值 × 100；Table 1 用百万美元","Table 1 与 Table 2 的定义不同；系数 −0.160","LAG_CAPX_SCALE",0],
+ [17,"Variable（变量）","价差单位与筛选","百分比；剔除无效报价","Higher 组占比应为 55.2%","SPREAD_UNIT",0],
+ [18,"Estimation（估计）","聚类用的“行业”","两位 SIC，每家公司固定","保证公司 FE 嵌套在聚类内；备选 FF48","INDUSTRY",0],
+ [25,"Estimation（估计）","singletons","保留","Table 2 (1)–(5) 的 N 都是 17,577","DROP_SINGLETONS",1],
+ [26,"Estimation（估计）","自由度修正","reghdfe 口径","备选 areg","DOF_MODE",0],
+ [27,"Estimation（估计）","在哪个样本上标准化","全样本一次","分组时不再重做","STANDARDIZE_ON",0],
+ [32,"Variable（变量）","SURP 跨拆股","用 ajexq 换算","论文未提","SURP_SPLIT_ADJUST",0],
+ [35,"Variable（变量）","CAR_POS / CAR_NEG 的顺序","先切分原始 CAR，再分别标准化","脚注 25 无法区分两种做法","build_capex_sample.py",0]];
+var cats=["All（全部）","Sample（样本）","Variable（变量）","Estimation（估计）","Inferred from N（由 N 反推）"],cur=cats[0];
+cats.forEach(function(c,i){var b=document.createElement("button");b.className="chip";b.type="button";b.textContent=c;b.setAttribute("aria-pressed",i===0?"true":"false");
+  b.addEventListener("click",function(){cur=c;$("dChips").querySelectorAll(".chip").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});drawDec();});$("dChips").appendChild(b);});
+function drawDec(){var q=$("dQ").value.trim(),ql=q.toLowerCase(),n=0,h="";
+  DEC.forEach(function(r){if(cur===cats[4]?!r[6]:(cur!==cats[0]&&r[1]!==cur))return;if(ql&&("d"+r[0]+" "+r.slice(1,6).join(" ")).toLowerCase().indexOf(ql)<0)return;n++;
+    h+='<article class="dcard'+(r[6]?" inferred":"")+'"><header><span class="id">D'+r[0]+'</span><b>'+hi(r[2],q)+'</b><span class="count">'+r[1]+'</span></header><dl><dt>选择</dt><dd>'+hi(r[3],q)+'</dd><dt>依据</dt><dd>'+hi(r[4],q)+'</dd><dt>开关</dt><dd><code>'+esc(r[5])+'</code></dd></dl></article>';});
+  $("dList").innerHTML=h||'<p>没有匹配的决策。</p>';$("dN").textContent=n+" / "+DEC.length;}
+$("dQ").addEventListener("input",drawDec);
+
+/* ---------------- 16 glossary ---------------- */
+var GL=[
+ ["Capital expenditure (capex)","资本支出","购置长期资产的支出","Accounting（会计）"],["Capex guidance / forecast","资本支出指引 / 预测","管理层事先公布的计划支出","Accounting（会计）"],
+ ["Point / range / open-ended forecast","点 / 区间 / 开放式预测","Table 1 Panel C 的三类","Accounting（会计）"],["Voluntary disclosure","自愿披露","法律不要求、公司主动公布的信息","Accounting（会计）"],
+ ["Mandatory disclosure","强制披露","10-K、10-Q、8-K 等","Accounting（会计）"],["Earnings announcement (EA)","盈余公告","公布实际业绩；EA_DUM","Accounting（会计）"],
+ ["Earnings forecast / guidance","盈利预测 / 指引","管理层对未来 EPS 的预告；同日发布的 capex 预测被删除","Accounting（会计）"],["Earnings surprise","盈余意外","本文用季节性 EPS 变化 SURP","Accounting（会计）"],
+ ["Fiscal year (FY)","财年","Compustat 的 fyear；datadate 是财年末","Accounting（会计）"],["Feedback effect","反馈效应","股价信息反过来影响公司决策","Finance（金融）"],
+ ["Managerial learning","管理层学习","管理层从股价中获取新信息","Finance（金融）"],["Elicit market feedback","征求市场反馈","本文提出的披露动机","Finance（金融）"],
+ ["Informed trader","知情交易者","掌握私人信息或更会解读信息的交易者","Finance（金融）"],["Information asymmetry","信息不对称","用价差、PIN 度量","Finance（金融）"],
+ ["Bid-ask spread","买卖价差","(ask − bid) / 中间价","Finance（金融）"],["Market maker","做市商","提供买卖报价的交易商","Finance（金融）"],
+ ["Limits to arbitrage","套利限制","Edmans et al. (2015)：负面信息较少被交易","Finance（金融）"],["Disciplining channel","约束渠道","负面反应迫使管理层放弃坏项目","Finance（金融）"],
+ ["Empire building","帝国建造","管理层为扩张而过度投资","Finance（金融）"],["Catering","迎合","为推高短期股价而迎合市场偏好","Finance（金融）"],
+ ["Real effects","实际后果","信息或披露对真实经济决策的影响","Finance（金融）"],["Event study","事件研究","比较事件前后的非正常收益","Econometrics（计量）"],
+ ["Abnormal return","超额收益","个股收益减基准收益","Econometrics（计量）"],["Cumulative abnormal return (CAR)","累计超额收益","[−2, +2] 五日之和","Econometrics（计量）"],
+ ["Market-adjusted return","市场调整收益","基准为 S&P 500 收益","Econometrics（计量）"],["Event window","事件窗口","以交易日计","Econometrics（计量）"],
+ ["Fixed effects (FE)","固定效应","公司 / 年季各自的截距","Econometrics（计量）"],["Within estimator","组内估计量","只用组内变化识别","Econometrics（计量）"],
+ ["Clustered standard errors","聚类标准误","允许组内相关","Econometrics（计量）"],["Singleton","单例观测","某个固定效应组只有一条观测","Econometrics（计量）"],
+ ["Standardized coefficient","标准化系数","自变量一个标准差的效应","Econometrics（计量）"],["Economic significance / magnitude","经济显著性 / 量级","系数 / 因变量均值","Econometrics（计量）"],
+ ["Falsification / placebo test","证伪 / 安慰剂检验","SF_CAR、MKTRET、CAR_PRE","Econometrics（计量）"],["Omitted variable bias","遗漏变量偏误","同时影响 X 和 Y 的未观测因素","Econometrics（计量）"],
+ ["Reverse causality","反向因果","Y 影响 X","Econometrics（计量）"],["Winsorization","缩尾","把极端值拉回到 1% / 99% 分位","Econometrics（计量）"],
+ ["Adjusted R-squared","调整 R²","含固定效应的拟合优度","Econometrics（计量）"],["Seemingly unrelated estimation (suest)","似不相关估计","跨模型系数差异检验","Econometrics（计量）"],
+ ["IBES Guidance","IBES 管理层指引数据库","ibes.det_guidance","Data（数据）"],["CRSP","证券价格研究中心数据库","股票日 / 月收益，PERMNO","Data（数据）"],
+ ["Compustat","标普财务数据库","财务报表，GVKEY","Data（数据）"],["Link table","链接表","ibcrsphist、ccmxpf_lnkhist","Data（数据）"],
+ ["PERMNO / GVKEY / ticker","CRSP / Compustat / IBES 公司代码","—","Data（数据）"],["Data vintage","数据版本","下载日期；数据库会回溯修订","Data（数据）"],
+ ["CAPEX_ADJ","资本支出调整","因变量，%","Paper variables（论文变量）"],["SF_CAR","销售预测的市场反应","安慰剂","Paper variables（论文变量）"],
+ ["CAR_PRE","伪事件日的市场反应","公告前 14 个日历日","Paper variables（论文变量）"],["MKTRET","公告日大盘收益","S&P 500","Paper variables（论文变量）"],
+ ["LAG_CAPX","上年资本支出","回归中除以年初市值","Paper variables（论文变量）"],["EA_DUM","是否与盈余公告同时发布","0/1","Paper variables（论文变量）"]];
+function drawGl(){var q=$("gQ").value.trim(),ql=q.toLowerCase(),n=0,h="";
+  GL.forEach(function(r){if(ql&&r.join(" ").toLowerCase().indexOf(ql)<0)return;n++;h+='<tr><td><b>'+hi(r[0],q)+'</b></td><td>'+hi(r[1],q)+'</td><td>'+hi(r[2],q)+'</td><td class="count">'+r[3]+'</td></tr>';});
+  $("gBody").innerHTML=h||'<tr><td colspan="4">没有匹配的术语。</td></tr>';$("gN").textContent=n+" / "+GL.length;}
+$("gQ").addEventListener("input",drawGl);
+var SAY=[
+ ["Managers use voluntary capex forecasts to elicit feedback from the market.","管理层用自愿发布的资本支出预测来征求市场反馈。"],
+ ["A one-standard-deviation higher market reaction is associated with a 0.849 percentage-point upward revision in actual capex, about 11% of the mean.","市场反应高一个标准差，对应实际资本支出上调 0.849 个百分点，约为均值的 11%。"],
+ ["The effect is confined to forecasts that attract informed trading, as indicated by a rise in bid-ask spreads.","这一效应只出现在吸引了知情交易（表现为买卖价差上升）的预测中。"],
+ ["Market reactions to concurrent sales forecasts do not predict capex adjustments.","同期销售预测的市场反应不能预测资本支出调整。"],
+ ["Consistent with limits to arbitrage, learning stems from positive rather than negative reactions.","与套利限制一致，学习来自正面而非负面的反应。"],
+ ["We follow the paper's sample construction; the final sample contains N forecasts by M firms, compared with 17,577 and 1,790.","我们按论文构建样本：最终样本为 M 家公司的 N 个预测，论文为 17,577 和 1,790。"],
+ ["Differences arise mainly from revisions to I/B/E/S Guidance and from choices the paper does not report.","差异主要来自 IBES Guidance 的修订以及论文未报告的处理选择。"],
+ ["Point estimates are within one standard error of the published coefficients.","点估计与论文系数的差距在一个标准误以内。"],
+ ["We cluster standard errors by two-digit SIC industry and absorb firm and year-quarter fixed effects.","标准误按两位 SIC 行业聚类，并吸收公司和年季固定效应。"],
+ ["The difference between the two subsamples is significant at the 5% level (p = 0.019).","两个子样本之间的差异在 5% 水平显著（p = 0.019）。"]];
+$("sBody").innerHTML=SAY.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td></tr>';}).join("");
+
+/* ---------------- checklist ---------------- */
+var KEY="jw2020-t13-checks",boxes=document.querySelectorAll("#checklist input[type=checkbox]"),saved={};
+try{saved=JSON.parse(store.get(KEY)||"{}");}catch(e){saved={};}
+function prog(){var d=0;boxes.forEach(function(b){if(b.checked)d++;});$("progText").textContent="Checklist（清单）"+d+" / "+boxes.length;$("progBar").style.width=(d/boxes.length*100)+"%";}
+boxes.forEach(function(b){b.checked=!!saved[b.getAttribute("data-k")];b.addEventListener("change",function(){saved[b.getAttribute("data-k")]=b.checked;store.set(KEY,JSON.stringify(saved));prog();});});
+$("resetChecks").addEventListener("click",function(){boxes.forEach(function(b){b.checked=false;});saved={};store.set(KEY,"{}");prog();});
+
+/* ---------------- init ---------------- */
+function redraw(){drawWin();drawFE();drawWF();drawYears();drawCoefs();adj();}
+if($("t2body"))paperTables();fillCar(carData[carKeys[0]]);mag();link();drawVars();drawDec();drawGl();prog();redraw();
+})();
+</script>
+
+<script>
+/* ===================== Section 8: per-cell explanations for Tables 1-3 ===================== */
+(function(){
+"use strict";
+function $(id){return document.getElementById(id);}
+function f(x,d){return (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);}
+function n0(x){return Math.round(x).toLocaleString("en-US");}
+function sgn(x){return (x>0?"+":"")+f(x,3);}
+function pNorm(t){var z=Math.abs(t),k=1/(1+0.2316419*z),d=0.3989423*Math.exp(-z*z/2);
+  var p=d*k*(0.3193815+k*(-0.3565638+k*(1.781478+k*(-1.821256+k*1.330274))));return 2*p;}
+function sigText(t){var a=Math.abs(t);
+  if(a>=2.58)return "1% 水平显著：如果真实效应为 0，得到至少这么大估计值的概率不到 1%";
+  if(a>=1.96)return "5% 水平显著";
+  if(a>=1.645)return "10% 水平显著（证据较弱）";
+  return "不显著：95% 置信区间包含 0，不能排除“其实没有关系”";}
+function card(el,title,rows){
+  var h="<h5>"+title+"</h5><dl>";
+  rows.forEach(function(r){if(r&&r[1])h+='<dt'+(r[0]==="类比"?' class="ex"':'')+'>'+r[0]+'</dt><dd>'+r[1]+'</dd>';});
+  el.innerHTML=h+"</dl>";}
+function bind(table,exp,fn,first){
+  function sel(c){table.querySelectorAll(".sel").forEach(function(x){x.classList.remove("sel");});c.classList.add("sel");fn(c.dataset);}
+  table.addEventListener("click",function(e){var c=e.target.closest(".cx");if(c){sel(c);
+    var r=exp.getBoundingClientRect();if(r.top>window.innerHeight-80||r.bottom<0)exp.scrollIntoView({block:"nearest",behavior:"smooth"});}});
+  table.addEventListener("keydown",function(e){var c=e.target.closest(".cx");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();sel(c);}});
+  var f0=table.querySelector(first);if(f0)sel(f0);}
+var HINT='<p class="hint">点击表中任意一格（包括行名），这里会显示它的解释。</p>';
+
+/* ---------------------------------------------------------------- Table 1 Panel A */
+var A=[
+ ["CAPEX_FORE","百万美元",[17577,586.539,120,1318.429,2,8000]],
+ ["CAPEX_ACT","百万美元",[17577,654.077,123.512,1527.146,0,9496]],
+ ["CAPEX_ADJ","%",[17577,7.421,0,48.482,-77.05,290.91]],
+ ["CAR","%",[17577,-0.148,0.069,8.974,-31.359,25.35]],
+ ["SIZE","ln(百万美元)",[17577,7.378,7.344,1.629,1.366,11.3]],
+ ["LAG_CAPX","百万美元",[17546,611.045,118.307,1398.011,0,8620.081]],
+ ["SURP","美元/股",[17577,-0.033,0,0.783,-4.684,3.212]],
+ ["EA_DUM","0/1",[17577,0.559,1,0.497,0,1]]];
+var AC=[["Obs.","观测数 (observations)：该变量非缺失的预测个数","告诉读者样本多大、哪个变量有缺失，可以和 Table 2 的 N 对照","点名册上实到的人数"],
+ ["Mean","均值 (mean)：平均水平","经济显著性的分母；对极端值敏感","全班平均分"],
+ ["Median","中位数 (median)：一半观测低于它","不受极端值影响；与均值比较可判断偏态","排在正中间那位同学的分数"],
+ ["S.D.","标准差 (standard deviation)：分散程度","回归中标准化变量的“一个单位”；也表示有多少变异可以解释","分数挤在一起，还是拉得很开"],
+ ["Min","最小值 (minimum)","检查异常值、单位错误，判断是否缩尾","最低分"],
+ ["Max","最大值 (maximum)","同上","最高分"]];
+var AR={
+ CAPEX_FORE:["管理层预测的当年资本支出；区间预测取中点","CAPEX_ADJ 的分母","餐馆预告的进货量"],
+ CAPEX_ACT:["被预测财年的实际资本支出，Compustat capx","CAPEX_ADJ 的分子","年底实际进货量"],
+ CAPEX_ADJ:["(实际 − 预测) / 预测 × 100；区间内记 0","<b>因变量</b>：Table 2、3 要解释的对象","进货比预告多或少百分之几"],
+ CAR:["[−2, +2] 五日个股收益减 S&amp;P 500 收益之和","<b>关键自变量</b>；回归中标准化","预告那一周的口碑"],
+ SIZE:["ln(上季末市值，百万美元)","控制变量","店面大小"],
+ LAG_CAPX:["上一财年实际资本支出（Table 1 用百万美元）","控制变量；回归中除以年初市值","去年实际进货量"],
+ SURP:["当季 EPS 减去年同季 EPS；不同时发布盈余公告时为 0","控制变量","营业额比去年同期好了多少"],
+ EA_DUM:["是否与盈余公告同日发布","控制变量","同一天还公布了上季度营业额"]};
+var AN={
+ "CAPEX_FORE|0":"17,577 是最终样本量，每一行是一个公司-季度的 capex 预测。后面 Table 2 的 (1)–(5)、(7) 用的正是这 17,577 个。",
+ "CAPEX_FORE|1":"平均每个预测约 5.9 亿美元：这些是金额巨大的决策，管理层有充分动力去“听意见”。均值被少数能源、电信巨头的巨额预测拉高。",
+ "CAPEX_FORE|2":"中位数只有 1.2 亿，约为均值的 1/5：典型公司的预测远小于“平均”。均值 ≫ 中位数 = 右偏分布。",
+ "CAPEX_FORE|3":"标准差是均值的 2.2 倍，金额跨度极大。所以因变量用百分比 CAPEX_ADJ，而不是美元差额，否则回归会被几家大公司主导。",
+ "CAPEX_FORE|4":"最小 200 万美元：小公司也会发布 capex 预测。",
+ "CAPEX_FORE|5":"最大 80 亿美元：可能是真实的最大预测，也可能是缩尾后的 99% 分位。<code>table1_winsor_check.csv</code> 会用真实数据判断。",
+ "CAPEX_ACT|0":"每个预测都匹配到了实际 capex：样本构建时就要求能在 Compustat 找到被预测财年的数据。",
+ "CAPEX_ACT|1":"654.1 比预测均值 586.5 高 11.5%：平均而言，公司最终花得比计划多。",
+ "CAPEX_ACT|2":"123.5 只比预测中位数 120 高 2.9%：典型公司基本按计划花，“多花”主要来自大公司。",
+ "CAPEX_ACT|3":"1,527 大于预测的 1,318：实际支出比计划更分散，说明执行过程中确实发生了调整。",
+ "CAPEX_ACT|4":"最小值是 0：有公司全年没有资本支出（例如项目取消）。这也说明金额变量没有缩尾，否则最小值会是一个正数（L11）。",
+ "CAPEX_ACT|5":"约 95 亿美元。",
+ "CAPEX_ADJ|0":"因变量没有缺失。",
+ "CAPEX_ADJ|1":"平均上调 7.421%。它是正文经济显著性的分母：1.193 / 7.421 = 16.1%，0.849 / 7.421 = 11.4%。为什么不等于 (654.1 − 586.5) / 586.5 = 11.5%？因为 CAPEX_ADJ 是先逐个算比例再平均，每个预测权重相同；区间内记 0；又经过缩尾。",
+ "CAPEX_ADJ|2":"中位数恰好为 0：典型预测“说到做到”。这是区间预测“落在区间内记 0”规则的指纹（Panel C：34.48% 是区间预测）。复现时如果中位数不是 0，先检查预测类型有没有识别对。",
+ "CAPEX_ADJ|3":"48.5 是均值的 6.5 倍：调整的差异远大于平均调整。有大量变异等着被解释，Table 2 就是要看其中有多少和市场反应有关。",
+ "CAPEX_ADJ|4":"最多下调 77%。实际为 0 的点预测会得到 −100，这里没有出现 −100，说明 CAPEX_ADJ 被缩尾了。",
+ "CAPEX_ADJ|5":"最多比计划多花约 2.9 倍（实际约为预测的 3.9 倍）。",
+ "CAR|0":"所有预测都有完整的五日收益：样本构建时就要求有 CRSP 收益（40,785 → 36,900 这一步）。",
+ "CAR|1":"平均 −0.148%，在 5% 水平显著（脚注 15）：市场对“花钱计划”平均略有疑虑。",
+ "CAR|2":"中位数几乎为 0：典型预测几乎没有引起反应，正负反应大体平衡。",
+ "CAR|3":"8.974% 是 Table 2、3 中“一个标准差”的长度。所有 CAR 系数都应读成：反应高 8.974 个百分点时，CAPEX_ADJ 变化多少个百分点。",
+ "CAR|4":"约 −31%。五日收益在 1.8 万个观测里几乎一定会出现更极端的值，所以这里很可能是缩尾后的结果。",
+ "CAR|5":"约 +25%，与最小值不对称，也符合 1% / 99% 缩尾的特征。",
+ "SIZE|1":"e^7.378 ≈ 16 亿美元：典型的中大型上市公司。",
+ "SIZE|2":"e^7.344 ≈ 15.5 亿美元。均值与中位数几乎相等：取对数让高度右偏的市值分布变得接近对称，这正是取对数的目的。",
+ "SIZE|3":"一个标准差相当于市值相差 e^1.629 ≈ 5.1 倍。",
+ "SIZE|4":"e^1.366 ≈ 390 万美元的微型公司。",
+ "SIZE|5":"e^11.3 ≈ 810 亿美元。样本期内最大公司的市值远超这个数，所以要么 SIZE 被缩尾，要么超大公司很少发布 capex 预测。",
+ "LAG_CAPX|0":"17,546，比 17,577 少 31 个：上一财年没有 capex 数据（例如刚上市）。这是后面回归样本减少的原因之一。",
+ "LAG_CAPX|1":"上年实际 611.0 → 今年计划 586.5 → 今年实际 654.1：平均而言，计划比去年少约 4%，最终却比去年多约 7%。",
+ "LAG_CAPX|2":"118.3 → 120.0 → 123.5：中位数公司每一步都小幅增长。",
+ "LAG_CAPX|4":"最小值为 0，与 CAPEX_ACT 一样，说明金额变量没有缩尾。",
+ "SURP|1":"每股盈余同比平均下降约 3 美分，接近 0。",
+ "SURP|2":"中位数为 0：44.1% 的预测不与盈余公告同时发布，这些观测的 SURP 被设为 0。",
+ "SURP|3":"0.783 美元/股；Table 2 中它的系数要按“每股多赚 1 美元”来读。",
+ "SURP|4":"−4.68 到 +3.21 美元/股，看起来缩尾过。",
+ "EA_DUM|1":"55.9% 的 capex 预测与盈余公告同日发布：很多公司习惯在财报电话会上一并给出指引。所以公告期的反应可能混入了对盈利的反应，需要控制。",
+ "EA_DUM|2":"超过一半是 1，所以中位数为 1。",
+ "EA_DUM|3":"0.497 = √(0.559 × 0.441)：0/1 变量的标准差完全由均值决定，可以用来核对数据。",
+ "EA_DUM|4":"0/1 变量。","EA_DUM|5":"0/1 变量。"};
+function genA(v,c,x){var name=AC[c][0],u=v[1];
+  if(c===0)return x===17577?"全部预测都有这个变量。":"有 "+n0(17577-x)+" 个缺失。";
+  if(c===1)return "17,577 个预测的平均值是 "+f(x,3)+" "+u+"。";
+  if(c===2)return "一半预测低于 "+f(x,3)+" "+u+"。";
+  if(c===3)return "标准差 "+f(x,3)+" "+u+"。";
+  return name+" = "+f(x,3)+" "+u+"。";}
+function buildA(){var t=$("annoT1"),h='<thead><tr><th class="lab">Variable</th>'+AC.map(function(c,i){return '<th class="cx" tabindex="0" data-k="col" data-c="'+i+'">'+c[0]+'</th>';}).join("")+'</tr></thead><tbody>';
+  A.forEach(function(r,ri){h+='<tr><th class="lab cx" tabindex="0" data-k="row" data-r="'+ri+'">'+r[0]+'</th>'+r[2].map(function(x,ci){
+    var s=ci===0?n0(x):(r[0]==="CAPEX_FORE"||r[0]==="CAPEX_ACT"||r[0]==="LAG_CAPX")&&Math.abs(x)>=1000?Number(x).toLocaleString("en-US",{minimumFractionDigits:3,maximumFractionDigits:3}):f(x,3);
+    return '<td class="cx" tabindex="0" data-k="cell" data-r="'+ri+'" data-c="'+ci+'">'+s.replace("-","−")+'</td>';}).join("")+'</tr>';});
+  t.innerHTML=h+"</tbody>";
+  bind(t,$("expT1"),function(d){var e=$("expT1");
+    if(d.k==="col"){var c=AC[+d.c];card(e,"Column（列）："+c[0],[["含义",c[1]],["为什么报告",c[2]],["类比",c[3]]]);return;}
+    var r=A[+d.r],ri=AR[r[0]];
+    if(d.k==="row"){card(e,"Row（行）："+r[0],[["是什么",ri[0]+"（单位："+r[1]+"）"],["角色",ri[1]],["类比",ri[2]],["提示","点击这一行的六个数字，看每个统计量分别说明了什么。"]]);return;}
+    var c=+d.c,x=r[2][c],key=r[0]+"|"+c;
+    card(e,"Table 1A · "+r[0]+" · "+AC[c][0]+" = "+(c===0?n0(x):f(x,3)),[
+      ["这个数是什么",genA(r,c,x)],["说明了什么",AN[key]||"—"],["这一行",ri[0]+"；"+ri[1]],["这一列",AC[c][1]+"。"+AC[c][2]],["类比",ri[2]+"；"+AC[c][3]]]);
+  },'td[data-r="2"][data-c="1"]');}
+
+/* ---------------------------------------------------------------- Table 1 Panels B, C */
+var B=[[2003,22,22],[2004,226,121],[2005,488,181],[2006,874,235],[2007,841,197],[2008,1560,234],[2009,2064,225],[2010,1974,133],[2011,2048,122],[2012,1993,96],[2013,1931,87],[2014,1779,73],[2015,1777,64]];
+var BN={2003:"样本第一年只有 22 个预测，全部是首次预测：IBES Guidance 早期对 capex 指引的覆盖还很少。这也是 2002 年的预测没有进入最终样本的旁证（决策 D2）。",
+ 2008:"从 841 个跳到 1,560 个，几乎翻倍。论文没有解释原因，可能与 IBES 覆盖扩大有关，也可能与金融危机期间公司更多地给出指引有关。年季固定效应可以吸收这类时期差异。",
+ 2009:"2,064 个，样本峰值。之后每年稳定在约 1,800–2,050 个。",
+ 2015:"1,777 个预测中只有 64 家新公司：样本后期主要由反复发布预测的“老公司”构成。"};
+function buildB(){var t=$("annoT1B"),h='<thead><tr><th class="lab">Year</th><th class="cx" tabindex="0" data-k="col" data-c="0">Forecasts</th><th class="cx" tabindex="0" data-k="col" data-c="1">First-time</th><th>新公司占比</th></tr></thead><tbody>';
+  B.forEach(function(r,i){h+='<tr><th class="lab cx" tabindex="0" data-k="row" data-r="'+i+'">'+r[0]+'</th><td class="cx" tabindex="0" data-k="cell" data-r="'+i+'" data-c="0">'+n0(r[1])+'</td><td class="cx" tabindex="0" data-k="cell" data-r="'+i+'" data-c="1">'+r[2]+'</td><td>'+f(r[2]/r[1]*100,1)+'%</td></tr>';});
+  h+='<tr class="sep"><th class="lab cx" tabindex="0" data-k="total">Total</th><td class="cx" tabindex="0" data-k="total">17,577</td><td class="cx" tabindex="0" data-k="total">1,790</td><td>10.2%</td></tr>';
+  t.innerHTML=h+"</tbody>";
+  bind(t,$("expT1B"),function(d){var e=$("expT1B");
+    if(d.k==="total"){card(e,"Total（合计）：17,577 个预测，1,790 家公司",[["这个数是什么","13 年的预测总数和首次预测公司总数。"],["说明了什么","首次预测公司数之和正好等于样本中的公司总数，因为每家公司只在第一次出现的年份计一次。17,577 / 1,790 ≈ 9.8：平均每家公司约 10 个预测，所以需要公司固定效应，并按公司或行业聚类。"],["类比","健身房的总打卡次数和会员总数：大多数打卡来自老会员。"]]);return;}
+    if(d.k==="col"){card(e,+d.c===0?"Column（列）：Number of capex forecasts":"Column（列）：Number of first-time forecasters",
+      +d.c===0?[["含义","该年发布的公司-季度预测数（按发布日的日历年）"],["为什么报告","看样本是否集中在某一时期；年季固定效应正是为此而设"],["类比","每年餐馆发布预告的次数"]]
+              :[["含义","该年第一次出现在样本中的公司数"],["为什么报告","说明披露是否“粘性”：公司一旦开始披露，往往会持续"],["类比","每年新加入的餐馆"]]);return;}
+    var r=B[+d.r],prev=+d.r>0?B[+d.r-1]:null;
+    if(d.k==="row"){card(e,"Row（行）："+r[0]+" 年",[["含义",r[0]+" 年发布了 "+n0(r[1])+" 个 capex 预测，其中 "+r[2]+" 家公司是第一次发布"],["说明了什么",BN[r[0]]||("新公司占当年预测数的 "+f(r[2]/r[1]*100,1)+"%。")]]);return;}
+    var c=+d.c,x=r[c+1],chg=prev?(x/prev[c+1]-1)*100:null;
+    card(e,"Table 1B · "+r[0]+" · "+(c===0?"Forecasts":"First-time")+" = "+n0(x),[
+      ["这个数是什么",c===0?r[0]+" 年发布的公司-季度 capex 预测数。":r[0]+" 年第一次发布 capex 预测的公司数。"],
+      ["与上一年比较",chg===null?"样本第一年。":(chg>=0?"增加 ":"减少 ")+f(Math.abs(chg),1)+"%（上一年 "+n0(prev[c+1])+"）。"],
+      ["说明了什么",BN[r[0]]||(c===1?"新公司约占当年预测数的 "+f(r[2]/r[1]*100,1)+"%；越到后期越低，说明样本主要由持续披露的公司构成。":"样本在时间上分布较均匀，结论不是由某一两年驱动的。")]]);
+  },'td[data-r="5"][data-c="0"]');}
+var Cc=[["Point（点预测）",9720,55.30,"给出一个数，例如“16 亿美元”","(实际 − 预测) / 预测","天气预报“明天 25 度”"],
+ ["Range（区间预测）",6061,34.48,"给出区间，例如“15–17 亿美元”","区间内记 0；区间外按越过的边界计算，除以中点","“明天 23–27 度”：实际 26 度时算全对"],
+ ["Others（其他）",1796,10.22,"开放式，例如“不少于 15 亿美元”","论文没写；本复现按点预测处理（D8），稳健性检验去掉这类（脚注 17）","“明天不低于 20 度”"]];
+function buildC(){var t=$("annoT1C"),h='<thead><tr><th class="lab">Type</th><th class="cx" tabindex="0" data-k="col" data-c="0">Number</th><th class="cx" tabindex="0" data-k="col" data-c="1">%</th></tr></thead><tbody>';
+  Cc.forEach(function(r,i){h+='<tr><th class="lab cx" tabindex="0" data-k="row" data-r="'+i+'">'+r[0]+'</th><td class="cx" tabindex="0" data-k="row" data-r="'+i+'">'+n0(r[1])+'</td><td class="cx" tabindex="0" data-k="row" data-r="'+i+'">'+f(r[2],2)+'</td></tr>';});
+  t.innerHTML=h+'<tr class="sep"><th class="lab">Total</th><td>17,577</td><td>100.00</td></tr></tbody>';
+  bind(t,$("expT1C"),function(d){var e=$("expT1C");
+    if(d.k==="col"){card(e,"Column（列）："+(+d.c===0?"Number":"%"),[["含义",+d.c===0?"每种预测类型的个数":"占 17,577 的百分比"],["为什么报告","预测类型决定 CAPEX_ADJ 怎么计算；也是复现时校准 IBES 编码的直接目标（D3）"]]);return;}
+    var r=Cc[+d.r];
+    card(e,"Table 1C · "+r[0]+"：" +n0(r[1])+" 个（"+f(r[2],2)+"%）",[["是什么",r[3]],["CAPEX_ADJ 怎么算",r[4]],
+      ["说明了什么",+d.r===1?"三分之一的预测是区间，大量“落在区间内”的预测记为 0，这正是 Panel A 中 CAPEX_ADJ 中位数为 0 的原因；它也让系数偏向 0（局限 §12 第 4 条）。":+d.r===0?"一半以上的公司给出精确数字：精确的承诺更容易被市场评价，也更容易被检验是否调整。":"开放式预测只给出一端的界限，计算 CAPEX_ADJ 时最难处理，所以论文的稳健性检验把它们去掉（脚注 17）。"],
+      ["类比",r[5]]]);
+  },'td[data-r="1"]');}
+
+/* ---------------------------------------------------------------- Table 2 */
+var T2=[["CAR",[[1.193,.372,"***"],[1.207,.371,"***"],[1.196,.377,"***"],[.975,.294,"***"],[.975,.322,"***"],[.672,.370,"*"],[1.006,.326,"***"],[.849,.304,"***"]]],
+ ["SF_CAR",[null,null,null,null,null,[.039,.061,""],null,null]],
+ ["MKTRET",[null,null,null,null,null,null,[-.252,.308,""],[-.202,.322,""]]],
+ ["CAR_PRE",[null,null,null,null,null,null,[.305,.200,""],[.230,.197,""]]],
+ ["SIZE",[null,[1.485,.632,"**"],[1.411,.653,"**"],[.419,1.302,""],[.419,1.128,""],[3.351,2.203,""],[.444,1.131,""],[-1.513,1.415,""]]],
+ ["LAG_CAPX",[null,null,null,null,null,null,null,[-.160,.032,"***"]]],
+ ["SURP",[null,null,null,null,null,null,null,[.213,.385,""]]],
+ ["EA_DUM",[null,null,null,null,null,null,null,[-.108,.619,""]]]];
+var T2B=[["Fixed effects",["None","None","Yr-qtr","Firm, yr-qtr","Firm, yr-qtr","Firm, yr-qtr","Firm, yr-qtr","Firm, yr-qtr"]],
+ ["Clusters",["Firm","Firm","Firm","Firm","Industry","Industry","Industry","Industry"]],
+ ["Obs.",["17,577","17,577","17,577","17,577","17,577","3,456","17,577","17,505"]],
+ ["Adj. R²",[".001",".003",".007",".523",".523",".648",".523",".526"]]];
+var M2=["只有 CAR，没有控制变量和固定效应：最原始的关系。类比：只看“吃药的人是否好得快”。",
+ "加入 SIZE：大公司的反应和调整幅度可能都不同。类比：控制体重。",
+ "加入年季固定效应：去掉同一季度所有公司共同的冲击（如 2008 年危机）。类比：控制季节。",
+ "加入公司固定效应：只比较同一家公司不同预测之间的差异（L7）。类比：和病人自己的过去比。",
+ "与 (4) 完全相同，只是标准误改为按行业聚类（L8）。类比：换一种更保守的方式算误差。",
+ "加入 SF_CAR，只用有同期销售预测的 3,456 个观测：安慰剂检验（L10）。类比：对饮料单的口碑能否预测进货？",
+ "回到全样本，加入 MKTRET 和 CAR_PRE 两个安慰剂。类比：整条街的人流、两周前的口碑能否预测进货？",
+ "加入 LAG_CAPX、SURP、EA_DUM：控制对 capex 的既有预期和同期盈余信息。最严格的设定，也是 Table 3、5 的基准。"];
+var R2={CAR:["公告期 [−2, +2] 市场调整收益，标准化","H1 的核心：预期为正","CAR 高一个标准差（8.974 个百分点）","预告那一周的口碑"],
+ SF_CAR:["同一财年销售预测的公告期反应，标准化","安慰剂：预期为 0","销售预测的反应高一个标准差","对饮料单（营业额目标）的口碑"],
+ MKTRET:["公告当天 S&amp;P 500 收益，标准化","安慰剂：预期为 0","公告当天大盘收益高一个标准差","那天整条美食街的人流"],
+ CAR_PRE:["公告前约两周伪事件日的五日 CAR，标准化","安慰剂：预期为 0","两周前伪事件日的反应高一个标准差","预告前两周随便一天的口碑"],
+ SIZE:["ln(上季末市值)","控制变量：符号不确定","ln(市值) 高 1（市值约为 2.7 倍）","店面大小"],
+ LAG_CAPX:["上年 capex / 年初市值 × 100","控制对 capex 的既有预期：符号不确定","上年 capex 占年初市值的比例高 1 个百分点","去年的进货量"],
+ SURP:["当季 EPS 减去年同季 EPS（美元/股）","控制同期盈余新闻","每股盈余比去年同期多 1 美元","营业额比去年同期好了多少"],
+ EA_DUM:["是否与盈余公告同日发布（0/1）","控制同期盈余公告","与盈余公告同日发布（相对于不同日）","同一天还公布了上季度营业额"]};
+var N2={"CAR|0":"关系存在：反应越正，上调越多。1.193 / 7.421 = 16.1%，这就是摘要和引言引用的数字。",
+ "CAR|1":"加入 SIZE 后几乎不变（1.193 → 1.207）：CAR 不是在替公司规模说话。",
+ "CAR|2":"加入年季固定效应后几乎不变（1.207 → 1.196）：不是宏观环境同时推高股价和投资造成的。",
+ "CAR|3":"加入公司固定效应后下降约 18%（1.196 → 0.975），但仍在 1% 水平显著：部分关联来自公司之间的差别，但同一家公司内部，反应越好、上调越多。0.975 / 7.421 = 13.1%。",
+ "CAR|4":"系数和 (4) 完全相同，标准误从 0.294 增加到 0.322：行业聚类更保守，但结论不变。复现时这两列的系数必须完全相同。",
+ "CAR|5":"0.672，只在 10% 水平显著。系数变小部分是因为换成了 3,456 个观测的子样本，标准误也因样本小而变大。这一列的重点是 SF_CAR，不是 CAR 的大小。",
+ "CAR|6":"加入两个安慰剂后为 1.006，与 (5) 的 0.975 几乎相同：安慰剂没有“吸收”掉 CAR 的效应。",
+ "CAR|7":"所有控制都加上后仍为 0.849***，相当于平均调整的 11.4%，约合 500 万美元（按平均预测 5.87 亿美元计）。这是全文的基准估计。",
+ "SF_CAR|5":"0.039，几乎为 0 且不显著，只有 CAR（0.672）的约 1/17：同一财年销售预测的反应不能预测 capex 调整。管理层不是对“任何好消息”都多投，只对市场对 capex 计划本身的评价做出反应。",
+ "MKTRET|6":"不显著：管理层不是跟着大盘调整投资。","MKTRET|7":"仍不显著。",
+ "CAR_PRE|6":"0.305，不显著：公司并非本来就处在股价上升、投资增加的趋势中。","CAR_PRE|7":"仍不显著。",
+ "SIZE|1":"1.485**：市值约大 2.7 倍的公司，平均多上调约 1.5 个百分点。","SIZE|2":"控制时间后依然显著。",
+ "SIZE|3":"加入公司固定效应后降到 0.419 且不显著：规模效应是“公司之间”的（大公司总是上调更多），而不是“同一公司变大就上调更多”。",
+ "SIZE|5":"3.351，不显著；子样本不同，标准误很大。","SIZE|7":"−1.513，不显著。符号翻转但标准误很大，不应解读。",
+ "LAG_CAPX|7":"−0.160***：去年投入占市值越高，今年越倾向于少于计划，符合均值回归 (mean reversion)。系数的大小要结合单位来读：论文没有报告回归中 LAG_CAPX（除以市值）的分布，假如它的标准差是 10 个百分点，一个标准差的变化就对应约 1.6 个百分点的调整。复现时这个系数对单位最敏感（D15），可以用真实数据算出它的标准差再换算。",
+ "SURP|7":"0.213，不显著：同期盈利的好坏不能解释调整。结合脚注 22（corr(SURP, CAR) = 0.08），说明 CAR 不是在替盈余新闻说话。",
+ "EA_DUM|7":"−0.108，不显著：与财报同日发布的预测，调整幅度没有系统性不同。"};
+var NB={"Fixed effects":["吸收掉的固定效应：不显示系数，但决定了“和谁比”","None 表示所有观测放在一起比；Firm 表示每家公司和自己比；Yr-qtr 去掉季度共同冲击"],
+ "Clusters":["标准误按什么分组","只影响括号里的标准误和星号，不影响系数：比较 (4) 和 (5)"],
+ "Obs.":["回归样本量","17,577（全样本）；(6) 3,456（需要有同期销售预测）；(8) 17,505（控制变量缺失 72 个）"],
+ "Adj. R²":["调整后的拟合优度，包含固定效应的解释力","(3) → (4) 从 0.007 跳到 0.523：调整幅度主要由“公司是谁”决定。(1) 只有 0.001，但 R² 低不代表效应不存在，我们关心的是系数是否为正、是否稳健"]};
+function coefCard(e,tab,v,m,cc,colText,rowInfo,note,prevC,cmpLab){
+  var b=cc[0],se=cc[1],t=b/se,p=pNorm(t),lo=b-1.96*se,hi=b+1.96*se;
+  var std=["CAR","SF_CAR","MKTRET","CAR_PRE","CAR_POS","CAR_NEG"].indexOf(v)>=0;
+  var read=rowInfo[2]+" → CAPEX_ADJ "+(b>=0?"高 ":"低 ")+f(Math.abs(b),3)+" 个百分点"+(std?"（约为均值 7.421% 的 "+f(b/7.421*100,1)+"%）":"")+"。";
+  if(v==="CAR_NEG")read="CAR_NEG = min(CAR, 0) ≤ 0。系数为正意味着反应越负 → CAPEX_ADJ 越低（下调）："+read;
+  var rows=[["怎么读",read],["统计上","t = "+f(t,2)+"，95% 置信区间 ["+f(lo,2)+", "+f(hi,2)+"]，正态近似 p ≈ "+f(p,3)+"。"+sigText(t)+"。论文的星号用 t(G−1) 分布，和正态近似可能略有不同。"],
+    ["说明了什么",note||"—"]];
+  if(prevC)rows.push([cmpLab||"与前一列比较",prevC]);
+  rows.push(["这一行",rowInfo[0]+"；"+rowInfo[1]]);rows.push(["这一列",colText]);rows.push(["类比",rowInfo[3]]);
+  card(e,tab+" · "+v+" · ("+m+") = "+f(b,3)+cc[2]+" ("+f(se,3)+")",rows);}
+function buildT2(){var t=$("annoT2"),h='<thead><tr><th class="lab"></th>';
+  for(var m=1;m<=8;m++)h+='<th class="cx" tabindex="0" data-k="col" data-m="'+m+'">('+m+')</th>';h+='</tr></thead><tbody>';
+  T2.forEach(function(r,ri){h+='<tr><th class="lab cx" tabindex="0" data-k="row" data-r="'+ri+'">'+r[0]+'</th>'+r[1].map(function(c,mi){
+    return c?'<td class="cx" tabindex="0" data-k="cell" data-r="'+ri+'" data-m="'+(mi+1)+'">'+f(c[0],3).replace("-","−")+c[2]+'<span class="se">('+f(c[1],3)+')</span></td>':'<td></td>';}).join("")+'</tr>';});
+  T2B.forEach(function(r,bi){h+='<tr'+(bi===0?' class="sep"':'')+'><th class="lab cx" tabindex="0" data-k="brow" data-b="'+bi+'">'+r[0]+'</th>'+r[1].map(function(x,mi){return '<td class="cx" tabindex="0" data-k="bcell" data-b="'+bi+'" data-m="'+(mi+1)+'">'+x+'</td>';}).join("")+'</tr>';});
+  t.innerHTML=h+"</tbody>";
+  bind(t,$("expT2"),function(d){var e=$("expT2");
+    if(d.k==="col"){var m=+d.m;card(e,"Column（列）：模型 ("+m+")",[["这一列做了什么",M2[m-1]],["CAR 系数",f(T2[0][1][m-1][0],3)+T2[0][1][m-1][2]],["样本 / 拟合","N = "+T2B[2][1][m-1]+"，Adj. R² = "+T2B[3][1][m-1]+"；固定效应："+T2B[0][1][m-1]+"；聚类："+T2B[1][1][m-1]]]);return;}
+    if(d.k==="row"){var v=T2[+d.r][0],ri=R2[v],cols=T2[+d.r][1].map(function(c,i){return c?"("+(i+1)+") "+f(c[0],3)+c[2]:null;}).filter(Boolean).join("，");
+      card(e,"Row（行）："+v,[["是什么",ri[0]],["为什么放进来",ri[1]],["各列结果",cols],["类比",ri[3]]]);return;}
+    if(d.k==="brow"){var b=T2B[+d.b];card(e,"Row（行）："+b[0],[["含义",NB[b[0]][0]],["怎么读",NB[b[0]][1]]]);return;}
+    if(d.k==="bcell"){var b2=T2B[+d.b],m2=+d.m;card(e,"Table 2 · "+b2[0]+" · ("+m2+") = "+b2[1][m2-1],[["含义",NB[b2[0]][0]],["这一格",b2[0]==="Obs."&&m2===6?"只用有同期销售预测的观测，样本最小。":b2[0]==="Obs."&&m2===8?"比 17,577 少 72 个：LAG_CAPX 缺失 31 个，其余可能来自年初市值缺失。":b2[0]==="Adj. R²"&&m2===4?"加入公司固定效应后从 0.007 跳到 0.523。":b2[0]==="Clusters"&&m2===5?"从这一列开始改为按行业聚类。":NB[b2[0]][1]],["这一列",M2[m2-1]]]);return;}
+    var row=T2[+d.r],v2=row[0],mm=+d.m,cc=row[1][mm-1],prev=null;
+    if(v2==="CAR"&&mm>1){var pc=row[1][mm-2][0];prev="("+(mm-1)+") 为 "+f(pc,3)+"，本列 "+f(cc[0],3)+"，变化 "+sgn(cc[0]-pc)+"（"+f((cc[0]/pc-1)*100,1)+"%）。";}
+    coefCard(e,"Table 2",v2,mm,cc,M2[mm-1],R2[v2],N2[v2+"|"+(mm-1)],prev);
+  },'td[data-r="0"][data-m="8"]');}
+
+/* ---------------------------------------------------------------- Table 3 */
+var T3=[["CAR",[[-.295,.372,""],[1.206,.497,"**"],null,null]],["CAR_POS",[null,null,[-.203,.419,""],[.893,.455,"*"]]],["CAR_NEG",[null,null,[-.045,.176,""],[.185,.129,""]]],
+ ["MKTRET",[[.103,.539,""],[-.327,.654,""],[.104,.538,""],[-.323,.655,""]]],["CAR_PRE",[[.452,.375,""],[.124,.302,""],[.451,.376,""],[.130,.305,""]]]];
+var M3=["Lower spreads（7,770 个）：公告期价差没有上升，披露没有引来知情交易。类比：只有路人随口评价。",
+ "Higher spreads（9,570 个）：公告期价差上升，披露引来了知情交易者解读。类比：来了懂行的美食评论家。",
+ "Lower spreads，把 CAR 拆成 CAR_POS（好评）和 CAR_NEG（差评）。",
+ "Higher spreads，把 CAR 拆成 CAR_POS 和 CAR_NEG：看反馈来自哪个方向。"];
+var R3={CAR:R2.CAR,MKTRET:R2.MKTRET,CAR_PRE:R2.CAR_PRE,
+ CAR_POS:["max(CAR, 0)：只保留正的反应，标准化","检验正反馈：预期 Higher 组为正","正面反应高一个标准差","好评"],
+ CAR_NEG:["min(CAR, 0)：只保留负的反应，标准化","检验负反馈：套利限制理论预期较弱","负面反应的数值高一个标准差（即不那么负）","差评"]};
+var N3={"CAR|0":"−0.295，不显著：没有引来知情交易时，市场反应不影响 capex 调整。−0.295 / 7.421 = −3.9%，方向甚至是负的。",
+ "CAR|1":"1.206**：引来知情交易时，反应高一个标准差 → 上调 1.2 个百分点（均值的 16.2%），比全样本的 0.849 更大，因为全样本混入了没有效应的 Lower 组。",
+ "CAR_POS|2":"−0.203，不显著：路人的好评不影响进货。",
+ "CAR_POS|3":"0.893*：评论家的好评让管理层追加投资。t = 1.96 却只有一颗星，因为论文按行业聚类、用 t(G−1) 分布。",
+ "CAR_NEG|2":"−0.045，接近 0。",
+ "CAR_NEG|3":"0.185，不显著：差评没有显著引起下调。符合 Edmans, Goldstein &amp; Jiang (2015)：负面信息较少被交易进价格（L6）；也说明结果不像“约束渠道”。",
+ "MKTRET|0":"不显著。","MKTRET|1":"不显著。与 (1) 的差异 p = 0.656：Higher 组并不是对一切信息都更敏感。",
+ "MKTRET|2":"与 (1) 几乎相同（0.104 vs 0.103）：拆分 CAR 不影响其他系数。","MKTRET|3":"与 (2) 几乎相同；与 (3) 的差异 p = 0.658。",
+ "CAR_PRE|0":"0.452，不显著。","CAR_PRE|1":"0.124，不显著。与 (1) 的差异 p = 0.540：平常日子的口碑在两组都不起作用。",
+ "CAR_PRE|2":"与 (1) 几乎相同。","CAR_PRE|3":"与 (2) 几乎相同；与 (3) 的差异 p = 0.549。"};
+var P3={CAR:["0.019","CAR 在 (1) 和 (2) 之间的差异在 5% 水平显著：这是 Table 3 最重要的数字。“一组显著、一组不显著”本身不够，必须直接检验差异（L12）。"],
+ CAR_POS:["0.099","好评的效应在两组之间的差异在 10% 水平显著。"],CAR_NEG:["0.262","差评的效应在两组之间没有显著差异。"],
+ MKTRET:["0.656 / 0.658","两组对大盘收益的敏感度没有差别。"],CAR_PRE:["0.540 / 0.549","两组对伪事件日反应的敏感度没有差别。"]};
+function buildT3(){var t=$("annoT3"),labs=["(1) Lower","(2) Higher","(3) Lower","(4) Higher"],h='<thead><tr><th class="lab"></th>';
+  labs.forEach(function(l,i){h+='<th class="cx" tabindex="0" data-k="col" data-m="'+(i+1)+'">'+l+'</th>';});h+='<th class="cx" tabindex="0" data-k="pcol">p of diff.</th></tr></thead><tbody>';
+  T3.forEach(function(r,ri){h+='<tr><th class="lab cx" tabindex="0" data-k="row" data-r="'+ri+'">'+r[0]+'</th>'+r[1].map(function(c,mi){
+    return c?'<td class="cx" tabindex="0" data-k="cell" data-r="'+ri+'" data-m="'+(mi+1)+'">'+f(c[0],3).replace("-","−")+c[2]+'<span class="se">('+f(c[1],3)+')</span></td>':'<td></td>';}).join("")+
+    '<td class="cx" tabindex="0" data-k="p" data-r="'+ri+'">'+P3[r[0]][0]+'</td></tr>';});
+  h+='<tr class="sep"><th class="lab cx" tabindex="0" data-k="n">Obs.</th>'+["7,770","9,570","7,770","9,570"].map(function(x){return '<td class="cx" tabindex="0" data-k="n">'+x+'</td>';}).join("")+'<td></td></tr>';
+  h+='<tr><th class="lab cx" tabindex="0" data-k="r2">Adj. R²</th>'+[".512",".531",".512",".531"].map(function(x){return '<td class="cx" tabindex="0" data-k="r2">'+x+'</td>';}).join("")+'<td></td></tr>';
+  t.innerHTML=h+"</tbody>";
+  bind(t,$("expT3"),function(d){var e=$("expT3");
+    if(d.k==="col"){card(e,"Column（列）：模型 ("+d.m+")",[["这一列做了什么",M3[+d.m-1]],["共同设定","控制变量同 Table 2 (8)；公司 + 年季固定效应；按行业聚类"]]);return;}
+    if(d.k==="pcol"){card(e,"Column（列）：p of difference（组间差异的 p 值）",[["含义","Lower 组与 Higher 组同一系数之差的检验 p 值"],["为什么报告","“一组显著、另一组不显著”不等于两组显著不同，必须直接检验（L12）"],["复现做法","两组合并成一个模型，所有变量和固定效应都与分组交互，用联合的聚类协方差检验，相当于 Stata 的 suest"],["类比","甲 61 分及格、乙 59 分不及格，不能说明两人水平有显著差别"]]);return;}
+    if(d.k==="p"){var k=T3[+d.r][0];card(e,"Table 3 · p of difference · "+k+" = "+P3[k][0],[["说明了什么",P3[k][1]]]);return;}
+    if(d.k==="n"){card(e,"Obs.：7,770 + 9,570 = 17,340",[["含义","两组的样本量"],["说明了什么","比 Table 2 (8) 的 17,505 少 165 个（缺少计算价差所需的买卖报价）。价差上升的预测占 55.2%：一半以上的 capex 预测引来了知情交易。"],["类比","来了评论家的预告比只有路人的预告还多"]]);return;}
+    if(d.k==="r2"){card(e,"Adj. R²：0.512 / 0.531",[["说明了什么","(1)(3) 都是 0.512、(2)(4) 都是 0.531：把 CAR 拆成正负两部分几乎不增加解释力。两组都在 0.5 左右，与 Table 2 (8) 的 0.526 相近，因为同样包含公司固定效应。"]]);return;}
+    if(d.k==="row"){var v=T3[+d.r][0],ri=R3[v];card(e,"Row（行）："+v,[["是什么",ri[0]],["为什么放进来",ri[1]],["组间差异 p",P3[v][0]+"："+P3[v][1]],["类比",ri[3]]]);return;}
+    var row=T3[+d.r],v3=row[0],mm=+d.m,cc=row[1][mm-1],other=row[1][mm%2===1?mm:mm-2];
+    var cmp=other?"同一行另一组（"+(mm%2===1?"Higher":"Lower")+"）为 "+f(other[0],3)+other[2]+"，差异 p = "+P3[v3][0]+"。"+(v3==="CAR"?" 全样本 Table 2 (8) 为 0.849。":""):null;
+    coefCard(e,"Table 3",v3,mm,cc,M3[mm-1],R3[v3],N3[v3+"|"+(mm-1)],cmp,"与另一组比较");
+  },'td[data-r="0"][data-m="2"]');}
+
+/* ---------------------------------------------------------------- N flow */
+function svgEl(tag,a,txt){var e=document.createElementNS("http://www.w3.org/2000/svg",tag);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e;}
+function nFlow(){var s=$("nFlow");s.innerHTML="";s.setAttribute("viewBox","0 0 760 260");
+  var d=svgEl("defs",{}),mk=svgEl("marker",{id:"nfa",viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto-start-reverse"});
+  mk.appendChild(svgEl("path",{d:"M0,0 L10,5 L0,10 z",style:"fill:var(--rule-strong)"}));d.appendChild(mk);s.appendChild(d);
+  var boxes=[[0,30,170,"17,577","T1；T2 (1)–(5)、(7)"],[295,30,170,"17,505","Table 2 (8)"],[590,30,170,"17,340","Table 3 合计"],
+             [470,180,135,"7,770","Lower (1)(3)"],[625,180,135,"9,570","Higher (2)(4)"],[150,180,170,"3,456","Table 2 (6)"]];
+  boxes.forEach(function(b){s.appendChild(svgEl("rect",{x:b[0]+1,y:b[1],width:b[2]-2,height:58,rx:6,style:"fill:var(--sheet);stroke:var(--accent);stroke-width:1.5"}));
+    s.appendChild(svgEl("text",{x:b[0]+12,y:b[1]+24,style:"font-size:17px;font-weight:600"},b[3]));
+    s.appendChild(svgEl("text",{x:b[0]+12,y:b[1]+45,"class":"mut",style:"font-size:12px"},b[4]));});
+  var arr=[[171,59,292,59,"−72 缺控制变量",180,48],[466,59,587,59,"−165 缺报价",488,48],
+           [660,89,545,177,"价差未升",530,128],[690,89,692,177,"价差上升",698,140],[60,89,220,177,"有同期销售预测",10,146]];
+  arr.forEach(function(a){s.appendChild(svgEl("line",{x1:a[0],y1:a[1],x2:a[2],y2:a[3],style:"stroke:var(--rule-strong);stroke-width:1.6","marker-end":"url(#nfa)"}));
+    s.appendChild(svgEl("text",{x:a[5],y:a[6],style:"font-size:12px;fill:var(--up);font-weight:600"},a[4]));});
+}
+if($("annoT1")){buildA();buildB();buildC();buildT2();buildT3();nFlow();}
+})();
+</script>
+
+</body>
+</html>
