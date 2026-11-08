@@ -8,8 +8,7 @@ Table 4 (9 models), Table 5 Panels A–D, E1, E2, Table 6, Figure 1, plus the ro
 moments quoted in the text. Each output table prints **our estimate next to the paper's number**.
 
 > ⚠️ The target numbers in `paper_targets.py` come from the **May-2019 working paper** (the only
-> full text openly available). Download the published version through the HKUST library and
-> check every target before reporting; see `REPLICATION_NOTES.md` §6.
+> full text openly available).
 
 ## 1. Quick start
 
@@ -63,7 +62,7 @@ Supporting modules: `config.py` (all switches), `utils.py` (links, event windows
 
 | Source (WRDS) | Used for |
 |---|---|
-| `ibes.det_guidance` | capex (CPX), sales (SAL) and EPS guidance — **IBES Guidance is a separate subscription; check HKUST has it** |
+| `ibes.det_guidance` | capex (CPX), sales (SAL) and EPS guidance — **IBES Guidance is a separate subscription** |
 | `wrdsapps_link_crsp_ibes.ibcrsphist`, `crsp.ccmxpf_lnkhist` | IBES → PERMNO → GVKEY |
 | `comp.funda`, `comp.fundq`, `comp.company` | actual capex, SIZE, LAG_CAPX, SURP, EA dates, performance, Table 6 controls, SIC, state |
 | `crsp.dsf` (event windows only), `crsp.dsi`, `crsp.msf`, `crsp.msenames` | CAR, S&P 500 return, bid-ask spreads, turnover, dollar volume, CUSIP links |
