@@ -2,14 +2,6 @@
 
 **"Should I Stay or Should I Grow? Using Voluntary Disclosure to Elicit Market Feedback"**,
 *Review of Financial Studies* 33(8): 3854–3888, doi:10.1093/rfs/hhz132.
-Prepared by Zhang Qi. Python only (pandas / numpy / scipy); no Stata needed.
-
-**Default scope: Tables 1–3** (`SCOPE = "t13"` in `config.py`). In this mode the package pulls only the
-nine WRDS tables Tables 1–3 need, builds the forecast sample, estimates Table 1 (A–C), Table 2 (8 models)
-and Table 3 (4 models with difference tests), recomputes every number the text quotes about them
-(economic magnitudes, footnotes 15 and 19–24, robustness in footnotes 17–19 and 23), checks the
-paper's winsorisation against Table 1, and writes an English replication report
-(`output/replication_report.html` / `.md`, printable to PDF). Study guide: `GUIDE.html`.
 
 With `JW_SCOPE=all` every table and figure of the paper is covered: Table 1 (A–C), Table 2 (8 models), Table 3,
 Table 4 (9 models), Table 5 Panels A–D, E1, E2, Table 6, Figure 1, plus the robustness numbers and
