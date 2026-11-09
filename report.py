@@ -17,6 +17,7 @@ import datetime as dt
 import html
 import json
 import platform
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -73,6 +74,7 @@ p{margin:8px 0}
 table{border-collapse:collapse;width:100%;font:13.5px/1.45 Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums}
 thead th{border-top:1.5px solid var(--ink);border-bottom:1px solid var(--ink);text-align:left;padding:5px 8px;font-weight:600}
 td{padding:4px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+td:first-child{min-width:9em}
 tbody tr:last-child td{border-bottom:1.5px solid var(--ink)}
 td.num,th.num{text-align:right;white-space:nowrap}
 tr.paper td{color:var(--muted);border-bottom-color:transparent}
@@ -123,6 +125,55 @@ class Doc:
         self.h.append(h)
         if m:
             self.m.append(m)
+
+    def markdown(self, text: str):
+        """Insert an editable Markdown file (docs/*.md): ###/#### headings, paragraphs, - and 1. lists,
+        **bold**, *italic*, `code`. Kept deliberately small so no extra package is needed."""
+        import re
+        def inline(s):
+            s = html.escape(s, quote=False)
+            s = re.sub(r"`([^`]+)`", r"<code>\1</code>", s)
+            s = s.replace("\\*", "&#42;")                       # \* = literal star
+            # bold/italic only when the marker is not glued to a word: keeps significance stars like 0.674** intact
+            s = re.sub(r"(?<![\w*])\*\*(?=\S)(.+?)(?<=\S)\*\*(?![\w*])", r"<b>\1</b>", s)
+            return re.sub(r"(?<![\w*])\*(?=[^\s*])([^*\n]+?)(?<=\S)\*(?![\w*])", r"<i>\1</i>", s)
+        out, para, lst = [], [], None
+        def flush():
+            nonlocal para, lst
+            if para:
+                out.append("<p>" + inline(" ".join(para)) + "</p>")
+                para = []
+            if lst:
+                tag, items = lst
+                out.append(f"<{tag}>" + "".join(f"<li>{inline(i)}</li>" for i in items) + f"</{tag}>")
+                lst = None
+        for line in text.splitlines():
+            s = line.rstrip()
+            m_ul, m_ol = re.match(r"^\s*[-*] (.*)", s), re.match(r"^\s*\d+\. (.*)", s)
+            if not s.strip():
+                flush()
+            elif s.startswith("#"):
+                flush()
+                lvl = len(s) - len(s.lstrip("#"))
+                out.append(f"<h{min(lvl, 4)}>{inline(s.lstrip('#').strip())}</h{min(lvl, 4)}>")
+            elif m_ul or m_ol:
+                if para:
+                    out.append("<p>" + inline(" ".join(para)) + "</p>")
+                    para = []
+                tag = "ul" if m_ul else "ol"
+                if lst and lst[0] != tag:
+                    flush()
+                lst = lst or (tag, [])
+                lst[1].append((m_ul or m_ol).group(1))
+            elif lst and line.startswith("  "):
+                lst[1][-1] += " " + s.strip()
+            else:
+                if lst:
+                    flush()
+                para.append(s.strip())
+        flush()
+        self.h.append("".join(out))
+        self.m.append("\n" + text.strip() + "\n")
 
     def table(self, df: pd.DataFrame, num_cols=(), paper_rows=None, note=None):
         paper_rows = paper_rows or set()
@@ -393,8 +444,68 @@ def section_robust(doc, est):
     doc.table(pd.DataFrame(rows, columns=["Specification", "CAR (ours)", "Obs.", "Paper"]), num_cols=("Obs.",))
 
 
+DOCS = Path(__file__).resolve().parent / "docs"
+
+
+def _md_file(name):
+    f = DOCS / name
+    return f.read_text(encoding="utf-8") if f.exists() else None
+
+
+def section_calibration(doc):
+    doc.head("8. Calibration on WRDS data")
+    txt = _md_file("calibration.md")
+    if txt:
+        doc.markdown(txt)
+    f = C.OUT / "calibrate_d9.csv"
+    if f.exists():
+        t = pd.read_csv(f).rename(columns={"Unnamed: 0": "Definition of an earnings forecast"})
+        fmt = {"final N": lambda x: fnum(float(x)) if float(x) >= 1000 else f"{int(x):,}",
+               "dropped at w3 (%)": lambda x: f"{float(x):.1f}"}
+        for col in t.columns[1:]:
+            t[col] = t[col].map(fmt.get(col, lambda x: f"{float(x):.3f}"))
+        doc.head("D9: sample characteristics under four definitions (no regressions)", 3)
+        doc.table(t, num_cols=tuple(t.columns[1:]),
+                  note="Produced by <code>calibrate_d9.py</code>. Only sample characteristics were compared when "
+                       "choosing the definition.")
+
+
+def section_t3_sensitivity(doc):
+    f = C.OUT / "t3_sensitivity.csv"
+    if not f.exists():
+        return
+    doc.head("9. Table 3 sensitivity")
+    doc.para("Table 3's two tests re-estimated under the alternative settings of D9 and D10, and, as a diagnostic not in "
+             "the paper, separately for forecasts issued with and without an earnings announcement. Lo = spreads do not "
+             "rise, Hi = spreads rise; p = p-value of the Lo-Hi difference.")
+    t = pd.read_csv(f).rename(columns={"Unnamed: 0": "Setting"})
+    t = pd.concat([t[t["Setting"] == "paper"], t[t["Setting"] != "paper"]]).fillna("")
+    for col in ("N_lo", "N_hi"):
+        t[col] = t[col].map(lambda x: f"{int(float(x)):,}" if x != "" else "")
+    for col in ("p_CAR", "p_POS", "p_NEG"):
+        t[col] = t[col].map(lambda x: f"{float(x):.3f}" if x != "" else "")
+    a = t[["Setting", "N_lo", "N_hi", "CAR_lo", "CAR_hi", "p_CAR"]].rename(columns={
+        "N_lo": "N Lo", "N_hi": "N Hi", "CAR_lo": "CAR Lo", "CAR_hi": "CAR Hi", "p_CAR": "p of difference"})
+    b = t[["Setting", "POS_lo", "POS_hi", "p_POS", "NEG_lo", "NEG_hi", "p_NEG"]].rename(columns={
+        "POS_lo": "CAR_POS Lo", "POS_hi": "CAR_POS Hi", "p_POS": "p CAR_POS",
+        "NEG_lo": "CAR_NEG Lo", "NEG_hi": "CAR_NEG Hi", "p_NEG": "p CAR_NEG"})
+    doc.head("Does the effect depend on rising spreads? (Table 3 models 1-2)", 3)
+    doc.table(a, num_cols=tuple(a.columns[1:]))
+    doc.head("Positive vs negative reactions (Table 3 models 3-4)", 3)
+    doc.table(b, num_cols=tuple(b.columns[1:]),
+              note="Produced by <code>t3_sensitivity.py</code>. The variants were specified before their results were "
+                   "seen; the main specification is not changed on the basis of these tables.")
+
+
+def section_discussion(doc):
+    txt = _md_file("discussion.md")
+    if txt:
+        doc.head("12. Discussion")
+        doc.markdown(txt)
+
+
 def section_choices(doc):
-    doc.head("8. Implementation choices")
+    doc.head("10. Implementation choices")
     doc.para("The paper leaves the following choices open. Each is a switch in <code>config.py</code>; the full log "
              "with the evidence for each choice is in <code>REPLICATION_NOTES.md</code>.")
     items = [
@@ -404,7 +515,8 @@ def section_choices(doc):
         ("D6", "Firm-quarter collapse", f"keep {C.ONE_PER_FIRM_QUARTER}; before waterfall = {C.COLLAPSE_AT_START}"),
         ("D7", "Range denominator", C.RANGE_SCALER),
         ("D8", "Open-ended forecasts", C.OTHER_RULE),
-        ("D9", "EPS-concurrency window (days)", C.EPS_CONCURRENT_DAYS),
+        ("D9", "Guidance counted as an earnings forecast", ", ".join(getattr(C, "CONCURRENT_MEASURES", ("EPS",)))),
+        ("D9", "Earnings-forecast concurrency window (days)", C.EPS_CONCURRENT_DAYS),
         ("D10", "EA_DUM window (days)", C.EA_CONCURRENT_DAYS),
         ("D11", "After-close shift of day 0", C.AFTER_CLOSE_SHIFT),
         ("D12", "Returns required in CAR", C.MIN_RET_OBS),
@@ -423,7 +535,7 @@ def section_choices(doc):
 
 
 def section_deviations(doc, est, extra, score):
-    doc.head("9. Where the replication differs, and why")
+    doc.head("11. Where the replication differs, and why")
     df, _ = score
     flagged = []
     for tab, var, m in KEY_COEFS:
@@ -455,14 +567,15 @@ def section_deviations(doc, est, extra, score):
 
 
 def section_repro(doc, log, synthetic):
-    doc.head("10. Reproducibility")
+    doc.head("13. Reproducibility")
     doc.para("Code: Python package <code>jw2020</code> (no Stata needed). Fixed-effects OLS with clustered standard "
              "errors is implemented in <code>hdfe.py</code> following Stata <code>reghdfe</code>: fixed effects absorbed "
              "by alternating projections; V = c(X'X)<sup>-1</sup>[&Sigma;<sub>g</sub>X<sub>g</sub>'u<sub>g</sub>u<sub>g</sub>'X<sub>g</sub>](X'X)<sup>-1</sup> "
              "with c = G/(G-1)&middot;(N-1)/(N-K); fixed effects nested in the cluster variable are not counted in K. "
              "<code>tests/test_hdfe.py</code> checks the estimator against least squares with dummy variables to 1e-8.")
     doc.raw("<pre><code>python check_wrds.py   # access and column check\npython pull_wrds.py    # 9 WRDS tables for Tables 1-3\n"
-            "python diagnose.py     # calibrate I/B/E/S coding switches\npython run_all.py      # sample, Tables 1-3, this report</code></pre>",
+            "python diagnose.py     # calibrate I/B/E/S coding switches\npython calibrate_d9.py # D9: compare definitions (sample only)\n"
+            "python run_all.py      # sample, Tables 1-3, this report\npython t3_sensitivity.py  # Table 3 sensitivity, then python report.py</code></pre>",
             "\n```\npython check_wrds.py\npython pull_wrds.py\npython diagnose.py\npython run_all.py\n```\n")
     doc.para(f"Generated {dt.datetime.now():%Y-%m-%d %H:%M} with Python {platform.python_version()}, pandas "
              f"{pd.__version__}, numpy {np.__version__}. Data: {'SYNTHETIC test data' if synthetic else 'WRDS'}.", "note")
@@ -492,8 +605,11 @@ def main():
     section_t3(doc, est, extra)
     section_text(doc, extra)
     section_robust(doc, est)
+    section_calibration(doc)
+    section_t3_sensitivity(doc)
     section_choices(doc)
     section_deviations(doc, est, extra, score)
+    section_discussion(doc)
     section_repro(doc, log, synthetic)
     banner = f'<div class="demo">{demo}</div>' if synthetic else ""
     page = (f'<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" '
