@@ -1,0 +1,6 @@
+,final N,dropped at w3 (%),EA_DUM mean,range share,CAPEX_ADJ mean,CAPEX_ADJ median,CAR mean
+paper,17577.0,47.4,0.559,0.3448,7.421,0.0,-0.148
+EPS only,22961.0,39.9,0.902,0.4484,2.867,-0.385,0.287
+EPS + GAAP EPS,22117.0,42.0,0.902,0.445,3.557,-0.276,0.271
+EPS + GPS + NET + PRE,21146.0,44.6,0.901,0.4406,3.805,-0.185,0.29
+all earnings-type,18866.0,50.9,0.899,0.4264,3.945,-0.326,0.318

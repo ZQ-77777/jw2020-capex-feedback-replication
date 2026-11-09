@@ -1,0 +1,7 @@
+step,ours,paper
+w0_ibes_capex_forecasts,49999,
+w0b_one_per_firm_quarter,43422,
+w1_matched_compustat,41452,40785.0
+w2_with_car,41443,36900.0
+w3_not_concurrent_eps,20344,19427.0
+w4_drop_2016,18866,17577.0
