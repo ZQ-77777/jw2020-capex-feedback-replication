@@ -62,8 +62,8 @@ def classify(c: pd.DataFrame) -> pd.DataFrame:
     c = c.copy()
     v1, v2 = c["val_1"], c["val_2"]
     is_range = v2.notna() & v1.notna() & (v2 != v1)
-    rd = c["range_desc"].astype(str).str.strip() if "range_desc" in c else pd.Series("", index=c.index)
-    is_other = ~is_range & rd.isin({str(x) for x in C.RANGE_DESC_OPEN_ENDED})
+    rd = c["range_desc"].astype(str).str.strip().str.zfill(2) if "range_desc" in c else pd.Series("", index=c.index)
+    is_other = ~is_range & rd.isin({str(x).zfill(2) for x in C.RANGE_DESC_OPEN_ENDED})
     c["FTYPE"] = np.select([is_range, is_other], ["range", "other"], "point")
     c["F_LO"] = np.where(is_range, np.fmin(v1, v2), v1)
     c["F_HI"] = np.where(is_range, np.fmax(v1, v2), v1)

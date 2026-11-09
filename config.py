@@ -43,7 +43,10 @@ REQUIRE_USD = True             # keep curr == 'USD' (or missing)
 # D3: range_desc codes that denote open-ended ("more than / less than") forecasts.
 #     Unknown ex ante -> run `python diagnose.py` and set so that the type split is close to
 #     Table 1 Panel C (point 55.30%, range 34.48%, other 10.22%).
-RANGE_DESC_OPEN_ENDED = set()
+# D3: I/B/E/S Guidance User Guide (Thomson Reuters 2009), Appendix 2: 03 more than, 04 at least, 10 less than,
+#     11 may exceed, 12/13 slightly more/less than, 15/16 significantly less/more than, 17 not to exceed.
+#     01 between, 06 high end of, 08 low end of = ranges; 02 about, 14 comfortable with = points.
+RANGE_DESC_OPEN_ENDED = {"03", "04", "10", "11", "12", "13", "15", "16", "17"}
 # D4: IBES 'units' code -> multiplier into US$ millions (Compustat capx is in $ millions).
 #     Unknown codes are left untouched and reported by diagnose.py.
 UNITS_TO_MILLIONS = {"M": 1.0, "MIL": 1.0, "B": 1000.0, "BIL": 1000.0, "K": 0.001, "THO": 0.001}

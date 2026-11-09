@@ -21,15 +21,42 @@ def save(df: pd.DataFrame, name: str, folder=None) -> None:
         pq.unlink(missing_ok=True)
 
 
+def plain_dtypes(df: pd.DataFrame) -> pd.DataFrame:
+    """wrds >= 3.2 returns pyarrow / nullable dtypes, where a missing value is pd.NA. This code base expects plain
+    numpy dtypes with NaN (np.where on a mask containing pd.NA raises 'boolean value of NA is ambiguous')."""
+    for col in df.columns:
+        s = df[col]
+        dt = s.dtype
+        if not isinstance(dt, pd.api.extensions.ExtensionDtype) or isinstance(dt, (pd.CategoricalDtype, pd.DatetimeTZDtype)):
+            continue
+        kind = getattr(dt, "kind", "O")
+        has_na = bool(s.isna().any())
+        try:
+            if kind in "iu":
+                df[col] = s.to_numpy(dtype="float64", na_value=np.nan) if has_na else s.to_numpy(dtype="int64")
+            elif kind == "f":
+                df[col] = s.to_numpy(dtype="float64", na_value=np.nan)
+            elif kind == "b":
+                df[col] = s.to_numpy(dtype="float64", na_value=np.nan) if has_na else s.to_numpy(dtype="bool")
+            elif kind == "M":
+                df[col] = pd.to_datetime(s.astype("datetime64[ns]"))
+            elif "decimal" in str(dt).lower():
+                df[col] = pd.to_numeric(s.astype(object), errors="coerce").astype("float64")
+            else:                                  # strings and anything else: object with NaN for missing
+                df[col] = s.astype(object).where(s.notna(), np.nan)
+        except (TypeError, ValueError):
+            df[col] = s.astype(object).where(s.notna(), np.nan)
+    return df
+
+
 def load(name: str, folder=None) -> pd.DataFrame:
     folder = folder or C.INTERIM
     pq, pk = folder / f"{name}.parquet", folder / f"{name}.pkl"
     if pq.exists():
-        return pd.read_parquet(pq).reset_index(drop=True)
+        return plain_dtypes(pd.read_parquet(pq).reset_index(drop=True))
     if pk.exists():
-        return pd.read_pickle(pk).reset_index(drop=True)
+        return plain_dtypes(pd.read_pickle(pk).reset_index(drop=True))
     raise FileNotFoundError(f"{name} not found in {folder}")
-
 
 def exists(name: str, folder=None) -> bool:
     folder = folder or C.INTERIM
