@@ -58,6 +58,7 @@ def load(name: str, folder=None) -> pd.DataFrame:
         return plain_dtypes(pd.read_pickle(pk).reset_index(drop=True))
     raise FileNotFoundError(f"{name} not found in {folder}")
 
+
 def exists(name: str, folder=None) -> bool:
     folder = folder or C.INTERIM
     return (folder / f"{name}.parquet").exists() or (folder / f"{name}.pkl").exists()

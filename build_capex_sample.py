@@ -200,8 +200,17 @@ def build() -> pd.DataFrame:
     c = c.dropna(subset=["CAR"]).reset_index(drop=True)
     wf.append(("w2_with_car", len(c)))
 
-    # ---- drop forecasts concurrent with an EPS forecast (D9)
-    eps = g[g["measure"] == C.MEASURE_EPS][["ticker", "anndats"]].drop_duplicates()
+    # ---- drop forecasts concurrent with an earnings forecast (D9: which measures count is a switch)
+    eps = g[g["measure"] == C.MEASURE_EPS][["ticker", "anndats"]]
+    extra = [m for m in C.CONCURRENT_MEASURES if m != C.MEASURE_EPS]
+    if extra:
+        ge = U.lower_cols(U.load("guidance_earn", C.RAW))
+        ge["ticker"] = ge["ticker"].astype(str).str.upper().str.strip()
+        ge["anndats"] = U.to_dt(ge["anndats"])
+        ge = ge[ge["measure"].astype(str).str.upper().str.strip().isin(extra)]
+        eps = pd.concat([eps, ge[["ticker", "anndats"]]], ignore_index=True)
+        print(f"[capex] D9: earnings forecasts = {list(C.CONCURRENT_MEASURES)}")
+    eps = eps.dropna().drop_duplicates()
     m = c[["eid", "ticker", "anndats"]].merge(eps.rename(columns={"anndats": "eps_dt"}), on="ticker")
     hit = m.loc[(m["anndats"] - m["eps_dt"]).dt.days.abs() <= C.EPS_CONCURRENT_DAYS, "eid"].unique()
     c = c[~c["eid"].isin(hit)].reset_index(drop=True)

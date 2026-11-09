@@ -57,6 +57,15 @@ def pull_guidance(db):
           AND anndats BETWEEN '{C.FCST_FIRST}' AND '{C.FCST_LAST}'""")
 
 
+def pull_guidance_earn(db):
+    """Other earnings-type guidance (GPS, NET, PRE, EBITDA, ...): ticker, measure and date only, for the D9 test."""
+    ms = "','".join(C.EXTRA_EARNINGS_MEASURES)
+    return db.raw_sql(f"""
+        SELECT DISTINCT ticker, measure, anndats FROM ibes.det_guidance
+        WHERE measure IN ('{ms}')
+          AND anndats BETWEEN '{C.FCST_FIRST}' AND '{C.FCST_LAST}'""")
+
+
 def pull_ibcrsphist(db):
     return first_ok(db, [f"SELECT ticker, permno, ncusip, sdate, edate, score FROM {t}"
                          for t in ("wrdsapps_link_crsp_ibes.ibcrsphist", "wrdsapps.ibcrsphist")])
@@ -200,7 +209,7 @@ def pull_s12_extreme(db):
 
 
 PULLS = {  # order matters: dsf / s12 rely on earlier pulls
-    "guidance": pull_guidance, "ibcrsphist": pull_ibcrsphist, "ccm": pull_ccm,
+    "guidance": pull_guidance, "guidance_earn": pull_guidance_earn, "ibcrsphist": pull_ibcrsphist, "ccm": pull_ccm,
     "funda": pull_funda, "fundq": pull_fundq, "company": pull_company,
     "msenames": pull_msenames, "dsi": pull_dsi, "msf": pull_msf,
     "insider": pull_insider, "mf_tna": pull_mf_tna, "mflink1": pull_mflink1,
@@ -220,7 +229,7 @@ def _log(name, rows, secs, status):
         print(f"  (could not write {f.name}: {e}; close it if it is open in Excel)")
 
 
-T13_TABLES = ["guidance", "ibcrsphist", "ccm", "funda", "fundq", "company", "msenames", "dsi", "dsf"]
+T13_TABLES = ["guidance", "guidance_earn", "ibcrsphist", "ccm", "funda", "fundq", "company", "msenames", "dsi", "dsf"]
 
 
 def main(names=None):

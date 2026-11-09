@@ -40,16 +40,14 @@ MEASURE_CAPEX, MEASURE_SALES, MEASURE_EPS = "CPX", "SAL", "EPS"   # D1: verify w
 PDICITY_ANNUAL = "ANN"
 REQUIRE_USFIRM = True          # keep usfirm == 1 when the column exists
 REQUIRE_USD = True             # keep curr == 'USD' (or missing)
-# D3: range_desc codes that denote open-ended ("more than / less than") forecasts.
-#     Unknown ex ante -> run `python diagnose.py` and set so that the type split is close to
-#     Table 1 Panel C (point 55.30%, range 34.48%, other 10.22%).
 # D3: I/B/E/S Guidance User Guide (Thomson Reuters 2009), Appendix 2: 03 more than, 04 at least, 10 less than,
 #     11 may exceed, 12/13 slightly more/less than, 15/16 significantly less/more than, 17 not to exceed.
 #     01 between, 06 high end of, 08 low end of = ranges; 02 about, 14 comfortable with = points.
 RANGE_DESC_OPEN_ENDED = {"03", "04", "10", "11", "12", "13", "15", "16", "17"}
 # D4: IBES 'units' code -> multiplier into US$ millions (Compustat capx is in $ millions).
 #     Unknown codes are left untouched and reported by diagnose.py.
-UNITS_TO_MILLIONS = {"M": 1.0, "MIL": 1.0, "B": 1000.0, "BIL": 1000.0, "K": 0.001, "THO": 0.001}
+UNITS_TO_MILLIONS = {"M": 1.0, "MIL": 1.0, "MILLIONS": 1.0, "B": 1000.0, "BIL": 1000.0, "BILLIONS": 1000.0,
+                     "K": 0.001, "THO": 0.001, "THOUSANDS": 0.001}   # WRDS spells them out: millions / billions
 MAX_HORIZON_MONTHS = 24        # D5: drop forecasts for fiscal periods > 24 months ahead
 NEAREST_PERIOD_ONLY = True     # D5: if one announcement covers FY t and t+1, keep FY t
 ONE_PER_FIRM_QUARTER = "first" # D6: unit is a firm-quarter -> 'first' | 'last' | None
@@ -59,8 +57,13 @@ RANGE_SCALER = "mid"           # D7: denominator of CAPEX_ADJ for ranges: 'mid' 
 OTHER_RULE = "val1_as_point"   # D8: open-ended forecasts treated as point at val_1
 
 # ----------------------------------------------------------------------------- concurrency
-EPS_CONCURRENT_DAYS = 0        # D9: drop capex forecast if EPS guidance within +/- N calendar days
-EA_CONCURRENT_DAYS = 1         # D10: EA_DUM = 1 if |anndats - rdq| <= N calendar days
+EPS_CONCURRENT_DAYS = 0        # D9: drop capex forecast if earnings guidance within +/- N calendar days
+# D9: which guidance counts as an "earnings forecast". EPS only is the narrow reading; the broad reading adds the other
+#     earnings-type I/B/E/S measures (GPS fully reported EPS, NET net income, PRE pretax income, EBT EBITDA,
+#     EBS EBITDA per share, OPR operating profit, FFO funds from operations), pulled into `guidance_earn`.
+EXTRA_EARNINGS_MEASURES = ("GPS", "NET", "PRE", "EBT", "EBS", "OPR", "FFO")
+CONCURRENT_MEASURES = ("EPS",) + EXTRA_EARNINGS_MEASURES   # D9: closest to the paper's N (see output/calibrate_d9.csv)
+EA_CONCURRENT_DAYS = 0         # D10: EA_DUM = 1 if |anndats - rdq| <= N calendar days
 AFTER_CLOSE_SHIFT = False      # D11: day 0 -> next trading day if anntims >= 16:00:00
 
 # ----------------------------------------------------------------------------- event windows (trading days)
@@ -82,7 +85,8 @@ WINSOR = (0.01, 0.99)          # D14: paper silent; Table 1 min/max look like 1/
 # tables.py prints raw min / p1 / p99 / max next to the paper so this can be checked on real data.
 WINSOR_VARS = ["CAPEX_ADJ", "CAR", "CAR_PRE", "SF_CAR", "SURP", "LAG_CAPX", "ASSET_GROWTH",
                "CFO1", "IBEI1", "NI1", "CAPEX_AT", "FORE_AT", "INSIDER"]
-WINSOR_LEVELS = False          # D14 switch: True also winsorises CAPEX_FORE, CAPEX_ACT, LAG_CAPX_MIL, SIZE
+WINSOR_LEVELS = True           # D14 (revised on WRDS data): Table 1 extremes match the 1st/99th percentiles of the
+                               # levels too, e.g. CAPEX_ACT p99 = 9,496 = the paper's max; CAPEX_FORE p1 = 2.0 = its min
 LAG_CAPX_SCALE = "mv_pct"      # D15: regression LAG_CAPX = capx_{t-1}/MV_{t-1} * 100
 PERF_SCALER = "at_same_year"   # D16: CFO_{t+1}/AT_{t+1} ('at_same_year') or /AT_t ('at_lag')
 SPREAD_UNIT = 100.0            # D17: relative spread in percent (median 0.073 in paper)
