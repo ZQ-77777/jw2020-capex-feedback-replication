@@ -162,16 +162,18 @@ def pull_dsf_windows(db, chunk=400):
         df = db.raw_sql(f"""SELECT permno, date, ret, prc, vol, shrout, bid, ask FROM crsp.dsf
                             WHERE permno IN ({','.join(map(str, ps))})
                               AND date BETWEEN '{C.PULL_START}' AND '{C.PULL_END}'""")
+        df = df.reset_index(drop=True)          # wrds.raw_sql reads in chunks: its index can repeat
         df["date"] = U.to_dt(df["date"])
         df["tidx"] = cal.index_exact(df["date"])
         keep = np.zeros(len(df), bool)
-        for p, idx in df.groupby("permno").groups.items():
+        tidx = df["tidx"].to_numpy()
+        for p, rows in df.groupby("permno").indices.items():   # positional row numbers
             t = np.sort(np.array(need[int(p)]))
-            ti = df.loc[idx, "tidx"].values
+            ti = tidx[rows]
             pos = np.searchsorted(t, ti)
             lo = np.abs(ti - t[np.clip(pos - 1, 0, len(t) - 1)])
             hi = np.abs(ti - t[np.clip(pos, 0, len(t) - 1)])
-            keep[df.index.get_indexer(idx)] = np.minimum(lo, hi) <= b
+            keep[rows] = np.minimum(lo, hi) <= b
         out.append(df.loc[keep].drop(columns="tidx"))
         print(f"  dsf chunk {i // chunk + 1}/{(len(permnos) - 1) // chunk + 1}: kept {keep.sum():,}")
     return pd.concat(out, ignore_index=True)
@@ -212,7 +214,10 @@ def _log(name, rows, secs, status):
     f = C.RAW / "_pull_log.csv"
     row = pd.DataFrame([dict(table=name, rows=rows, seconds=round(secs, 1), status=status,
                              pulled_at=pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"))])
-    row.to_csv(f, mode="a", header=not f.exists(), index=False)
+    try:
+        row.to_csv(f, mode="a", header=not f.exists(), index=False)
+    except OSError as e:                       # e.g. the log is open in Excel (Windows locks it)
+        print(f"  (could not write {f.name}: {e}; close it if it is open in Excel)")
 
 
 T13_TABLES = ["guidance", "ibcrsphist", "ccm", "funda", "fundq", "company", "msenames", "dsi", "dsf"]
@@ -230,7 +235,7 @@ def main(names=None):
             t = time.time()
             print(f"pulling {name} ...")
             try:
-                df = PULLS[name](db)
+                df = PULLS[name](db).reset_index(drop=True)
             except Exception as e:       # no subscription / renamed table / dropped connection
                 msg = str(e).strip().splitlines()[0][:200]
                 print(f"  FAILED {name}: {msg}")

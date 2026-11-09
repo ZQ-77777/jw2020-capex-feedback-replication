@@ -25,9 +25,9 @@ def load(name: str, folder=None) -> pd.DataFrame:
     folder = folder or C.INTERIM
     pq, pk = folder / f"{name}.parquet", folder / f"{name}.pkl"
     if pq.exists():
-        return pd.read_parquet(pq)
+        return pd.read_parquet(pq).reset_index(drop=True)
     if pk.exists():
-        return pd.read_pickle(pk)
+        return pd.read_pickle(pk).reset_index(drop=True)
     raise FileNotFoundError(f"{name} not found in {folder}")
 
 
