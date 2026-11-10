@@ -211,7 +211,9 @@ def make(n_firms=250, seed=7):
     mflink2 = pd.DataFrame(l2_rows)
     s12 = pd.DataFrame(s12_rows)
 
-    tables = dict(guidance=guidance, ibcrsphist=ibl, ccm=ccm, funda=funda, fundq=fundq, company=company,
+    cpx = guidance[guidance["measure"] == "CPX"][["ticker", "anndats"]].drop_duplicates()
+    guidance_earn = cpx.sample(frac=0.10, random_state=7).assign(measure="EBT")   # e.g. EBITDA guidance (D9)
+    tables = dict(guidance=guidance, guidance_earn=guidance_earn, ibcrsphist=ibl, ccm=ccm, funda=funda, fundq=fundq, company=company,
                   msenames=names, dsi=dsi, msf=msf, insider=insider, mf_tna=mf_tna, mflink1=mflink1,
                   mflink2=mflink2, ea_daily=ea_daily, dsf=dsf, s12=s12)
     C.RAW.mkdir(parents=True, exist_ok=True)

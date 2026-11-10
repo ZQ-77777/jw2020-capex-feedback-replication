@@ -30,7 +30,7 @@ FILES = ["config.py", "check_wrds.py", "pull_wrds.py", "diagnose.py", "run_all.p
          "tables.py", "hdfe.py", "utils.py", "report.py", "paper_targets.py", "compare_stata.py",
          "stata/tables_2_3.do", "tests/test_hdfe.py", "tests/run_synthetic.py", "tests/make_synthetic.py",
          "REPLICATION_NOTES.md", "WRDS_GUIDE.md", "GUIDE.html", "README.md", "requirements.txt"]
-T13 = ["guidance", "ibcrsphist", "ccm", "funda", "fundq", "company", "msenames", "dsi", "dsf"]
+T13 = ["guidance", "guidance_earn", "ibcrsphist", "ccm", "funda", "fundq", "company", "msenames", "dsi", "dsf"]
 
 rows: list[tuple[str, str, str]] = []          # (check, status, detail); status in OK / WARN / FAIL
 

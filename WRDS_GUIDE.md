@@ -4,6 +4,8 @@
 每一步都写明：要做什么、要运行什么命令、成功时看到什么、出错时怎么办。
 
 > 阅读顺序：§1–§3 是准备工作（只做一次）；§4–§7 是正式下载与校准；§8–§10 是参考资料，遇到问题时再查。
+>
+> **状态（2026-11-10）：** 本指南的全部步骤已在真实 WRDS 数据上走通，§7 的校准结果和 §9 里的几个报错都来自这次实际运行。
 
 ---
 
@@ -11,17 +13,18 @@
 
 ```
 拿到 WRDS 账号 + 开通 Duo
-  → 配好 Python 环境（§2）
+  → 配好 Python 环境（§2），python preflight.py
   → 第一次连接，保存密码（§3）
   → python check_wrds.py            检查权限和字段名（§4）
-  → python pull_wrds.py             下载约 16 张表（§5）
+  → python pull_wrds.py             下载 Table 1–3 所需的 10 张表（§5）
   → 核对下载结果（§6）
   → python diagnose.py              校准 IBES 编码开关（§7）
-  → python run_all.py               构建样本、跑全部表格
-  → 先看 sample_waterfall.csv 和 Table 1，再看回归
+  → python calibrate_d9.py          比较"盈利预测"的 4 种定义（§7）
+  → python run_all.py               构建样本、Table 1–3、最终报告
+  → python t3_sensitivity.py        Table 3 敏感性检验，然后 python report.py
 ```
 
-整套流程第一次跑，预计半天到一天，大部分时间是在等 `crsp.dsf` 和 `tfn.s12` 下载。
+实际用时参考：`crsp.dsf` 约 11 分钟（700 万行），其余每张表几十秒到几分钟；每次构建样本约半分钟。
 
 ---
 
@@ -172,7 +175,7 @@ python check_wrds.py
 
 ## 5. 下载数据
 
-> **只做 Table 1–3（默认 `SCOPE = "t13"`）时**，`pull_wrds.py` 只下载 9 张表：guidance、ibcrsphist、ccm、funda、fundq、company、msenames、dsi、dsf。
+> **只做 Table 1–3（默认 `SCOPE = "t13"`）时**，`pull_wrds.py` 只下载 10 张表：guidance、guidance_earn、ibcrsphist、ccm、funda、fundq、company、msenames、dsi、dsf。其中 `guidance_earn` 只含其他盈利类指引（GPS、NET、PRE、EBITDA 等）的代码、指标和日期，用于 D9。
 > 下文的内部人交易、共同基金和 s12 表都不需要，§1.3 中标为“跳过”的订阅缺了也不影响。
 
 ### 5.1 一次全部下载
@@ -273,6 +276,27 @@ python diagnose.py
 | [4] 不同天数窗口下 EA_DUM 的比例 | D10 `EA_CONCURRENT_DAYS` | 0.559 | 选最接近的天数 |
 | [5] 与 EPS 预测同日的比例 | D9 `EPS_CONCURRENT_DAYS` | 约 47%（17,473 / 36,900） | 一般用 0 天 |
 
+**注意：** [4] 和 [5] 是在删除"同日盈利预测"之前的样本上算的，只能作参考；EA_DUM 要以最终样本为准（构建样本后看 Table 1）。
+
+接着比较"盈利预测"的不同定义（D9）：
+
+```bash
+python pull_wrds.py guidance_earn     # 只需一次
+python calibrate_d9.py                # -> output/calibrate_d9.csv
+```
+
+它在 4 种定义下各构建一次样本，只报告样本量、删除比例、EA_DUM 等样本特征，不跑回归。选最接近论文样本量的定义，写进 `config.py` 的 `CONCURRENT_MEASURES`。
+
+**这次实际的校准结果**（详见 `REPLICATION_NOTES.md` §4b）：
+
+| 开关 | 结果 |
+|---|---|
+| D3 | 按 I/B/E/S 官方编码：03、04、10–13、15–17 为开放式；开放式在当前数据中只占约 1%–3% |
+| D4 | WRDS 把单位写成 `millions` / `billions`；换算后中位比值 0.99 |
+| D9 | 全部盈利类指标（EPS、GPS、NET、PRE、EBT、EBS、OPR、FFO）：最终样本 18,866，最接近论文的 17,577 |
+| D10 | 同一天：EA_DUM 0.662（±1 天为 0.899，论文 0.559） |
+| D14 | `table1_winsor_check.csv` 显示金额变量也被论文缩尾，改为全部缩尾 |
+
 每改一次开关，都在 `REPLICATION_NOTES.md` 第 4 节对应的 D# 行下面记一笔：改成了什么、依据是什么。
 
 然后运行：
@@ -289,6 +313,15 @@ python run_all.py
 4. 最后才看回归表。
 
 成功的标准：样本量在 ±5–10% 以内，核心系数的符号相同、显著性格局相同、数量级接近。
+
+最后做 Table 3 的敏感性检验，并把它并入报告：
+
+```bash
+python t3_sensitivity.py              # -> output/t3_sensitivity.md
+python report.py                      # 报告第 9 节读入敏感性表；第 12 节读入 docs/discussion.md
+```
+
+报告的文字部分（校准依据、讨论）分别在 `docs/calibration.md` 和 `docs/discussion.md`，可以直接编辑后重新运行 `python report.py`。
 
 ---
 
@@ -320,6 +353,12 @@ python run_all.py
 | `FileNotFoundError: xxx not found in data/raw` | 这张表没有下载成功 | 查看 `_pull_log.csv`，重新下载这张表 |
 | `ModuleNotFoundError: tabulate` | 少装了包 | `pip install -r requirements.txt` |
 | synthetic 测试通过，但真实数据报 `KeyError` | WRDS 返回的列名和预期不同 | 先跑 `check_wrds.py` 看缺哪一列 |
+| `InvalidIndexError: Reindexing only valid with uniquely valued Index objects`（下载 dsf 时） | `wrds.raw_sql` 分块读取后行号重复 | 已在 `pull_wrds.py` 修复；用最新代码重新运行 `python pull_wrds.py dsf` |
+| `TypeError: boolean value of NA is ambiguous`（构建样本时） | 新版 `wrds` 返回 pyarrow / 可空类型，缺失值是 `pd.NA` | 已在 `utils.load` 修复，读入时统一转为 numpy 类型；不需要重新下载 |
+| 写 `_pull_log.csv` 时报 `PermissionError` | 日志文件正在 Excel 里打开（Windows 会锁定文件） | 关掉 Excel；新代码只会打印提醒，不会中断下载 |
+| CAPEX_ADJ 出现几万个百分点的极端值 | 有些预测的单位是 `billions`，没有换算 | `config.py` 的 `UNITS_TO_MILLIONS` 已包含 `MILLIONS` / `BILLIONS` |
+| PowerShell 报 `“(”后面应为表达式` | 把一行 Python 代码粘贴进了 PowerShell | 无害；Python 代码要放在 `python -c "..."` 里或 .py 文件中运行 |
+| `git push` 被拒绝，提示 `fetch first` | GitHub 上有本地没有的提交（例如在网页上改过文件） | 先 `git pull --rebase origin main`，再 `git push` |
 
 ---
 

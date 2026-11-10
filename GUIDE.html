@@ -204,7 +204,7 @@ table.anno tr.sep td{border-top:1.5px solid var(--rule-strong)}
 <body>
 <div class="layout">
 <nav class="toc" aria-label="Contents（目录）">
-  <div class="brand"><b>Jayaraman &amp; Wu (2020) 学习与复现指南</b><span>Tables 1–3 · Zhang Qi，v3，2026-11-03</span></div>
+  <div class="brand"><b>Jayaraman &amp; Wu (2020) 学习与复现指南</b><span>Tables 1–3 · Zhang Qi，v4，2026-11-10</span></div>
   <ol id="toc"></ol>
   <div class="side-tools">
     <span id="progText">Checklist（清单）0 / 0</span><div class="bar"><i id="progBar"></i></div>
@@ -247,9 +247,9 @@ table.anno tr.sep td{border-top:1.5px solid var(--rule-strong)}
   </svg>
 
   <div class="status">
-    <div style="--sc:var(--green)"><b>已完成</b>代码（Tables 1–3 模式）、模拟数据端到端测试、估计器验证、报告生成器、本指南</div>
-    <div style="--sc:var(--up)"><b>进行中</b>WRDS 下载与 IBES 编码校准（§14.3–14.5）</div>
-    <div style="--sc:var(--accent)"><b>计划中</b>正式数据结果与差异分析（§18）、核对 RFS 正式版</div>
+    <div style="--sc:var(--green)"><b>已完成</b>WRDS 数据复现：Table 1–2 复现成功，Table 3 未复现（§17）；最终报告 <code>output/replication_report.html</code></div>
+    <div style="--sc:var(--up)"><b>待完成</b>用 RFS 正式版核对目标数字；Stata 交叉核对</div>
+    <div style="--sc:var(--accent)"><b>可讨论</b>Table 3 对不上的原因；不与财报同日子样本中的线索（§17.3）</div>
   </div>
 </header>
 
@@ -382,8 +382,8 @@ Table 2 (8):  0.849 / 7.421 = 11.4%
 <article class="lesson" id="L11"><h3><span class="ln">L11</span>Winsorization<span class="en">缩尾</span></h3><dl>
 <dt>一句话</dt><dd>把低于 1% 分位数的值设为 1% 分位数、高于 99% 分位数的值设为 99% 分位数，防止极端值主导回归。</dd>
 <dt>类比</dt><dd>评委打分去掉最高分和最低分，这里是把它们“拉回”到正常范围。</dd>
-<dt class="ex">例子</dt><dd>论文没说缩尾了哪些变量，但 Table 1 留下了线索：CAPEX_ACT 和 LAG_CAPX 的最小值是 0.000。在近 1.8 万个 capex 预测中，第 1 百分位恰好为 0 不太可能，所以金额变量大概率没有缩尾。CAPEX_ADJ 最小值是 −77.05，而实际 capex 为 0 的点预测会给出 −100，所以 CAPEX_ADJ 被缩尾了。</dd>
-<dt>论文位置</dt><dd>没有明说，只能从 Table 1 的极值推断（决策 D14）。代码会输出一张核对表，自动判断每个变量的论文极值更接近原始值还是缩尾后的值。</dd>
+<dt class="ex">例子</dt><dd>论文没说缩尾了哪些变量，只能从 Table 1 的极值推断。CAPEX_ADJ 最小值是 −77.05，而实际 capex 为 0 的点预测会给出 −100，所以 CAPEX_ADJ 被缩尾了。数据前我还从“CAPEX_ACT 最小值是 0.000”推断金额变量没有缩尾，<b>这个推断被真实数据推翻了</b>：资本支出为 0 的公司很多，1% 分位数本身就约等于 0，所以“最小值为 0”说明不了什么。第一次用 WRDS 数据运行时，CAPEX_ACT 的 99% 分位数恰好是 9,496，正是论文的最大值。教训：极值线索要用数据检验，代码里的自动核对表正是为此而设。</dd>
+<dt>论文位置</dt><dd>没有明说，只能从 Table 1 的极值推断（决策 D14）。代码输出的 <code>table1_winsor_check.csv</code> 逐个变量判断论文极值更接近原始值还是 1%/99% 分位数；用 WRDS 数据核对后，最终设定为所有 Table 1 变量都缩尾。</dd>
 <dt>自测</dt><dd><details class="check"><summary>CAR 的最大值是 25.35%、最小值是 −31.36%，为什么看起来像缩尾过？</summary><p>17,577 个五日窗口里，原始 CAR 几乎一定会出现 ±50% 以上的极端值（例如生物科技公司、破产传闻）；最大值和最小值不对称，又都只在 ±30% 左右，最符合 1%/99% 缩尾的结果。</p></details></dd>
 </dl></article>
 
@@ -939,21 +939,24 @@ python tests/run_synthetic.py    # ALL SYNTHETIC CHECKS PASSED：Tables 1–3 �
 <thead><tr><th>File（文件）</th><th>Role（作用）</th></tr></thead>
 <tbody>
 <tr><td><code>config.py</code></td><td>全部开关，<code>SCOPE = "t13"</code> 时只做 Table 1–3；每个开关标着决策编号 D#</td></tr>
-<tr><td><code>check_wrds.py</code> → <code>pull_wrds.py</code> → <code>diagnose.py</code> → <code>run_all.py</code></td><td>运行顺序（§14.3）</td></tr>
+<tr><td><code>preflight.py</code></td><td>运行前自检：环境、依赖包、两套测试、数据状态，并给出下一步命令</td></tr>
+<tr><td><code>check_wrds.py</code> → <code>pull_wrds.py</code> → <code>diagnose.py</code> → <code>calibrate_d9.py</code> → <code>run_all.py</code> → <code>t3_sensitivity.py</code></td><td>运行顺序（§14.3）</td></tr>
 <tr><td><code>build_capex_sample.py</code></td><td>样本构建和全部变量（§14.4）</td></tr>
 <tr><td><code>tables.py</code></td><td>Table 1–3、正文数字、稳健性、缩尾核对</td></tr>
 <tr><td><code>hdfe.py</code></td><td>高维固定效应 OLS + 聚类标准误（reghdfe 口径）</td></tr>
-<tr><td><code>report.py</code></td><td>生成英文复现报告 <code>replication_report.html / .md</code></td></tr>
+<tr><td><code>report.py</code>、<code>docs/calibration.md</code>、<code>docs/discussion.md</code></td><td>生成英文最终报告 <code>replication_report.html / .md</code>；两个 Markdown 文件是报告里可编辑的文字部分</td></tr>
+<tr><td><code>stata/tables_2_3.do</code>、<code>compare_stata.py</code></td><td>用 Stata <code>reghdfe</code> 重算 Table 2–3 并逐格比对</td></tr>
 <tr><td><code>paper_targets.py</code></td><td>论文全部数字，用于逐格对照</td></tr>
 <tr><td><code>REPLICATION_NOTES.md</code>、<code>WRDS_GUIDE.md</code></td><td>决策日志全文；WRDS 操作手册</td></tr>
 </tbody></table></div>
 
 <h3 id="s14-2">14.2 WRDS<span class="en">WRDS 数据</span></h3>
-<p>Table 1–3 只需要 9 张表，<code>pull_wrds.py</code> 在 <code>SCOPE = "t13"</code> 时自动只下载这 9 张：</p>
+<p>Table 1–3 需要 10 张表，<code>pull_wrds.py</code> 在 <code>SCOPE = "t13"</code> 时自动只下载这 10 张：</p>
 <div class="tw"><table>
 <thead><tr><th>Name（代码中的名字）</th><th>WRDS table</th><th>用来算</th></tr></thead>
 <tbody>
 <tr><td>guidance</td><td><code>ibes.det_guidance</code></td><td>capex 预测（CPX）、销售预测（SAL，用于 SF_CAR）、EPS 预测（用于删除同日发布的）</td></tr>
+<tr><td>guidance_earn</td><td><code>ibes.det_guidance</code>（其他盈利类指标）</td><td>GPS、NET、PRE、EBITDA、EBS、OPR、FFO 指引的日期，用于判断“与盈利预测同时发布”（D9）</td></tr>
 <tr><td>ibcrsphist</td><td><code>wrdsapps_link_crsp_ibes.ibcrsphist</code></td><td>IBES ticker → PERMNO</td></tr>
 <tr><td>ccm</td><td><code>crsp.ccmxpf_lnkhist</code></td><td>PERMNO → GVKEY</td></tr>
 <tr><td>funda</td><td><code>comp.funda</code></td><td>实际 capex、LAG_CAPX、年初市值、<code>sich</code>（行业）</td></tr>
@@ -971,7 +974,11 @@ python tests/run_synthetic.py    # ALL SYNTHETIC CHECKS PASSED：Tables 1–3 �
 python check_wrds.py               # → output/wrds_check.md</code></pre><p>输出里 9 张表都是 OK，并把 CPX 编码分布截图保存。</p></li>
 <li><h4>Download（下载）</h4><pre><code>python pull_wrds.py                # 9 张表，一次 Duo 推送 → data/raw/ 和 _pull_log.csv</code></pre></li>
 <li><h4>Calibrate（校准）</h4><pre><code>python diagnose.py</code></pre><p>按 §14.6 设定 D1、D3、D4、D9、D10。<b>只看样本特征，不看回归结果。</b></p></li>
-<li><h4>Build and estimate（构建与估计）</h4><pre><code>python run_all.py                  # → output/ 下的全部结果和报告</code></pre></li>
+<li><h4>Calibrate D9（盈利预测的定义）</h4><pre><code>python pull_wrds.py guidance_earn   # 只需一次
+python calibrate_d9.py              # 4 种定义下的样本特征 → output/calibrate_d9.csv</code></pre><p>只比较样本量、删除比例、EA_DUM 等样本特征，不跑回归。</p></li>
+<li><h4>Build and estimate（构建与估计）</h4><pre><code>python run_all.py                  # → output/ 下的全部结果和报告
+python t3_sensitivity.py           # Table 3 敏感性检验 → output/t3_sensitivity.md
+python report.py                   # 把敏感性检验和讨论并入最终报告</code></pre></li>
 <li><h4>Read in this order（按顺序读结果）</h4><p><code>sample_waterfall.csv</code> → <code>tables.md</code> 的 Table 1 和缩尾核对 → 正文数字 → Table 2、3 → <code>replication_report.html</code>。</p></li>
 </ol>
 <div class="tw"><table>
@@ -995,20 +1002,20 @@ python check_wrds.py               # → output/wrds_check.md</code></pre><p>输
 
 <h3 id="s14-6">14.6 Calibration targets<span class="en">校准目标：先对样本，再看系数</span></h3>
 <div class="tw"><table>
-<thead><tr><th>Target（目标）</th><th class="n">Paper</th><th>Switch（开关）</th><th>Where（在哪里看）</th></tr></thead>
+<thead><tr><th>Target（目标）</th><th class="n">Paper</th><th class="n">Ours（WRDS）</th><th>Switch（开关）</th></tr></thead>
 <tbody>
-<tr><td>Waterfall（样本瀑布）</td><td class="n">40,785 → 36,900 → 19,427 → 17,577</td><td>D1, D2, D5, D6, D9</td><td><code>sample_waterfall.csv</code></td></tr>
-<tr><td>Point / range / other（预测类型比例）</td><td class="n">55.30 / 34.48 / 10.22%</td><td>D3</td><td>Table 1 Panel C</td></tr>
-<tr><td>Dropped as concurrent with EPS（同日删除比例）</td><td class="n">47.4%</td><td>D9</td><td><code>diagnose.py</code> [5]</td></tr>
-<tr><td>Actual / forecast by unit（实际 / 预测）</td><td class="n">≈ 1</td><td>D4</td><td><code>diagnose.py</code> [3]</td></tr>
-<tr><td>EA_DUM mean</td><td class="n">0.559</td><td>D10</td><td>Table 1 Panel A</td></tr>
-<tr><td>CAPEX_ADJ median（中位数）</td><td class="n">0.000</td><td>D3, D7</td><td>Table 1 Panel A</td></tr>
-<tr><td>CAR mean / SD / min / max</td><td class="n">−0.148 / 8.974 / −31.36 / 25.35</td><td>D11, D12, D14</td><td>Table 1，脚注 15</td></tr>
-<tr><td>corr(SURP, CAR); corr(SURP, CAPEX_ADJ)</td><td class="n">0.08; 0.001</td><td>D10, D32</td><td>脚注 22</td></tr>
-<tr><td>Sales-forecast sample / median distance</td><td class="n">3,456 / 86 days</td><td>D13</td><td>Table 2 (6)，脚注 21</td></tr>
-<tr><td>Median SF_CAR</td><td class="n">0.457%</td><td>D13</td><td>脚注 20</td></tr>
-<tr><td>Higher-spread share（价差上升组占比）</td><td class="n">55.2%</td><td>D17</td><td>Table 3 的 N</td></tr>
+<tr><td>Waterfall（样本瀑布）</td><td class="n">40,785 → 36,900 → 19,427 → 17,577</td><td class="n">41,452 → 41,443 → 20,344 → 18,866</td><td>D1, D2, D5, D6, D9</td></tr>
+<tr><td>Point / range / other（预测类型比例）</td><td class="n">55.30 / 34.48 / 10.22%</td><td class="n">54.60 / 42.64 / 2.77%</td><td>D3</td></tr>
+<tr><td>Actual / forecast by unit（实际 / 预测）</td><td class="n">≈ 1</td><td class="n">0.99</td><td>D4</td></tr>
+<tr><td>EA_DUM mean</td><td class="n">0.559</td><td class="n">0.662</td><td>D10</td></tr>
+<tr><td>CAPEX_ADJ median（中位数）</td><td class="n">0.000</td><td class="n">−0.326</td><td>D3, D7</td></tr>
+<tr><td>CAR mean / SD</td><td class="n">−0.148 / 8.974</td><td class="n">0.318 / 9.283</td><td>D11, D12, D14</td></tr>
+<tr><td>corr(SURP, CAR); corr(SURP, CAPEX_ADJ)</td><td class="n">0.08; 0.001</td><td class="n">0.069; 0.000</td><td>D10, D32</td></tr>
+<tr><td>Sales-forecast sample / median distance</td><td class="n">3,456 / 86 days</td><td class="n">3,791 / 86 days</td><td>D13</td></tr>
+<tr><td>Median SF_CAR</td><td class="n">0.457%</td><td class="n">0.447%</td><td>D13</td></tr>
+<tr><td>Higher-spread share（价差上升组占比）</td><td class="n">55.2%</td><td class="n">56.4%</td><td>D17</td></tr>
 </tbody></table></div>
+<p>大部分目标都对得上；对不上的几项（预测类型比例、CAPEX_ADJ 中位数、CAR 均值）在所有设定下都不变，指向数据版本的差异（§17.2）。</p>
 
 <h3 id="s14-7">14.7 Reading the report<span class="en">怎么读复现报告</span></h3>
 <p><code>replication_report.html</code> 按以下顺序组织（英文，可直接交给老师）：Summary（四个关键数字 + 记分卡）→ Data and sample（瀑布与数据版本）→ Table 1 → Table 2 → Table 3（含差异 p 值）→ Numbers quoted in the text（经济显著性与脚注）→ Robustness（脚注 17–19、23）→ Implementation choices → Where the replication differs, and why → Reproducibility。</p>
@@ -1097,23 +1104,51 @@ python check_wrds.py               # → output/wrds_check.md</code></pre><p>输
 <!-- =============================================================== 17 -->
 <section class="sec" id="s17">
 <h2><span class="no">17</span>Results and analysis<span class="en">结果与分析</span></h2>
-<h3 id="s17-1">17.1 Status<span class="en">当前进度</span></h3>
-<p>代码和方法已经验证，<b>真实数据的结果尚未产生</b>：WRDS 下载完成后运行 <code>run_all.py</code>，结果会写进 <code>replication_report.html</code>，之后再把关键数字补到本节。</p>
+<p class="lead">数据于 2026-11-09 至 11-10 从 WRDS 下载。结论一句话：<b>Table 1–2 复现成功，Table 3 没有复现</b>。完整报告见 <code>output/replication_report.html</code>。</p>
+
+<h3 id="s17-1">17.1 What replicates<span class="en">复现成功的部分</span></h3>
 <div class="tw"><table>
-<thead><tr><th>Check（验证项）</th><th>Result（结果）</th></tr></thead>
+<thead><tr><th>Item（项目）</th><th class="n">Paper</th><th class="n">Ours</th></tr></thead>
 <tbody>
-<tr><td>HDFE estimator vs dummy-variable OLS（估计器对照）</td><td class="pos">系数一致到 1e-8；聚类标准误公式与 reghdfe 口径一致</td></tr>
-<tr><td>Synthetic pipeline（模拟数据全流程）</td><td class="pos">Tables 1–3 和报告全部生成；植入的 CAR 效应被还原</td></tr>
-<tr><td>Internal N checks（样本量内部一致性）</td><td class="pos">T2 (1)–(5)(7) 同一样本；(8) ≤ (7)；T3 两组之和 ≤ T2 (8)；去重在瀑布之前</td></tr>
-<tr><td>Real-data replication（真实数据复现）</td><td class="flat">待运行</td></tr>
+<tr><td>Final sample（最终样本）</td><td class="n">17,577 / 1,790 家</td><td class="n">18,866 / 2,180 家（+7.3%）</td></tr>
+<tr><td>T2 (1) CAR</td><td class="n">1.193***</td><td class="n">1.193***</td></tr>
+<tr><td>T2 (4) CAR（公司 + 年季 FE）</td><td class="n">0.975***</td><td class="n">1.017***</td></tr>
+<tr><td>T2 (8) CAR（全部控制变量）</td><td class="n">0.849***</td><td class="n">0.988***</td></tr>
+<tr><td>Placebos（SF_CAR / MKTRET / CAR_PRE）</td><td class="n">不显著</td><td class="n">不显著</td></tr>
+<tr><td>Footnote 19（行业 × 年 / 州 × 年 FE）</td><td class="n">0.800** / 0.968***</td><td class="n">0.779*** / 0.752***</td></tr>
 </tbody></table></div>
-<h3 id="s17-2">17.2 What to write once results arrive<span class="en">拿到结果后怎么写分析</span></h3>
+<p>Table 2 的 8 个 CAR 系数全部在论文的一个标准误以内。加入公司固定效应后系数下降的比例（−20% 对 −18%）也几乎相同。这说明论文的主结论“市场反应越正，实际 capex 上调越多”在今天的数据里依然成立。</p>
+<figure><svg class="fig" id="resChart" viewBox="0 0 760 380" role="img" aria-label="论文与复现的系数对比"></svg>
+<figcaption>Paper vs replication（论文 vs 复现），点为系数，横线为 ±1.96 × SE。灰色：论文；蓝色：复现。Table 2 两者几乎重合；Table 3 中价差未升组（Lower）的复现系数显著为正，而论文接近 0。</figcaption></figure>
+
+<h3 id="s17-2">17.2 What does not replicate<span class="en">没有复现的部分</span></h3>
+<div class="tw"><table>
+<thead><tr><th>Setting（设定）</th><th class="n">CAR Lower</th><th class="n">CAR Higher</th><th class="n">差异 p</th></tr></thead>
+<tbody>
+<tr><td>Paper（论文）</td><td class="n">−0.295</td><td class="n">1.206**</td><td class="n">0.019</td></tr>
+<tr class="hl"><td>Main specification（主设定）</td><td class="n">0.674**</td><td class="n">0.880**</td><td class="n">0.672</td></tr>
+<tr><td>D9：只看 EPS</td><td class="n">0.637**</td><td class="n">0.899***</td><td class="n">0.555</td></tr>
+<tr><td>D10：±1 天</td><td class="n">0.645*</td><td class="n">0.873**</td><td class="n">0.641</td></tr>
+</tbody></table></div>
+<p>论文最关键的机制检验，“只有价差上升（引来知情交易）时才有反馈效应”，在所有设定下都没有出现：两组都有效应，差异远不显著。另外几项在所有设定下都与论文不同：CAR 均值 +0.32%（论文 −0.15%），CAPEX_ADJ 均值 3.9%（7.4%），区间预测占 42.6%（34.5%）。它们不随设定变化，最可能来自数据版本（I/B/E/S Guidance 自 2019 年起有修订）。</p>
+
+<h3 id="s17-3">17.3 A lead for discussion<span class="en">一条值得讨论的线索</span></h3>
+<p>把样本按“是否与财报同日发布”拆开（诊断用，不是论文的设定）：</p>
+<div class="tw"><table>
+<thead><tr><th>Subsample（子样本）</th><th class="n">N</th><th class="n">CAR Lower</th><th class="n">CAR Higher</th><th class="n">差异 p</th></tr></thead>
+<tbody>
+<tr><td>Not with an earnings announcement（不与财报同日）</td><td class="n">6,337</td><td class="n">0.709</td><td class="n">2.180**</td><td class="n">0.139</td></tr>
+<tr><td>With an earnings announcement（与财报同日）</td><td class="n">12,340</td><td class="n">0.586</td><td class="n">0.409</td><td class="n">0.781</td></tr>
+</tbody></table></div>
+<p>在没有盈余新闻干扰的预测里，论文的模式隐约可见：价差上升组效应大且显著，未升组不显著。这和“财报日的盈余新闻冲淡了价差分组”的解释相符。但这是事后拆分，差异也不显著，所以只能当作讨论的线索，不能当作复现成功的证据。</p>
+
+<h3 id="s17-4">17.4 Lessons from the replication<span class="en">这次复现学到的五点</span></h3>
 <ol>
-<li><b>Sample（样本）</b>：瀑布每一步的差距及原因；与 IBES 修订、链接表差异有关的部分单独说明。</li>
-<li><b>Table 1</b>：Panel C 比例、CAPEX_ADJ 中位数是否为 0、缩尾核对的结论（哪些变量论文缩尾了）。</li>
-<li><b>Table 2</b>：CAR 系数在 8 列中的符号、显著性和大小；安慰剂是否仍不显著；经济显著性与 16.1%、11.4% 的比较。</li>
-<li><b>Table 3</b>：Higher / Lower 的差异及 p 值；CAR_POS 与 CAR_NEG；如果模式不成立，用 D17、D35 的切换检验敏感性。</li>
-<li><b>Discussion（讨论）</b>：结合 §12 的局限，说明哪些差异来自数据修订，哪些来自论文未披露的选择。</li>
+<li><b>Check inferences against data（推断要用数据检验）</b>：从“最小值为 0”推断“没有缩尾”，被真实数据推翻（L11、D14）。自动核对表比人工推理可靠。</li>
+<li><b>Definitions move the sample（定义会改变样本）</b>：“盈利预测”只看 EPS 还是包括所有盈利类指标，让最终样本相差 4,000 多个（22,961 对 18,866）。</li>
+<li><b>Measurement windows matter（时间窗口很关键）</b>：财报日按同一天还是 ±1 天计，EA_DUM 从 0.66 变成 0.90，因为约四分之一的指引和财报日错开一天。</li>
+<li><b>Main effects travel better than mechanisms（主效应比机制检验更容易复现）</b>：Table 2 的平均关系很稳健，Table 3 依赖分组的异质性检验对数据和度量方式敏感得多。</li>
+<li><b>Stop before searching（适时停止调整设定）</b>：开关只按样本特征校准，没有为了让 Table 3 显著而继续改设定。如实报告“没复现”，比凑出一个显著结果更可信。</li>
 </ol>
 </section>
 
@@ -1123,13 +1158,14 @@ python check_wrds.py               # → output/wrds_check.md</code></pre><p>输
 <div class="tw"><table>
 <thead><tr><th>Version</th><th>Date</th><th>Changes（改动）</th></tr></thead>
 <tbody>
+<tr><td>v4</td><td>2026-11-10</td><td>用 WRDS 数据完成复现：§17 写入结果、对比图和五点经验；§14 更新为 10 张表、校准步骤和最终设定（D3、D4、D9、D10、D14）；修正 L11 和 Table 1 注释中被真实数据推翻的缩尾推断</td></tr>
 <tr><td>v3</td><td>2026-11-03</td><td>重写 §8：Table 1–3 每一格可点击，显示含义、读法（t 值、置信区间、占均值比例）、说明了什么和类比；新增贯穿类比“餐馆试菜”、列 / 行指南、横向比较、样本量流向图、数字地图、反事实表和 7 道自测题</td></tr>
 <tr><td>v2</td><td>2026-11-02</td><td>聚焦 Table 1–3；按学习指南模板重写；术语改为英文在前；新增 13 节预备课、5 个交互演示、Table 1–3 逐格精读、偏差诊断树；代码新增 Table 1–3 模式、缩尾核对和英文报告生成器</td></tr>
 <tr><td>v1</td><td>2026-11-02</td><td>覆盖全部 6 张表的复现手册与决策日志 D1–D37</td></tr>
 </tbody></table></div>
 </section>
 
-<footer>Zhang Qi · Jayaraman &amp; Wu (2020) Tables 1–3 学习与复现指南 v3。论文数字来自 2019 年 5 月工作论文，引用前请以 RFS 正式版为准。</footer>
+<footer>Zhang Qi · Jayaraman &amp; Wu (2020) Tables 1–3 学习与复现指南 v4。论文数字来自 2019 年 5 月工作论文，引用前请以 RFS 正式版为准。</footer>
 </div>
 </main>
 </div>
@@ -1365,18 +1401,18 @@ $("varQ").addEventListener("input",drawVars);
 var DEC=[
  [1,"Sample（样本）","IBES Guidance 的 measure 代码","CPX / SAL / EPS，pdicity = ANN","check_wrds.py 与 diagnose.py [1] 打印实际代码","MEASURE_CAPEX",0],
  [2,"Sample（样本）","初始 2002–2016，最终 2003–2015","只保留 2003–2015 年发布的","瀑布算术精确 → 2002 年的预测没有进入最终样本","KEEP_FROM_YEAR",1],
- [3,"Sample（样本）","哪些 range_desc 代码是开放式","由 diagnose.py 交叉表设定","目标：55.30 / 34.48 / 10.22%","RANGE_DESC_OPEN_ENDED",0],
- [4,"Variable（变量）","预测值单位","统一为百万美元","各单位下 实际/预测 的中位数 ≈ 1","UNITS_TO_MILLIONS",0],
+ [3,"Sample（样本）","哪些 range_desc 代码是开放式","03、04、10–13、15–17（I/B/E/S 官方编码）","WRDS：点 54.6% / 区间 42.6% / 开放式 2.8%（论文 55.3 / 34.5 / 10.2）","RANGE_DESC_OPEN_ENDED",0],
+ [4,"Variable（变量）","预测值单位","millions ×1，billions ×1000","WRDS 把单位拼成全称；换算后中位比值 0.99","UNITS_TO_MILLIONS",0],
  [5,"Sample（样本）","预测期限；一次覆盖多个财年","财年末晚于公告日且 ≤ 24 个月；只留最近财年","论文未提","MAX_HORIZON_MONTHS",0],
  [6,"Sample（样本）","同一季度多次预测","保留第一次，且在瀑布第一步之前去重","36,900 − 17,473 − 1,850 = 17,577 精确成立","ONE_PER_FIRM_QUARTER, COLLAPSE_AT_START",1],
  [7,"Variable（变量）","区间预测的分母","区间中点","“scaled by the forecast”；备选：越过的边界","RANGE_SCALER",0],
  [8,"Variable（变量）","开放式预测的 CAPEX_ADJ","按 val_1 的点预测处理","稳健性：只保留点和区间（脚注 17）","OTHER_RULE",0],
- [9,"Sample（样本）","“与盈利预测同时发布”","同一日历日有 EPS 预测","删除比例应约为 47.4%","EPS_CONCURRENT_DAYS",1],
- [10,"Variable（变量）","EA_DUM 的“同时”","|anndats − rdq| ≤ 1 个日历日","均值应为 0.559","EA_CONCURRENT_DAYS",0],
+ [9,"Sample（样本）","“与盈利预测同时发布”","同一天有任一盈利类指引（EPS、GPS、NET、PRE、EBT、EBS、OPR、FFO）","WRDS：最终样本 18,866，最接近论文 17,577；只看 EPS 时为 22,961","CONCURRENT_MEASURES",1],
+ [10,"Variable（变量）","EA_DUM 的“同时”","同一天","WRDS：同一天 0.662，±1 天 0.899，论文 0.559","EA_CONCURRENT_DAYS",0],
  [11,"Variable（变量）","盘后发布是否顺延 day 0","不顺延","五日窗口已覆盖；可做稳健性","AFTER_CLOSE_SHIFT",0],
  [12,"Variable（变量）","CAR 允许缺失几天","五天必须齐全","—","MIN_RET_OBS",0],
  [13,"Variable（变量）","SF_CAR 用哪个销售预测","同财年、最近、窗口相隔 ≥ 5 个交易日","N = 3,456，中位距离 86 天","SF_MIN_GAP_TDAYS",1],
- [14,"Variable（变量）","缩尾哪些变量","比率变量 1%/99%；金额变量不缩尾","Table 1：CAPEX_ACT 最小值 0，CAPEX_ADJ 最小值 −77.05","WINSOR_VARS, WINSOR_LEVELS",1],
+ [14,"Variable（变量）","缩尾哪些变量","所有 Table 1 变量 1%/99%（数据前的推断被推翻）","WRDS：金额变量的论文极值接近我们的 1%/99% 分位数，如 CAPEX_ACT 99% 分位曾恰为 9,496","WINSOR_VARS, WINSOR_LEVELS",1],
  [15,"Variable（变量）","LAG_CAPX 的单位","回归用 capx / 市值 × 100；Table 1 用百万美元","Table 1 与 Table 2 的定义不同；系数 −0.160","LAG_CAPX_SCALE",0],
  [17,"Variable（变量）","价差单位与筛选","百分比；剔除无效报价","Higher 组占比应为 55.2%","SPREAD_UNIT",0],
  [18,"Estimation（估计）","聚类用的“行业”","两位 SIC，每家公司固定","保证公司 FE 嵌套在聚类内；备选 FF48","INDUSTRY",0],
@@ -1446,7 +1482,14 @@ boxes.forEach(function(b){b.checked=!!saved[b.getAttribute("data-k")];b.addEvent
 $("resetChecks").addEventListener("click",function(){boxes.forEach(function(b){b.checked=false;});saved={};store.set(KEY,"{}");prog();});
 
 /* ---------------- init ---------------- */
-function redraw(){drawWin();drawFE();drawWF();drawYears();drawCoefs();adj();}
+function drawResults(){if(!$("resChart"))return;var P="var(--rule-strong)",O="var(--accent)";
+  coefPlot("resChart",[
+   {lab:"T2 (1) paper",b:1.193,se:.372,st:"***",col:P},{lab:"T2 (1) ours",b:1.193,se:.331,st:"***",col:O},
+   {lab:"T2 (4) paper",b:.975,se:.294,st:"***",col:P},{lab:"T2 (4) ours",b:1.017,se:.260,st:"***",col:O},
+   {lab:"T2 (8) paper",b:.849,se:.304,st:"***",col:P},{lab:"T2 (8) ours",b:.988,se:.219,st:"***",col:O},
+   {lab:"T3 Lower paper",b:-.295,se:.372,col:P},{lab:"T3 Lower ours",b:.674,se:.327,st:"**",col:O},
+   {lab:"T3 Higher paper",b:1.206,se:.497,st:"**",col:P},{lab:"T3 Higher ours",b:.880,se:.350,st:"**",col:O}],-1,3,760,34);}
+function redraw(){drawWin();drawFE();drawWF();drawYears();drawCoefs();drawResults();adj();}
 if($("t2body"))paperTables();fillCar(carData[carKeys[0]]);mag();link();drawVars();drawDec();drawGl();prog();redraw();
 })();
 </script>
@@ -1509,12 +1552,12 @@ var AN={
  "CAPEX_FORE|2":"中位数只有 1.2 亿，约为均值的 1/5：典型公司的预测远小于“平均”。均值 ≫ 中位数 = 右偏分布。",
  "CAPEX_FORE|3":"标准差是均值的 2.2 倍，金额跨度极大。所以因变量用百分比 CAPEX_ADJ，而不是美元差额，否则回归会被几家大公司主导。",
  "CAPEX_FORE|4":"最小 200 万美元：小公司也会发布 capex 预测。",
- "CAPEX_FORE|5":"最大 80 亿美元：可能是真实的最大预测，也可能是缩尾后的 99% 分位。<code>table1_winsor_check.csv</code> 会用真实数据判断。",
+ "CAPEX_FORE|5":"最大 80 亿美元。用 WRDS 数据核对后，判断为缩尾后的 99% 分位数（最终样本中我们的 99% 分位数是 10,500）。",
  "CAPEX_ACT|0":"每个预测都匹配到了实际 capex：样本构建时就要求能在 Compustat 找到被预测财年的数据。",
  "CAPEX_ACT|1":"654.1 比预测均值 586.5 高 11.5%：平均而言，公司最终花得比计划多。",
  "CAPEX_ACT|2":"123.5 只比预测中位数 120 高 2.9%：典型公司基本按计划花，“多花”主要来自大公司。",
  "CAPEX_ACT|3":"1,527 大于预测的 1,318：实际支出比计划更分散，说明执行过程中确实发生了调整。",
- "CAPEX_ACT|4":"最小值是 0：有公司全年没有资本支出（例如项目取消）。这也说明金额变量没有缩尾，否则最小值会是一个正数（L11）。",
+ "CAPEX_ACT|4":"最小值是 0：有公司全年没有资本支出（例如项目取消）。数据前我据此推断金额变量没有缩尾，但真实数据推翻了这一点：资本支出为 0 的公司很多，1% 分位数本身就约等于 0（L11）。",
  "CAPEX_ACT|5":"约 95 亿美元。",
  "CAPEX_ADJ|0":"因变量没有缺失。",
  "CAPEX_ADJ|1":"平均上调 7.421%。它是正文经济显著性的分母：1.193 / 7.421 = 16.1%，0.849 / 7.421 = 11.4%。为什么不等于 (654.1 − 586.5) / 586.5 = 11.5%？因为 CAPEX_ADJ 是先逐个算比例再平均，每个预测权重相同；区间内记 0；又经过缩尾。",
@@ -1532,11 +1575,11 @@ var AN={
  "SIZE|2":"e^7.344 ≈ 15.5 亿美元。均值与中位数几乎相等：取对数让高度右偏的市值分布变得接近对称，这正是取对数的目的。",
  "SIZE|3":"一个标准差相当于市值相差 e^1.629 ≈ 5.1 倍。",
  "SIZE|4":"e^1.366 ≈ 390 万美元的微型公司。",
- "SIZE|5":"e^11.3 ≈ 810 亿美元。样本期内最大公司的市值远超这个数，所以要么 SIZE 被缩尾，要么超大公司很少发布 capex 预测。",
+ "SIZE|5":"e^11.3 ≈ 810 亿美元。用 WRDS 数据核对时证据矛盾：论文最大值接近我们的 99% 分位数（11.7），最小值却接近我们的原始最小值（1.20）。SIZE 只是控制变量，维持缩尾。",
  "LAG_CAPX|0":"17,546，比 17,577 少 31 个：上一财年没有 capex 数据（例如刚上市）。这是后面回归样本减少的原因之一。",
  "LAG_CAPX|1":"上年实际 611.0 → 今年计划 586.5 → 今年实际 654.1：平均而言，计划比去年少约 4%，最终却比去年多约 7%。",
  "LAG_CAPX|2":"118.3 → 120.0 → 123.5：中位数公司每一步都小幅增长。",
- "LAG_CAPX|4":"最小值为 0，与 CAPEX_ACT 一样，说明金额变量没有缩尾。",
+ "LAG_CAPX|4":"最小值为 0，与 CAPEX_ACT 一样。0 恰好也是 1% 分位数，所以不能据此判断是否缩尾（L11）。",
  "SURP|1":"每股盈余同比平均下降约 3 美分，接近 0。",
  "SURP|2":"中位数为 0：44.1% 的预测不与盈余公告同时发布，这些观测的 SURP 被设为 0。",
  "SURP|3":"0.783 美元/股；Table 2 中它的系数要按“每股多赚 1 美元”来读。",

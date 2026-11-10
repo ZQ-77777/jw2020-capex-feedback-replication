@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jayaraman &amp; Wu (2020) Table 1–3 复现报告</title>
+<style>
+:root{color-scheme:light;
+ --bg:#F1F4F8;--sheet:#FFFFFF;--ink:#15223A;--muted:#55667E;--rule:#D4DCE6;--rule2:#AEBBCC;
+ --acc:#1D5BA6;--acc-soft:#E2EBF7;--up:#A6650F;--up-soft:#F7ECDA;--ok:#1F7A4D;--ok-soft:#E1F1E8;--bad:#A23A3A;
+ --code:#EEF2F6;--mark:#FFF0B8;
+ --serif:"Noto Serif SC","Songti SC","STSong","Source Han Serif SC",Georgia,serif;
+ --sans:"PingFang SC","Noto Sans SC","Microsoft YaHei","Hiragino Sans GB","Helvetica Neue",Arial,sans-serif;
+ --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+ --bg:#0D1520;--sheet:#141F2E;--ink:#E2E8F0;--muted:#9CABBF;--rule:#293A50;--rule2:#3D5170;
+ --acc:#80AEEA;--acc-soft:#1B2D46;--up:#E3B465;--up-soft:#382D19;--ok:#74CF9F;--ok-soft:#17322A;--bad:#E88B8B;--code:#1A283B;--mark:#4D4118}}
+:root[data-theme="dark"]{color-scheme:dark;
+ --bg:#0D1520;--sheet:#141F2E;--ink:#E2E8F0;--muted:#9CABBF;--rule:#293A50;--rule2:#3D5170;
+ --acc:#80AEEA;--acc-soft:#1B2D46;--up:#E3B465;--up-soft:#382D19;--ok:#74CF9F;--ok-soft:#17322A;--bad:#E88B8B;--code:#1A283B;--mark:#4D4118}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.78 var(--sans);-webkit-text-size-adjust:100%}
+a{color:var(--acc)}:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+code{font-family:var(--mono);font-size:.86em;background:var(--code);padding:.06em .32em;border-radius:3px}
+.layout{display:grid;grid-template-columns:262px minmax(0,1fr);max-width:1260px;margin:0 auto;gap:34px;padding:0 22px}
+nav.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;padding:28px 0}
+.brand b{display:block;font:600 15px/1.45 var(--serif)}.brand span{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+nav.toc ol{list-style:none;margin:14px 0 0;padding:0}nav.toc ol ol{margin:2px 0 6px 16px}
+nav.toc a{display:block;padding:3px 10px;border-left:2px solid transparent;color:var(--muted);text-decoration:none;font-size:14px;line-height:1.5}
+nav.toc ol ol a{font-size:13px}nav.toc a:hover,nav.toc a.on{color:var(--ink);border-left-color:var(--acc)}
+.side{margin-top:16px;display:grid;gap:8px;font-size:13px;color:var(--muted)}
+.btn{font:14px var(--sans);padding:6px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--sheet);color:var(--ink);cursor:pointer}
+details.mtoc{display:none}
+main{padding:30px 0 110px;min-width:0}
+.sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:36px 44px}
+h1{font:600 clamp(26px,3.6vw,36px)/1.3 var(--serif);margin:4px 0 8px}
+h2{font:600 25px/1.35 var(--serif);margin:0 0 10px}h2 .no{color:var(--acc);margin-right:.4em}
+h3{font:600 19px/1.45 var(--sans);margin:30px 0 8px;scroll-margin-top:12px}
+h4{font:600 16px/1.5 var(--sans);margin:18px 0 4px}
+p,ul,ol{max-width:50em}p{margin:9px 0}li{margin:3px 0}
+section.sec{padding-top:52px;margin-top:52px;border-top:1px solid var(--rule)}
+section.sec:first-of-type{border-top:0;margin-top:18px;padding-top:18px}
+.lead{color:var(--muted);font-size:16.5px}.cite{color:var(--muted);font-size:14px}
+.key{border-left:3px solid var(--acc);padding:4px 0 4px 14px;font-weight:600;max-width:48em}
+.note{border-left:3px solid var(--up);background:var(--up-soft);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;max-width:50em}
+.note.info{border-left-color:var(--acc);background:var(--acc-soft)}.note.ok{border-left-color:var(--ok);background:var(--ok-soft)}
+.tw{overflow-x:auto;margin:12px 0;border:1px solid var(--rule);border-radius:6px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:7px 11px;border-bottom:1px solid var(--rule)}
+thead th{font-weight:600;color:var(--muted);font-size:13.5px;background:var(--bg)}
+tr:last-child td,tr:last-child th{border-bottom:0}
+.tw table:not(.anno) tbody td:first-child{min-width:6.5em}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.status{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.status div{border-top:3px solid var(--sc);background:var(--bg);padding:10px 12px;font-size:14px}.status b{display:block;margin-bottom:2px}
+.fx{font-family:Georgia,"Times New Roman",var(--serif);font-size:15.5px;background:var(--code);border-left:3px solid var(--acc);
+ padding:8px 12px;margin:6px 0;border-radius:0 5px 5px 0;overflow-x:auto;line-height:1.7}
+figure.code{margin:12px 0;border:1px solid var(--rule);border-radius:6px;overflow:hidden;scroll-margin-top:12px}
+figure.code figcaption{background:var(--bg);color:var(--muted);font-size:13px;padding:5px 12px;border-bottom:1px solid var(--rule)}
+figure.code pre{margin:0;padding:12px 14px;overflow-x:auto;font:13px/1.55 var(--mono);background:var(--code)}
+figure.code pre code{background:none;padding:0;font-size:inherit}
+figure.code:target{outline:2px solid var(--acc)}
+details.src{margin:8px 0}details.src summary{cursor:pointer;color:var(--acc);font-size:14.5px}
+.codeline{margin:6px 0;border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+.codeline span{display:block;font-size:12.5px;color:var(--muted);background:var(--bg);padding:2px 10px}
+.codeline pre{margin:0;padding:6px 10px;overflow-x:auto;font:12.5px/1.5 var(--mono);background:var(--code)}
+.codeline pre code{background:none;padding:0}
+table.anno td{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.anno .lab{text-align:left}
+table.anno .cx{cursor:pointer}table.anno .cx:hover{background:var(--acc-soft)}
+table.anno .sel{outline:2px solid var(--acc);outline-offset:-2px;background:var(--acc-soft)}
+table.anno tr.sep td,table.anno tr.sep th{border-top:1.5px solid var(--rule2)}
+.se{display:block;color:var(--muted);font-size:12.5px}
+.explain{border:1px solid var(--rule2);border-left:4px solid var(--acc);border-radius:6px;padding:12px 16px;background:var(--sheet);margin:10px 0 18px;scroll-margin-top:50px}
+.explain h5{margin:0 0 8px;font:600 16.5px/1.45 var(--sans)}
+.explain dl{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:7px 14px;margin:0}
+.explain dt{color:var(--muted);font-size:14px;padding-top:1px}.explain dd{margin:0;min-width:0}
+ol.chain{margin:2px 0;padding-left:1.3em}ol.chain li{margin:2px 0}
+.hint{color:var(--muted);font-size:13.5px;margin:2px 0}
+.wf .row{display:grid;grid-template-columns:minmax(160px,300px) 1fr;gap:14px;align-items:center;margin:8px 0}
+.wf .track{position:relative;height:32px;background:var(--bg);border-radius:4px}
+.wf .fill{position:absolute;left:0;top:0;bottom:0;background:var(--acc-soft);border-left:3px solid var(--acc);border-radius:4px;display:flex;align-items:center;padding-left:10px;font:600 14px var(--sans);white-space:nowrap}
+.wf .minus{color:var(--bad);font-weight:400;font-size:13px;margin-left:8px}
+svg.fig{width:100%;height:auto;display:block;margin:10px 0}svg text{font-family:var(--sans);fill:var(--ink)}
+svg .mut{fill:var(--muted)}svg a:hover rect{stroke:var(--up)}
+.steps{list-style:none;padding:0;counter-reset:st;max-width:none}
+.steps>li{counter-increment:st;position:relative;padding:2px 0 16px 46px;border-left:1px solid var(--rule);margin-left:15px}
+.steps>li:last-child{border-left-color:transparent}
+.steps>li::before{content:counter(st);position:absolute;left:-16px;top:0;width:31px;height:31px;border-radius:50%;background:var(--sheet);border:1.5px solid var(--acc);color:var(--acc);font:600 14px/28px var(--sans);text-align:center}
+.steps h4{margin:2px 0}
+pre.cmd{background:var(--code);padding:8px 12px;border-radius:5px;overflow-x:auto;font:13px/1.55 var(--mono);margin:6px 0}
+footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);color:var(--muted);font-size:13.5px}
+@media (max-width:980px){.layout{grid-template-columns:1fr;padding:0 8px;gap:0}nav.toc{display:none}
+ details.mtoc{display:block;position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--rule);padding:10px 4px}
+ details.mtoc summary{cursor:pointer;font-weight:600}details.mtoc ol{max-height:70vh;overflow-y:auto;font-size:14.5px;padding-left:1.4em}
+ .sheet{padding:22px 14px;border-radius:0;border-left:0;border-right:0}.status{grid-template-columns:1fr}
+ .explain dl{grid-template-columns:minmax(0,1fr)}.explain dt{padding-top:6px}.wf .row{grid-template-columns:1fr}}
+@media print{nav.toc,details.mtoc,.side,.hint{display:none}.layout{display:block}.sheet{border:0;padding:0}
+ details.src{display:block}details.src>*{display:block}section.sec{break-inside:auto}h2,h3{break-after:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="目录">
+  <div class="brand"><b>Jayaraman &amp; Wu (2020)<br>Table 1–3 复现报告</b></div>
+  <ol id="toc"></ol>
+  <div class="side"><button class="btn" id="themeBtn" type="button">切换深色 / 浅色</button><span>离线单文件；可在浏览器中打印为 PDF。</span></div>
+</nav>
+<main>
+<details class="mtoc"><summary>目录</summary><ol id="mtoc"></ol></details>
+<div class="sheet">
+
+<header id="top">
+  <p class="cite">Jayaraman, S. &amp; Wu, J. S. (2020). Should I Stay or Should I Grow? Using Voluntary Disclosure to Elicit Market Feedback. <i>Review of Financial Studies</i> 33(8): 3854–3888.</p>
+  <h1>Table 1–3 复现报告</h1>
+  <p class="cite">Zhang Qi</p>
+  <p class="note info"><b>存档版本（2026-11-07，使用 WRDS 数据之前）。</b>用真实数据得到的结果见 <code>output/replication_report.html</code>。此后 D3、D4、D9、D10、D14 已按 WRDS 数据重新校准，其中 D14“金额变量未缩尾”的推断已被数据推翻，详见 <code>REPLICATION_NOTES.md</code> §4b。下文保留当时的原文；代码摘录对应当前版本的代码。</p>
+  <div class="status">
+    <div style="--sc:var(--ok)"><b>已完成</b>Table 1–3 全部代码；估计器与模拟数据验证；Stata 交叉核对脚本</div>
+    <div style="--sc:var(--up)"><b>等待</b>含 I/B/E/S Guidance 的 WRDS 权限；RFS 正式版数字核对</div>
+    <div style="--sc:var(--acc)"><b>拿到数据后</b>5 条命令产出 Table 1–3 及逐格对照（附录 A）</div>
+  </div>
+  <p class="lead">本报告说明：在使用 WRDS 原始数据之前，这项复现已经做了什么、每个数字将如何从原始数据算出、怎样判断复现是否成功。正文按“研究问题 → 数据 → 样本 → 变量 → 估计 → 三张表”的顺序展开；§8–§10 中三张表的<b>每一格都可以点击</b>，查看它的含义、计算公式、从原始字段到数字的路径，以及对应代码的文件和行号。</p>
+</header>
+
+<!-- ============================================================= 1 -->
+<section class="sec" id="s1" data-title="结论摘要">
+<h2><span class="no">1</span>结论摘要</h2>
+<p class="key">Table 1–3 的复现已经做到“拿到数据就能运行”：从下载、样本构建、变量计算、回归估计到逐格对照报告，全部步骤已经编码并测试，唯一缺少的输入是 WRDS 数据。</p>
+<div class="tw"><table>
+<thead><tr><th>方面</th><th>现状</th><th>证据</th></tr></thead>
+<tbody>
+<tr><td>代码覆盖</td><td>Table 1 的 A、B、C 三个 Panel；Table 2 的 8 个模型；Table 3 的 4 个模型和 7 个组间差异 p 值；正文引用的经济显著性和脚注数字；脚注 17–19、23 的稳健性检验</td><td>§4–§10；附录 B</td></tr>
+<tr><td>估计器</td><td>固定效应回归和聚类标准误按 Stata <code>reghdfe</code> 口径实现，与“虚拟变量 OLS”的结果一致到 1e−8</td><td>§13</td></tr>
+<tr><td>端到端</td><td>在植入了已知效应的模拟数据上跑通全流程，恢复出 Table 3 要检验的模式（只在价差上升组有效应）</td><td>§13</td></tr>
+<tr><td>可核对性</td><td>论文没写明的 37 个处理选择全部记录在案，其中 14 个影响 Table 1–3；每个都是一个开关，并说明依据</td><td>§12</td></tr>
+<tr><td>交叉验证</td><td>另附 Stata 脚本，在完全相同的样本上用 <code>reghdfe</code> 重算 Table 2–3，并有逐格比对程序</td><td>§7.4</td></tr>
+<tr><td>尚待完成</td><td>WRDS 权限（I/B/E/S Guidance 往往需要单独订阅）；用 RFS 正式版核对目标数字（目前取自 2019 年 5 月工作论文）</td><td>§15</td></tr>
+</tbody></table></div>
+<p>需要复现的核心数字：Table 2 模型 (1) 的 CAR 系数 <b>1.193</b>、模型 (8) 的 <b>0.849</b>；Table 3 中价差上升组 <b>1.206</b> 与价差未升组 <b>−0.295</b> 的对比（差异 p = 0.019）。数据库自 2019 年以来都有回溯修订，因此不追求逐位相同；成功标准见 §14。</p>
+</section>
+
+<!-- ============================================================= 2 -->
+<section class="sec" id="s2" data-title="研究问题与复现范围">
+<h2><span class="no">2</span>研究问题与复现范围</h2>
+<p>论文的主张是：管理层会用自愿披露的资本支出预测（capex forecast）来征求市场反馈（elicit market feedback）。市场对预测的反应越正面，年底的实际资本支出相对预测上调得越多。Table 1–3 构成这一主张的完整论证链：</p>
+<svg class="fig" viewBox="0 0 760 150" role="img" aria-label="三张表的逻辑">
+  <g style="font-size:14px">
+  <a href="#s8"><rect x="2" y="20" width="230" height="100" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.6"/>
+  <text x="18" y="50" style="font-weight:600">Table 1　我们有什么？</text><text x="18" y="76" class="mut" style="font-size:13px">17,577 个预测、1,790 家公司</text><text x="18" y="98" class="mut" style="font-size:13px">变量分布与变异</text></a>
+  <a href="#s9"><rect x="265" y="20" width="230" height="100" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.6"/>
+  <text x="281" y="50" style="font-weight:600">Table 2　有没有关系？</text><text x="281" y="76" class="mut" style="font-size:13px">反应越正 → 上调越多</text><text x="281" y="98" class="mut" style="font-size:13px">加固定效应、安慰剂后仍成立</text></a>
+  <a href="#s10"><rect x="528" y="20" width="230" height="100" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.6"/>
+  <text x="544" y="50" style="font-weight:600">Table 3　为什么有关系？</text><text x="544" y="76" class="mut" style="font-size:13px">只在引来知情交易时成立</text><text x="544" y="98" class="mut" style="font-size:13px">主要来自正面反应</text></a>
+  <path d="M234 70 L261 70" style="stroke:var(--rule2);stroke-width:2"/><path d="M497 70 L524 70" style="stroke:var(--rule2);stroke-width:2"/>
+  </g></svg>
+<p>本次复现范围为 Table 1–3。Table 4–6 的代码也已写好（设置 <code>JW_SCOPE=all</code> 即可运行），但不在本报告的讨论范围内。</p>
+</section>
+
+<!-- ============================================================= 3 -->
+<section class="sec" id="s3" data-title="总流程：从原始数据到表格">
+<h2><span class="no">3</span>总流程：从 WRDS 原始数据到表格中的数字</h2>
+<p>整个复现是一条单向流水线，每一步的输入和输出都是确定的。点击下图中的方框可以跳到对应章节。</p>
+<svg class="fig" viewBox="0 0 760 250" role="img" aria-label="复现流水线">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--rule2)"/></marker></defs>
+<g style="font-size:13.5px">
+<a href="#s4"><rect x="2" y="10" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="16" y="38" style="font-weight:600">① 原始数据（§4）</text><text x="16" y="62" class="mut">WRDS 9 张表</text><text x="16" y="82" class="mut">pull_wrds.py</text></a>
+<a href="#s5"><rect x="265" y="10" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="279" y="38" style="font-weight:600">② 链接与样本（§5）</text><text x="279" y="62" class="mut">IBES → CRSP → Compustat</text><text x="279" y="82" class="mut">40,785 → … → 17,577</text></a>
+<a href="#s6"><rect x="528" y="10" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="542" y="38" style="font-weight:600">③ 变量（§6）</text><text x="542" y="62" class="mut">CAPEX_ADJ、CAR、控制变量</text><text x="542" y="82" class="mut">build_capex_sample.py</text></a>
+<a href="#s7"><rect x="528" y="150" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="542" y="178" style="font-weight:600">④ 估计（§7）</text><text x="542" y="202" class="mut">固定效应 OLS、聚类标准误</text><text x="542" y="222" class="mut">hdfe.py</text></a>
+<a href="#s8"><rect x="265" y="150" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="279" y="178" style="font-weight:600">⑤ 三张表（§8–§10）</text><text x="279" y="202" class="mut">逐格与论文对照</text><text x="279" y="222" class="mut">tables.py</text></a>
+<a href="#s13"><rect x="2" y="150" width="230" height="86" rx="8" style="fill:var(--sheet);stroke:var(--acc);stroke-width:1.5"/><text x="16" y="178" style="font-weight:600">⑥ 报告与核对（§13）</text><text x="16" y="202" class="mut">自动报告、Stata 交叉核对</text><text x="16" y="222" class="mut">report.py, compare_stata.py</text></a>
+<path d="M234 53 L261 53" style="stroke:var(--rule2);stroke-width:1.8" marker-end="url(#ar)"/><path d="M497 53 L524 53" style="stroke:var(--rule2);stroke-width:1.8" marker-end="url(#ar)"/>
+<path d="M643 98 L643 146" style="stroke:var(--rule2);stroke-width:1.8" marker-end="url(#ar)"/><path d="M526 193 L499 193" style="stroke:var(--rule2);stroke-width:1.8" marker-end="url(#ar)"/>
+<path d="M263 193 L236 193" style="stroke:var(--rule2);stroke-width:1.8" marker-end="url(#ar)"/></g></svg>
+
+<h3 id="s3-1">3.1 一个预测的完整路径：Newfield Exploration（2010 年 4 月）</h3>
+<p>论文附录 1 的例子正好可以说明一条记录如何变成表中的数字。<b>以下 PERMNO、GVKEY 和逐日收益为示意数值</b>，用来展示计算过程，真实数值以 WRDS 查询结果为准。</p>
+<div class="tw"><table>
+<thead><tr><th>步骤</th><th>原始数据 / 输入</th><th>计算</th><th>结果</th><th>代码</th></tr></thead>
+<tbody>
+<tr><td>1 预测记录</td><td><code>ibes.det_guidance</code>：ticker = NFX，anndats = 2010-04-26，measure = CPX，pdicity = ANN，prd_yr = 2010，prd_mon = 12，val_1 = 1,600，val_2 为空</td><td>val_2 为空 → 点预测</td><td>F = 1,600 百万美元</td><td>{{REF:classify}}</td></tr>
+<tr><td>2 链接</td><td><code>ibcrsphist</code>：NFX 在 2010-04-26 有效的链接；<code>ccmxpf_lnkhist</code></td><td>ticker → PERMNO → GVKEY</td><td>PERMNO、GVKEY（示意）</td><td>{{REF:link_ibes}}；{{REF:link_ccm}}</td></tr>
+<tr><td>3 实际 capex</td><td><code>comp.funda</code>：datadate = 2010-12-31，capx = 1,971</td><td>datadate 的年月 = prd_yr / prd_mon</td><td>A = 1,971</td><td>{{REF:link_actual}}</td></tr>
+<tr><td>4 CAPEX_ADJ</td><td>A = 1,971，F = L = H = 1,600</td><td>100 × (1,971 − 1,600) / 1,600</td><td><b>+23.19%</b></td><td>{{REF:capex_adj}}</td></tr>
+<tr><td>5 day 0</td><td><code>crsp.dsi</code> 交易日历</td><td>2010-04-26 是交易日（周一）</td><td>t₀ = 2010-04-26；窗口为 4/22、4/23、4/26、4/27、4/28</td><td>{{REF:day0}}</td></tr>
+<tr><td>6 CAR</td><td><code>dsf.ret</code>（示意）：0.4、−0.3、5.2、2.2、0.9（%）；<code>dsi.sprtrn</code>（示意）：0.2、−0.5、0.6、0.4、0.2</td><td>Σ (ret − sprtrn) = 0.2 + 0.2 + 4.6 + 1.8 + 0.7</td><td><b>CAR = +7.5%</b></td><td>{{REF:car}}</td></tr>
+<tr><td>7 标准化</td><td>全样本 CAR 均值与标准差（以论文的 −0.148、8.974 示意）</td><td>(7.5 + 0.148) / 8.974</td><td>CAR_z ≈ 0.85</td><td>{{REF:zscore}}</td></tr>
+<tr><td>8 进入回归</td><td>Table 2 (8)：β = 0.849</td><td>0.849 × 0.85</td><td>CAR 解释的调整 ≈ +0.72 个百分点（实际调整为 +23.2%）</td><td>{{REF:hdfe_ols}}</td></tr>
+</tbody></table></div>
+<p>第 8 步也说明了论文结论的含义：市场反应只能解释调整中的一部分，但这一部分在 17,577 个预测上系统地存在，而且只出现在引来知情交易的预测中（Table 3）。</p>
+</section>
+
+<!-- ============================================================= 4 -->
+<section class="sec" id="s4" data-title="原始数据">
+<h2><span class="no">4</span>原始数据：9 张 WRDS 表</h2>
+<p>Table 1–3 只需要 9 张表，<code>pull_wrds.py</code> 在 Table 1–3 模式下只下载这些。其中 I/B/E/S Guidance 是关键订阅，没有它任何一张表都无法构建。</p>
+<div class="tw"><table>
+<thead><tr><th>WRDS 表</th><th>用到的字段</th><th>下载范围</th><th>用来构造</th></tr></thead>
+<tbody>
+<tr><td><code>ibes.det_guidance</code></td><td>ticker, measure, pdicity, prd_yr, prd_mon, anndats, anntims, val_1, val_2, range_desc, units, curr</td><td>measure ∈ {CPX, SAL, EPS}，2002–2016 年发布</td><td>capex 预测；销售预测（SF_CAR）；EPS 预测（删除同日发布的）</td></tr>
+<tr><td><code>wrdsapps_link_crsp_ibes.ibcrsphist</code></td><td>ticker, permno, sdate, edate, score</td><td>全部</td><td>IBES ticker → PERMNO</td></tr>
+<tr><td><code>crsp.ccmxpf_lnkhist</code></td><td>gvkey, lpermno, linktype, linkprim, linkdt, linkenddt</td><td>LU/LC，P/C</td><td>PERMNO → GVKEY</td></tr>
+<tr><td><code>comp.funda</code></td><td>gvkey, datadate, fyear, capx, prcc_f, csho, sich</td><td>标准工业格式，1999–2018</td><td>实际 capex、LAG_CAPX、年初市值、行业</td></tr>
+<tr><td><code>comp.fundq</code></td><td>gvkey, datadate, fyearq, fqtr, rdq, epspxq, ajexq, prccq, cshoq</td><td>标准工业格式，1999–2017</td><td>SIZE、SURP、盈余公告日（EA_DUM）</td></tr>
+<tr><td><code>comp.company</code></td><td>gvkey, sic, state</td><td>全部</td><td>缺历史 SIC 时的表头 SIC；州（脚注 19）</td></tr>
+<tr><td><code>crsp.msenames</code></td><td>permno, ncusip, namedt, nameendt, shrcd</td><td>全部</td><td>CUSIP 历史（核对用）</td></tr>
+<tr><td><code>crsp.dsi</code></td><td>date, sprtrn</td><td>2001–2017</td><td>S&amp;P 500 日收益；交易日历</td></tr>
+<tr><td><code>crsp.dsf</code></td><td>permno, date, ret, bid, ask, prc, shrout</td><td>样本公司、事件前后 ±30 个交易日</td><td>CAR、CAR_PRE、SF_CAR；买卖价差</td></tr>
+</tbody></table></div>
+<details class="src"><summary>查看下载代码：I/B/E/S Guidance 与 CRSP 日数据</summary>{{CODE:pull_guidance}}{{CODE:pull_dsf}}</details>
+<p class="cite">CRSP 旧格式（SIZ）于 2024-12-31 停止更新，但仍可查询；样本截至 2016 年，使用旧表即可。</p>
+</section>
+
+<!-- ============================================================= 5 -->
+<section class="sec" id="s5" data-title="样本构建">
+<h2><span class="no">5</span>样本构建：40,785 → 17,577</h2>
+<p>论文第 2.2 节给出四个样本数，代码在每一步打印自己的计数，与论文逐步对照（<code>output/sample_waterfall.csv</code>）。</p>
+<div class="wf" id="wf"></div>
+<div class="tw"><table>
+<thead><tr><th>步骤</th><th class="n">论文</th><th>规则（数学条件）</th><th>代码</th></tr></thead>
+<tbody>
+<tr><td>0 年度 capex 预测</td><td class="n">—</td><td>measure = CPX，pdicity = ANN；财年末 prd_end ∈ (anndats, anndats + 24 个月]；同一公告日只留最近财年、最新修订；然后每个公司-季度只留第一条（D6）</td><td>{{REF:annual_forecasts}}；{{REF:collapse}}</td></tr>
+<tr><td>1 匹配到 Compustat 实际 capex</td><td class="n">40,785</td><td>公告日有效的 IBES → PERMNO → GVKEY 链接存在，且 funda 中 (GVKEY, datadate 年月 = prd_yr/prd_mon) 的 capx 非缺失</td><td>{{REF:link_actual}}</td></tr>
+<tr><td>2 有五日市场反应</td><td class="n">36,900</td><td>[−2, +2] 五个交易日的 ret 和 sprtrn 全部存在</td><td>{{REF:waterfall_car}}</td></tr>
+<tr><td>3 不与 EPS 预测同日</td><td class="n">19,427</td><td>同一 ticker 不存在 |anndats − anndats<sup>EPS</sup>| ≤ 0 天的 EPS 预测（D9）</td><td>{{REF:waterfall_eps}}</td></tr>
+<tr><td>4 2003–2015 年发布</td><td class="n">17,577</td><td>2003 ≤ year(anndats) ≤ 2015（D2）</td><td>{{REF:waterfall_eps}}</td></tr>
+</tbody></table></div>
+<p><b>从论文算术推出的两条规则。</b>36,900 − 17,473 − 1,850 = 17,577 精确成立，说明这几步之后没有其他删除。因此：(1) “一个公司-季度一条观测”的去重必须在第 1 步计数之前完成，否则会多出一步论文中不存在的删除；(2) 初始样本从 2002 年开始，但最终样本从 2003 年开始，而瀑布里只删了 2016 年，所以 2002 年的预测在前几步就已经没有了。</p>
+<p class="note info">注意区分：与 <b>EPS 预测（earnings forecast）</b>同日发布的 capex 预测被删除；与<b>盈余公告（earnings announcement）</b>同日发布的被保留（占 55.9%），用 EA_DUM 和 SURP 控制。</p>
+<details class="src"><summary>查看样本构建代码（5 段）</summary>{{CODE:annual_forecasts}}{{CODE:collapse}}{{CODE:link_actual}}{{CODE:waterfall_car}}{{CODE:waterfall_eps}}</details>
+<details class="src"><summary>查看链接函数（2 段）</summary>{{CODE:link_ibes}}{{CODE:link_ccm}}</details>
+</section>
+
+<!-- ============================================================= 6 -->
+<section class="sec" id="s6" data-title="变量构建">
+<h2><span class="no">6</span>变量构建：每个变量的公式与代码</h2>
+<p>记号：i 为一个预测（公司-季度），a 为预测发布的日历季度，t 为被预测的财年，t₀ 为事件日（day 0）。除因变量外，所有变量都在预测发布时或之前可知。</p>
+
+<h3 id="v-fore">6.1 预测值与预测类型（CAPEX_FORE、FTYPE）</h3>
+<div class="fx">range ⇔ val_2 非缺失且 val_2 ≠ val_1；other ⇔ 非 range 且 range_desc ∈ 开放式代码集合；其余为 point<br>L = min(val_1, val_2)，H = max(val_1, val_2)（区间）；L = H = val_1（点、开放式）；F = (L + H) / 2</div>
+<p>金额先按 <code>units</code> 统一为百万美元（D4）。开放式代码集合在拿到数据后用 <code>diagnose.py</code> 校准，使三类比例接近 Table 1 Panel C（D3）。</p>
+<details class="src"><summary>查看代码</summary>{{CODE:clean_guidance}}{{CODE:classify}}</details>
+
+<h3 id="v-adj">6.2 因变量 CAPEX_ADJ</h3>
+<div class="fx">CAPEX_ADJ<sub>i</sub> = 100 × (A<sub>i</sub> − H<sub>i</sub>) / F<sub>i</sub>　若 A<sub>i</sub> &gt; H<sub>i</sub><br>
+CAPEX_ADJ<sub>i</sub> = 100 × (A<sub>i</sub> − L<sub>i</sub>) / F<sub>i</sub>　若 A<sub>i</sub> &lt; L<sub>i</sub><br>
+CAPEX_ADJ<sub>i</sub> = 0　　　　　　　　　　若 L<sub>i</sub> ≤ A<sub>i</sub> ≤ H<sub>i</sub></div>
+<p>A 为被预测财年的 Compustat capx。区间预测落在区间内记 0，这是论文所说的保守处理；分母用区间中点（D7，备选：越过的边界）。</p>
+<details class="src"><summary>查看代码</summary>{{CODE:capex_adj}}</details>
+
+<h3 id="v-car">6.3 市场反应 CAR</h3>
+<div class="fx">ar<sub>i,d</sub> = ret<sub>i,d</sub> − sprtrn<sub>d</sub>；t₀ = 公告日当天或之后的第一个交易日<br>
+CAR<sub>i</sub> = 100 × Σ<sub>k=−2</sub><sup>+2</sup> ar<sub>i, t₀+k</sub>（五天必须齐全，D12）</div>
+<details class="src"><summary>查看代码（4 段）</summary>{{CODE:daily}}{{CODE:day0}}{{CODE:event_window}}{{CODE:car}}</details>
+
+<h3 id="v-mkt">6.4 安慰剂变量 MKTRET、CAR_PRE，以及价差分组</h3>
+<div class="fx">MKTRET<sub>i</sub> = 100 × sprtrn<sub>t₀</sub><br>
+CAR_PRE<sub>i</sub> = CAR 公式，但 t₀ 换成 anndats − 14 个日历日当天或之前的最后一个交易日</div>
+<p id="v-spread"><b>价差分组（Table 3）。</b></p>
+<div class="fx">spread<sub>i,d</sub> = 100 × (ask<sub>d</sub> − bid<sub>d</sub>) / [(ask<sub>d</sub> + bid<sub>d</sub>) / 2]，仅当 bid &gt; 0 且 ask &gt; bid<br>
+HIGHER_SPREAD<sub>i</sub> = 1{ mean<sub>k∈[−2,+2]</sub> spread &gt; mean<sub>k∈[−10,−3]</sub> spread }，要求事件期 ≥ 3 天、公告前 ≥ 4 天有效</div>
+<details class="src"><summary>查看代码</summary>{{CODE:event_vars}}</details>
+
+<h3 id="v-sf">6.5 安慰剂变量 SF_CAR</h3>
+<div class="fx">SF_CAR<sub>i</sub> = 同一 ticker、同一财年的销售预测（measure = SAL）中，与 capex 预测窗口不重叠（|t₀ − t₀<sup>SAL</sup>| ≥ 5 个交易日）且公告日最接近的那一个的五日 CAR</div>
+<p>论文的子样本为 3,456 个，两者距离的中位数为 86 天（脚注 21）。回归中 SF_CAR 在这个子样本内标准化。</p>
+<details class="src"><summary>查看代码</summary>{{CODE:sf_car}}</details>
+
+<h3 id="v-size">6.6 SIZE</h3>
+<div class="fx">SIZE<sub>i</sub> = ln(PRCCQ × CSHOQ)，取 datadate ≤ 公告季度第一天前一日的最近财季（183 天内）</div>
+<details class="src"><summary>查看代码</summary>{{CODE:size}}{{CODE:load_fundq}}</details>
+
+<h3 id="v-lag">6.7 LAG_CAPX</h3>
+<div class="fx">Table 1：LAG_CAPX_MIL<sub>i</sub> = CAPX<sub>t−1</sub>（百万美元）<br>
+回归：LAG_CAPX<sub>i</sub> = 100 × CAPX<sub>t−1</sub> / (PRCC_F × CSHO)<sub>t−1</sub><br>
+t−1 = 公告日前最近一个已结束的财年（400 天内）</div>
+<p>论文 Table 1 用百万美元报告 LAG_CAPX，Table 2 的定义却是“除以年初市值”。两个口径都已构造，分别用于描述统计和回归（D15）。</p>
+<details class="src"><summary>查看代码</summary>{{CODE:lag_capx}}{{CODE:load_funda}}</details>
+
+<h3 id="v-surp">6.8 EA_DUM 与 SURP</h3>
+<div class="fx">EA_DUM<sub>i</sub> = 1{ ∃ rdq：|anndats<sub>i</sub> − rdq| ≤ 1 个日历日 }（D10）<br>
+SURP<sub>i</sub> = EPSPXQ<sub>q</sub> − EPSPXQ<sub>q−4</sub> × AJEXQ<sub>q</sub> / AJEXQ<sub>q−4</sub>　若 EA_DUM<sub>i</sub> = 1；否则 0（D32：拆股调整）</div>
+<details class="src"><summary>查看代码</summary>{{CODE:ea_surp}}</details>
+
+<h3 id="v-ind">6.9 固定效应与聚类变量</h3>
+<p>公司固定效应用 GVKEY；年季固定效应 YQ = 年 × 10 + 季度（按公告日）；行业 = 每家公司历史 SICH 的众数取前两位，缺失时用表头 SIC（D18）。每家公司只属于一个行业，这样公司固定效应嵌套在行业聚类之内。</p>
+<details class="src"><summary>查看代码</summary>{{CODE:firm_industry}}{{CODE:fe_ids}}</details>
+
+<h3 id="v-std">6.10 缩尾、标准化、CAR_POS 与 CAR_NEG</h3>
+<div class="fx">winsor(x) = min( max(x, q<sub>0.01</sub>), q<sub>0.99</sub> )，q 为全样本分位数<br>
+z(x) = (x − x̄) / s，s 为样本标准差（N − 1）<br>
+CAR_POS = max(CAR, 0)，CAR_NEG = min(CAR, 0)，各自再标准化（D35）</div>
+<p>只对比率变量缩尾（CAPEX_ADJ、CAR、CAR_PRE、SF_CAR、SURP、回归口径的 LAG_CAPX），金额变量不缩尾。依据是 Table 1 的极值：CAPEX_ACT 和 LAG_CAPX 的最小值都是 0.000，而 CAPEX_ADJ 的最小值是 −77.05（实际为 0 的点预测应得 −100）（D14）。拿到数据后，<code>table1_winsor_check.csv</code> 会逐个变量核对这一推断。</p>
+<details class="src"><summary>查看代码（3 段）</summary>{{CODE:winsorize}}{{CODE:zscore}}{{CODE:winsor_z}}</details>
+</section>
+
+<!-- ============================================================= 7 -->
+<section class="sec" id="s7" data-title="估计方法">
+<h2><span class="no">7</span>估计方法</h2>
+<h3 id="s7-1">7.1 回归方程</h3>
+<div class="fx">CAPEX_ADJ<sub>i,a,t</sub> = α + β · CAR_z<sub>i</sub> + γ′X<sub>i</sub> + μ<sub>firm</sub> + τ<sub>a</sub> + ε<sub>i,a,t</sub></div>
+<p>β 读作：市场反应高一个标准差（8.974 个百分点）时，实际 capex 相对预测多上调多少个百分点。各列的 X、固定效应和聚类见 §9。</p>
+<h3 id="s7-2">7.2 系数、标准误与 p 值</h3>
+<ol>
+<li><b>吸收固定效应</b>：交替投影，把 y 和每个 x 依次对公司、年季去均值，重复直到变化小于 1e−10。</li>
+<li><b>系数</b>：β̂ = (X̃′X̃)<sup>−1</sup>X̃′ỹ，X̃、ỹ 为去均值后的数据；无固定效应时加常数项。</li>
+<li><b>聚类稳健方差</b>：V̂ = c · (X̃′X̃)<sup>−1</sup> [Σ<sub>g</sub> S<sub>g</sub>′S<sub>g</sub>] (X̃′X̃)<sup>−1</sup>，S<sub>g</sub> = Σ<sub>i∈g</sub> x̃<sub>i</sub>û<sub>i</sub>，c = G/(G−1) · (N−1)/(N−K)。</li>
+<li><b>自由度 K</b>：回归变量数加上<b>未嵌套</b>在聚类变量中的固定效应自由度（reghdfe 口径，D26）。公司固定效应嵌套在公司或行业聚类之内，因此不计入 K。</li>
+<li><b>p 值</b>：t = β̂ / SE，p = 2 · Pr(t<sub>G−1</sub> &gt; |t|)。这解释了论文中 CAR_POS 的 t = 1.96 只标一颗星。</li>
+<li><b>Adj. R²</b> = 1 − (1 − R²)(N − 1)/(N − k)，k 包含全部固定效应自由度；singletons 保留（D25：Table 2 有无公司固定效应时 N 相同）。</li>
+</ol>
+<details class="src"><summary>查看估计器代码（3 段）</summary>{{CODE:demean}}{{CODE:fe_dof}}{{CODE:hdfe_ols}}</details>
+<h3 id="s7-3">7.3 Table 3 的组间差异检验</h3>
+<div class="fx">t = (β̂<sub>Higher</sub> − β̂<sub>Lower</sub>) / √(V̂<sub>11</sub> + V̂<sub>00</sub> − 2V̂<sub>10</sub>)，p = 2 · Pr(t<sub>G−1</sub> &gt; |t|)</div>
+<p>论文没有说明差异检验的方法。这里把两组合并为一个回归，所有变量都乘以分组虚拟变量，公司和年季固定效应也按分组拆开；这样点估计与分开回归完全相同，协方差则是联合的、按行业聚类，相当于 Stata 的 <code>suest</code>。</p>
+<details class="src"><summary>查看代码</summary>{{CODE:diff_test}}</details>
+<h3 id="s7-4">7.4 各表的调用与 Stata 交叉核对</h3>
+<p>Table 1 的统计量、Table 2 的 8 个模型和 Table 3 的 4 个模型及 7 个差异检验，分别在下面三段代码中调用上述函数。拿到数据后，<code>stata/tables_2_3.do</code> 会在完全相同的样本上用 <code>reghdfe</code> 重算 Table 2–3，再由 <code>compare_stata.py</code> 逐格比较系数、标准误和样本量。</p>
+<details class="src"><summary>查看 Table 1–3 的调用代码（3 段）</summary>{{CODE:table1}}{{CODE:table2}}{{CODE:table3}}</details>
+</section>
+
+<!-- ============================================================= 8 -->
+<section class="sec" id="s8" data-title="Table 1 逐格说明">
+<h2><span class="no">8</span>Table 1：描述性统计（逐格说明）</h2>
+<p>Table 1 不检验假设，它告诉读者样本有多大、各变量的单位和分布，以及回归里“一个标准差”有多长。表中数字为论文值（2019 年 5 月工作论文）；拿到数据后，代码会在每一格下方给出复现值。</p>
+<p class="hint">点击任意数字、行名或列名，下方显示它的含义、公式、来源路径和代码。</p>
+<h3 id="s8-1">8.1 Panel A：变量的描述性统计</h3>
+<div class="tw">{{TABLE_T1A}}</div><div class="explain" data-for="T1A" aria-live="polite"></div>
+<p><b>读表要点。</b>CAPEX_FORE 的均值（586.5）远大于中位数（120）：分布右偏，所以因变量用百分比而不是美元差额。CAPEX_ADJ 的均值 7.421 是正文经济显著性的分母（1.193 / 7.421 = 16.1%）；中位数为 0 来自区间预测“落在区间内记 0”。CAR 的标准差 8.974 是 Table 2、3 中所有 CAR 系数的单位。</p>
+<h3 id="s8-2">8.2 Panel B：逐年分布</h3>
+<div class="tw">{{TABLE_T1B}}</div><div class="explain" data-for="T1B" aria-live="polite"></div>
+<h3 id="s8-3">8.3 Panel C：预测类型</h3>
+<div class="tw">{{TABLE_T1C}}</div><div class="explain" data-for="T1C" aria-live="polite"></div>
+</section>
+
+<!-- ============================================================= 9 -->
+<section class="sec" id="s9" data-title="Table 2 逐格说明">
+<h2><span class="no">9</span>Table 2：资本支出调整与市场反应（逐格说明）</h2>
+<p>从左往右读：每往右一列多加一层对照，看 CAR 的系数会不会消失。(1)(2) 是原始关系；(3) 加年季固定效应去掉宏观冲击；(4) 加公司固定效应，只比较同一家公司内部；(5) 改为行业聚类，系数不变、标准误变大；(6)(7) 加入三个安慰剂变量；(8) 加入全部控制变量，是 Table 3 的基准。</p>
+<p class="hint">点击系数格可以看到：读法、t 值与置信区间、本列回归方程、计算步骤、对应代码行。底部各行（固定效应、聚类、N、Adj. R²）也可以点击。</p>
+<div class="tw">{{TABLE_T2}}</div><div class="explain" data-for="T2" aria-live="polite"></div>
+<p><b>读表要点。</b>CAR 在 8 列中全部为正，7 列在 1% 水平显著；加入公司固定效应后由 1.196 降到 0.975，但仍然显著；三个安慰剂（SF_CAR、MKTRET、CAR_PRE）都不显著。(4)(5) 的系数必须完全相同，这是复现时检查样本和固定效应是否一致的最简单方法。</p>
+</section>
+
+<!-- ============================================================= 10 -->
+<section class="sec" id="s10" data-title="Table 3 逐格说明">
+<h2><span class="no">10</span>Table 3：信息不对称与反应方向（逐格说明）</h2>
+<p>Table 2 说明关系存在，Table 3 说明为什么：如果是管理层从市场中学习，效应应该只出现在披露引来知情交易（公告期价差上升）的预测里，而且主要来自正面反应（Edmans, Goldstein &amp; Jiang 2015 的套利限制）。如果是遗漏变量或反向因果，两组应该差不多。</p>
+<p class="hint">点击系数格、最右列的差异 p 值或底部各行查看说明。</p>
+<div class="tw">{{TABLE_T3}}</div><div class="explain" data-for="T3" aria-live="polite"></div>
+<p><b>读表要点。</b>价差上升组 1.206**、价差未升组 −0.295，差异 p = 0.019；拆分后，只有价差上升组的 CAR_POS（0.893*）显著。MKTRET 与 CAR_PRE 在两组都不显著且没有差别，说明价差上升组的公司并不是“对一切信息都更敏感”。</p>
+</section>
+
+<!-- ============================================================= 11 -->
+<section class="sec" id="s11" data-title="三张表之间的关系">
+<h2><span class="no">11</span>三张表之间的数字关系</h2>
+<p>三张表不是孤立的：样本量逐表递减，Table 1 的统计量是 Table 2、3 系数的“尺子”。下表列出复现时可以直接用来核对的数字关系。</p>
+<div class="tw"><table>
+<thead><tr><th>关系</th><th>数字</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td>Table 1 → Table 2 (1)–(5)、(7)</td><td class="n">17,577</td><td>同一个样本；比较这些列时样本没有变化</td></tr>
+<tr><td>Table 2 (8)</td><td class="n">17,577 − 72 = 17,505</td><td>控制变量缺失：LAG_CAPX（百万美元口径）缺 31 个，另外 41 个推测来自年初市值缺失</td></tr>
+<tr><td>Table 2 (6)</td><td class="n">3,456</td><td>有同一财年、窗口不重叠的销售预测的子样本</td></tr>
+<tr><td>Table 3</td><td class="n">7,770 + 9,570 = 17,340</td><td>比 Table 2 (8) 少 165 个（缺报价）；价差上升组占 55.2%</td></tr>
+<tr><td>Table 1 CAR 标准差</td><td class="n">8.974</td><td>Table 2、3 所有 CAR 类系数的单位</td></tr>
+<tr><td>Table 1 CAPEX_ADJ 均值</td><td class="n">7.421</td><td>经济显著性的分母：16.1%（T2 (1)）、11.4%（T2 (8)）、16.2%（T3 (2)）</td></tr>
+<tr><td>Table 2 (8) 与 Table 3</td><td class="n">−0.295 &lt; 0.849 &lt; 1.206</td><td>全样本系数是“没有效应的组”和“效应很强的组”混合的结果</td></tr>
+<tr><td>Table 1 Panel C 与 Panel A</td><td class="n">34.48% 区间 → 中位数 0.000</td><td>区间预测“落在区间内记 0”</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================= 12 -->
+<section class="sec" id="s12" data-title="未写明的处理选择">
+<h2><span class="no">12</span>论文未写明的处理选择</h2>
+<p>论文共有 37 处处理没有写明，其中 14 处影响 Table 1–3。每处都是 <code>config.py</code> 中的一个开关；“依据”一栏说明论文中哪条线索支持这一选择，标为<b>由 N 反推</b>的，证据来自论文自己报告的样本量。完整记录见 <code>REPLICATION_NOTES.md</code>。</p>
+<div class="tw"><table>
+<thead><tr><th>编号</th><th>问题</th><th>选择</th><th>依据</th></tr></thead>
+<tbody>
+<tr><td>D2</td><td>样本年份</td><td>只保留 2003–2015 年发布的预测</td><td><b>由 N 反推</b>：瀑布算术精确，最终样本从 2003 年开始</td></tr>
+<tr><td>D3</td><td>哪些 range_desc 代码表示开放式预测</td><td>拿到数据后用 <code>diagnose.py</code> 校准</td><td>目标比例 55.30 / 34.48 / 10.22%</td></tr>
+<tr><td>D4</td><td>预测值单位</td><td>统一为百万美元</td><td>各单位下 实际 / 预测 的中位数应接近 1</td></tr>
+<tr><td>D6</td><td>同一季度多次预测</td><td>保留第一次，在第 1 步计数前去重</td><td><b>由 N 反推</b>：瀑布算术中没有额外删除</td></tr>
+<tr><td>D7</td><td>区间预测的分母</td><td>区间中点</td><td>原文 “scaled by the forecast”；备选为越过的边界</td></tr>
+<tr><td>D8</td><td>开放式预测的 CAPEX_ADJ</td><td>按 val_1 的点预测处理</td><td>脚注 17 的稳健性检验只保留点和区间预测</td></tr>
+<tr><td>D9</td><td>“与盈利预测同时发布”</td><td>同一日历日有 EPS 预测</td><td><b>由 N 反推</b>：应删除约 47%（17,473 / 36,900）</td></tr>
+<tr><td>D10</td><td>与盈余公告“同时”</td><td>±1 个日历日</td><td>EA_DUM 均值应为 0.559</td></tr>
+<tr><td>D13</td><td>SF_CAR 用哪个销售预测</td><td>同一财年、窗口不重叠、距离最近</td><td><b>由 N 反推</b>：N = 3,456，中位距离 86 天</td></tr>
+<tr><td>D14</td><td>缩尾哪些变量</td><td>比率变量 1% / 99%，金额变量不缩尾</td><td><b>由极值反推</b>：CAPEX_ACT、LAG_CAPX 最小值为 0；CAPEX_ADJ 最小值为 −77.05 而非 −100</td></tr>
+<tr><td>D15</td><td>LAG_CAPX 的单位</td><td>Table 1 用百万美元，回归用除以市值</td><td>Table 1 与 Table 2 的定义不同</td></tr>
+<tr><td>D17</td><td>价差单位</td><td>百分比</td><td>非事件期价差中位数 0.073 只有在百分比单位下才合理</td></tr>
+<tr><td>D18</td><td>聚类用的“行业”</td><td>两位 SIC，每家公司固定</td><td>保证公司固定效应嵌套在聚类变量中</td></tr>
+<tr><td>D25</td><td>singletons</td><td>保留</td><td><b>由 N 反推</b>：Table 2 有无公司固定效应时 N 都是 17,577</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================= 13 -->
+<section class="sec" id="s13" data-title="数据前已完成的验证">
+<h2><span class="no">13</span>数据前已完成的验证</h2>
+<p>以下 8 项检查都在没有 WRDS 数据的情况下完成并通过。唯一未运行的是 Stata 脚本，因为开发环境中没有 Stata；Python 的结果不依赖它。</p>
+<div class="tw"><table>
+<thead><tr><th>检查</th><th>验证什么</th><th>结果</th></tr></thead>
+<tbody>
+<tr><td>估计器测试 <code>tests/test_hdfe.py</code></td><td>固定效应回归与聚类标准误，对照“公司和季度虚拟变量 + 最小二乘”的暴力解，分别按公司和行业聚类</td><td class="pos">系数完全一致；areg 口径的标准误与暴力解相同；植入的组间差异 0.6 被检出（p = 4.6e−7）</td></tr>
+<tr><td>端到端模拟 <code>tests/run_synthetic.py</code></td><td>从 WRDS 格式的原始表到 Table 1–3 和报告的每一步；只在价差上升组植入效应</td><td class="pos">Table 3：价差上升组 1.672***（SE 0.448），价差未升组 −0.004（SE 0.794）；全流程 34 秒</td></tr>
+<tr><td>样本量一致性</td><td>Table 2 (1)–(5)、(7) 同一样本；(8) ≤ (7)；Table 3 两组来自 (8) 的样本；去重在瀑布之前</td><td class="pos">全部断言通过</td></tr>
+<tr><td>报告输入</td><td>报告所需的每个数字都已产出；模拟数据的报告带 DEMO 水印</td><td class="pos">通过</td></tr>
+<tr><td>WRDS 权限检查 <code>check_wrds.py</code></td><td>无权限的表、缺字段、库改名三种情况</td><td class="pos">三种情况都正确报告</td></tr>
+<tr><td>下载容错 <code>pull_wrds.py</code></td><td>某张表失败时记录并跳过，其余继续下载，并给出重跑命令</td><td class="pos">通过</td></tr>
+<tr><td>Stata 比对 <code>compare_stata.py</code></td><td>能否发现 Stata 与 Python 结果的差异</td><td class="pos">53 个系数中植入的 1 个差异被检出，程序返回失败状态</td></tr>
+<tr><td>运行前自检 <code>preflight.py</code></td><td>环境、依赖包、配置、两套测试、数据状态</td><td class="pos">结论：READY FOR DATA</td></tr>
+</tbody></table></div>
+<p class="cite">模拟数据中植入的效应是“每个标准差 3.0 个百分点，只作用于点预测”。恢复出的 1.67 较小，是因为区间预测的零值、缩尾和实际测得的价差分组稀释了它。这项测试检验的是 Table 3 所依赖的模式能否被恢复，而不是具体数值。</p>
+</section>
+
+<!-- ============================================================= 14 -->
+<section class="sec" id="s14" data-title="校准目标与成功标准">
+<h2><span class="no">14</span>校准目标与成功标准</h2>
+<p>拿到数据后，先用与回归结果无关的样本特征确定编码开关，再看回归系数，避免根据结果反过来挑选设定。</p>
+<div class="tw"><table>
+<thead><tr><th>校准目标</th><th>论文</th><th>约束的开关</th></tr></thead>
+<tbody>
+<tr><td>样本瀑布</td><td>40,785 → 36,900 → 19,427 → 17,577</td><td>D1、D2、D5、D6、D9</td></tr>
+<tr><td>点 / 区间 / 其他 比例</td><td>55.30 / 34.48 / 10.22%</td><td>D3</td></tr>
+<tr><td>因与 EPS 预测同日而删除的比例</td><td>47.4%</td><td>D9</td></tr>
+<tr><td>EA_DUM 均值</td><td>0.559</td><td>D10</td></tr>
+<tr><td>CAPEX_ADJ 中位数</td><td>0.000</td><td>D3、D7</td></tr>
+<tr><td>CAR 均值 / 标准差 / 最小值 / 最大值</td><td>−0.148 / 8.974 / −31.359 / 25.350</td><td>D11、D12、D14</td></tr>
+<tr><td>销售预测子样本；中位距离</td><td>3,456；86 天</td><td>D13</td></tr>
+<tr><td>价差上升组占比</td><td>55.2%</td><td>D17</td></tr>
+</tbody></table></div>
+<p><b>判断复现成功的标准：</b></p>
+<ol>
+<li>最终样本与 17,577 相差不超过 10%，瀑布每一步的差距都有解释。</li>
+<li>CAR 系数在 Table 2 的 8 列中都为正且显著，量级相近（论文为 0.672–1.207）。</li>
+<li>三个安慰剂变量（SF_CAR、MKTRET、CAR_PRE）不显著。</li>
+<li>Table 3 中效应只出现在价差上升组，组间差异显著，并且来自正面反应。</li>
+<li>与论文相差超过一个论文标准误的系数，逐一列出并指向最可能的处理选择（报告生成器自动完成）。</li>
+</ol>
+</section>
+
+<!-- ============================================================= 15 -->
+<section class="sec" id="s15" data-title="风险与待确认事项">
+<h2><span class="no">15</span>风险与待确认事项</h2>
+<div class="tw"><table>
+<thead><tr><th>风险</th><th>后果</th><th>应对</th></tr></thead>
+<tbody>
+<tr><td>WRDS 账号没有 I/B/E/S Guidance</td><td>Table 1–3 都无法构建</td><td><code>check_wrds.py</code> 两分钟内即可确认；先解决订阅问题，再下载其他数据</td></tr>
+<tr><td>目标数字来自 2019 年 5 月工作论文</td><td>正式版表格可能不同</td><td>用 RFS 正式版和 Internet Appendix 核对 <code>paper_targets.py</code></td></tr>
+<tr><td>数据库自 2019 年起回溯修订</td><td>样本量和系数不会完全相同</td><td>按符号、显著性、量级判断（§14）；下载日期写入日志</td></tr>
+<tr><td>开放式预测的 IBES 编码与作者不同</td><td>Panel C 比例和 CAPEX_ADJ 偏移</td><td>在估计前把 D3 校准到论文比例</td></tr>
+<tr><td>CRSP 收盘报价是较粗的价差度量</td><td>Table 3 的分组可能与论文不同</td><td>校准到 55.2% 的价差上升占比；报告敏感性</td></tr>
+<tr><td>论文未写明差异检验方法</td><td>Table 3 的 p 值可能略有差异</td><td>交互模型方法已说明；Stata 用 <code>reghdfe</code> + <code>test</code> 交叉核对</td></tr>
+<tr><td>Stata 脚本尚未运行</td><td>可能在第一次使用时出现语法问题</td><td>拿到数据后第一次构建时运行；Python 结果不依赖它</td></tr>
+</tbody></table></div>
+<p><b>待讨论：</b>复现完成后，是否将样本延长到 2016 年以后。年份范围在 <code>config.py</code> 中设定；2024 年以后的数据还需要把 <code>pull_wrds.py</code> 中的 CRSP 查询改为新格式（CIZ）。</p>
+</section>
+
+<!-- ============================================================= A -->
+<section class="sec" id="sA" data-title="附录 A：拿到 WRDS 数据后的操作">
+<h2><span class="no">A</span>附录 A：拿到 WRDS 数据后的操作步骤</h2>
+<p>12 步，每一步写明命令、成功的标志和失败时怎么办。WRDS 账号、Duo 双因素认证和报错处理的细节见 <code>WRDS_GUIDE.md</code>。</p>
+<ol class="steps">
+<li><h4>核对目标数字</h4><p>下载 RFS 正式版和 Internet Appendix；Table 1–3 与工作论文不同的地方，更新 <code>paper_targets.py</code>。</p></li>
+<li><h4>账号与双因素认证</h4><p>注册 WRDS 账号并启用 Duo；之后每次用 Python 连接，手机都会收到一次推送，需要批准。</p></li>
+<li><h4>环境自检</h4><pre class="cmd">pip install -r requirements.txt
+export WRDS_USERNAME=你的用户名        # Windows: setx WRDS_USERNAME "你的用户名"
+python preflight.py</pre><p>成功：除数据一行外全部 ok，结论为 READY FOR DATA。</p></li>
+<li><h4>第一次连接</h4><p>在 Python 中运行一次 <code>wrds.Connection()</code>，批准 Duo 推送，提示保存密码文件时输入 <code>y</code>。</p></li>
+<li><h4>权限检查</h4><pre class="cmd">python check_wrds.py                  # 约 2 分钟 → output/wrds_check.md</pre><p>成功：9 张表都是 OK，I/B/E/S 有 measure = CPX 的记录。若 I/B/E/S Guidance 显示 NO ACCESS，就停下来先解决订阅问题。保留报告中 <code>range_desc</code> 代码的分布表，第 7 步要用。</p></li>
+<li><h4>下载</h4><pre class="cmd">python pull_wrds.py                   # 9 张表，一次 Duo 推送；日志 data/raw/_pull_log.csv</pre><p>成功：日志中没有 FAILED。断线时只重下失败的表，例如 <code>python pull_wrds.py dsf</code>。</p></li>
+<li><h4>校准</h4><pre class="cmd">python diagnose.py</pre><p>在不看任何回归结果的前提下，按 §14 设定 <code>config.py</code>：D3 把表示“至少 / 至多”的 range_desc 代码加入开放式集合，直到三类比例接近 55 / 34 / 10%；D4 中位比值约为 1,000 的单位需要换算；核对 D9 的 47% 和 D10 的 0.559。每次修改都写进 <code>REPLICATION_NOTES.md</code> 对应的编号下。</p></li>
+<li><h4>构建与估计</h4><pre class="cmd">python run_all.py                     # 样本、Table 1–3、报告 → output/</pre></li>
+<li><h4>按顺序读结果</h4><p><code>sample_waterfall.csv</code> → Table 1 与 <code>table1_winsor_check.csv</code> → 正文引用的数字 → Table 2、3 → <code>replication_report.html</code>。如果缩尾核对表与 D14 的判断不一致，修改 <code>WINSOR_VARS</code> 后重跑第 8 步。</p></li>
+<li><h4>Stata 交叉核对</h4><pre class="cmd">ssc install ftools
+ssc install reghdfe
+cd stata
+do tables_2_3.do
+* 回到代码包根目录：
+python compare_stata.py               # → output/stata_crosscheck.md</pre><p>成功：所有系数一致到舍入误差，每个模型的 N 相同。</p></li>
+<li><h4>稳健性</h4><p>依次切换 D7、D9、D10、D14、D18，每次重跑第 8 步，记录 Table 2、3 的结论是否改变。</p></li>
+<li><h4>报告</h4><p>在报告最后一节解释每一处标出的差异；在浏览器中把 <code>replication_report.html</code> 打印成 PDF；只分享 <code>output/</code> 中的结果，不分享 <code>data/</code> 中的任何原始数据。</p></li>
+</ol>
+</section>
+
+<!-- ============================================================= B -->
+<section class="sec" id="sB" data-title="附录 B：代码包结构">
+<h2><span class="no">B</span>附录 B：代码包结构</h2>
+<div class="tw"><table>
+<thead><tr><th>文件</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>preflight.py</code></td><td>运行前自检：环境、依赖、配置、两套测试、数据状态，给出下一步命令</td></tr>
+<tr><td><code>check_wrds.py</code></td><td>下载前检查 WRDS 权限、字段名和 I/B/E/S 编码</td></tr>
+<tr><td><code>pull_wrds.py</code></td><td>下载 9 张表，记录每张表的下载时间与行数</td></tr>
+<tr><td><code>diagnose.py</code></td><td>打印用于校准编码开关的样本特征</td></tr>
+<tr><td><code>run_all.py</code></td><td>构建样本、估计 Table 1–3、生成报告</td></tr>
+<tr><td><code>build_capex_sample.py</code></td><td>样本构建与全部变量（§5、§6）</td></tr>
+<tr><td><code>tables.py</code></td><td>Table 1–3、正文数字、稳健性、缩尾核对、Stata 导出</td></tr>
+<tr><td><code>hdfe.py</code></td><td>固定效应 OLS、聚类标准误、组间差异检验（§7）</td></tr>
+<tr><td><code>report.py</code></td><td>结果报告（英文 HTML / Markdown）：记分卡与差异诊断</td></tr>
+<tr><td><code>stata/tables_2_3.do</code>、<code>compare_stata.py</code></td><td>Stata <code>reghdfe</code> 重算与逐格比对</td></tr>
+<tr><td><code>config.py</code></td><td>全部开关，标注决策编号</td></tr>
+<tr><td><code>paper_targets.py</code></td><td>论文中的全部数字，用于对照</td></tr>
+<tr><td><code>tests/</code></td><td>估计器测试、模拟数据生成、端到端测试</td></tr>
+<tr><td><code>REPLICATION_NOTES.md</code>、<code>WRDS_GUIDE.md</code>、<code>GUIDE.html</code></td><td>决策日志 D1–D37；WRDS 操作手册；学习指南</td></tr>
+<tr><td><code>docs/build_report_zh.py</code>、<code>docs/build_report_en.py</code></td><td>生成本报告（中文版、英文版）；代码片段和行号直接取自源文件，代码修改后重跑即可同步</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================= C -->
+<section class="sec" id="sC" data-title="附录 C：论文中的不一致">
+<h2><span class="no">C</span>附录 C：工作论文中的不一致</h2>
+<div class="tw"><table>
+<thead><tr><th>位置</th><th>问题</th><th>本复现的理解</th></tr></thead>
+<tbody>
+<tr><td>Table 3 表注</td><td>写的是 “Model (9) of Table 2”，而 Table 2 只有 8 列</td><td>使用模型 (8) 的控制变量</td></tr>
+<tr><td>Table 1 与 Table 2</td><td>LAG_CAPX 在 Table 1 为百万美元，在 Table 2 为除以市值</td><td>两种口径都构造（D15）</td></tr>
+<tr><td>Table 3</td><td>CAR_POS = 0.893、SE = 0.455（t = 1.96）只标一颗星</td><td>与行业聚类下按 t(G−1) 计算的 p 值一致，代码采用同一口径</td></tr>
+<tr><td>第 2.2 节</td><td>初始样本为 2002–2016 年，但只删除了 2016 年，最终样本却从 2003 年开始</td><td>最终样本中没有 2002 年的预测（D2）</td></tr>
+<tr><td>附录 1</td><td>2014 年 11 月的 capex 预测写为 “for fiscal year 2016”</td><td>应为 2015 财年；不影响估计</td></tr>
+</tbody></table></div>
+</section>
+
+
+</div>
+</main>
+</div>
+<script id="cards" type="application/json">{{CARDS_JSON}}</script>
+<script>
+(function(){"use strict";
+function $(s,r){return (r||document).querySelector(s);}
+var store={get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},set:function(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+var t=store.get("jw-rep-theme");if(t)document.documentElement.setAttribute("data-theme",t);
+$("#themeBtn").addEventListener("click",function(){var c=document.documentElement.getAttribute("data-theme");
+  var dark=c?c==="dark":matchMedia("(prefers-color-scheme: dark)").matches;var n=dark?"light":"dark";
+  document.documentElement.setAttribute("data-theme",n);store.set("jw-rep-theme",n);});
+/* table of contents */
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+var toc=$("#toc"),mtoc=$("#mtoc"),links=[];
+document.querySelectorAll("section.sec").forEach(function(s){var no=s.querySelector("h2 .no").textContent;
+  var li='<li><a href="#'+s.id+'"><span style="color:var(--rule2);margin-right:6px">'+no+'</span>'+esc(s.dataset.title)+'</a>';
+  var sub="";s.querySelectorAll("h3[id]").forEach(function(h){sub+='<li><a href="#'+h.id+'">'+esc(h.textContent)+'</a></li>';});
+  if(sub)li+="<ol>"+sub+"</ol>";li+="</li>";toc.insertAdjacentHTML("beforeend",li);mtoc.insertAdjacentHTML("beforeend",li);});
+mtoc.addEventListener("click",function(e){if(e.target.closest("a"))mtoc.parentNode.removeAttribute("open");});
+links=[].slice.call(toc.querySelectorAll(":scope > li > a"));
+if("IntersectionObserver" in window){var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting)
+  links.forEach(function(l){l.classList.toggle("on",l.getAttribute("href")==="#"+en.target.id);});});},{rootMargin:"-15% 0px -75% 0px"});
+  document.querySelectorAll("section.sec").forEach(function(s){io.observe(s);});}
+/* waterfall */
+var wf=[["IBES 年度 capex 预测，匹配到 Compustat",40785,0],["有五日市场反应",36900,3885],["不与 EPS 预测同日发布",19427,17473],["2003–2015 年发布（最终样本）",17577,1850]],h="";
+wf.forEach(function(r){h+='<div class="row"><div>'+r[0]+'</div><div class="track"><div class="fill" style="width:'+(r[1]/40785*100).toFixed(1)+'%">'+
+  r[1].toLocaleString("en-US")+(r[2]?'<span class="minus">−'+r[2].toLocaleString("en-US")+'</span>':'')+'</div></div></div>';});
+$("#wf").innerHTML=h;
+/* links to code excerpts: open the folded <details> first, then jump */
+function openTo(id){var el=document.getElementById(id);if(!el)return;var d=el.closest("details");if(d)d.open=true;
+  el.scrollIntoView({block:"start",behavior:"smooth"});}
+document.addEventListener("click",function(e){var a=e.target.closest('a[href^="#code-"]');if(!a)return;
+  e.preventDefault();var id=a.getAttribute("href").slice(1);openTo(id);history.replaceState(null,"","#"+id);});
+if(location.hash.indexOf("#code-")===0)openTo(location.hash.slice(1));
+/* cell cards */
+var CARDS=JSON.parse($("#cards").textContent);
+document.querySelectorAll("table.anno").forEach(function(tab){
+  var box=tab.closest(".tw").nextElementSibling;
+  function show(c){tab.querySelectorAll(".sel").forEach(function(x){x.classList.remove("sel");});c.classList.add("sel");
+    box.innerHTML=CARDS[c.dataset.k]||'<p class="hint">（无说明）</p>';}
+  tab.addEventListener("click",function(e){var c=e.target.closest(".cx");if(!c)return;show(c);
+    var r=box.getBoundingClientRect();if(r.top>innerHeight-80||r.bottom<0)box.scrollIntoView({block:"nearest",behavior:"smooth"});});
+  tab.addEventListener("keydown",function(e){var c=e.target.closest(".cx");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();show(c);}});
+  var first=tab.querySelector('[data-k="t1a-2-1"]')||tab.querySelector('[data-k="t2-CAR-8"]')||tab.querySelector('[data-k="t3-CAR-2"]')||tab.querySelector("td.cx");
+  if(first)show(first);});
+})();
+</script>
+</body>
+</html>

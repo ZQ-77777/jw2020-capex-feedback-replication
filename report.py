@@ -295,7 +295,7 @@ def section_data(doc, wf, log):
               "w0b_one_per_firm_quarter": "one forecast per firm-quarter (first)",
               "w1_matched_compustat": "matched to Compustat actual capex",
               "w2_with_car": "with a five-day CRSP market reaction",
-              "w3_not_concurrent_eps": "not issued on the day of an EPS forecast",
+              "w3_not_concurrent_eps": "not issued on the day of an earnings forecast (D9)",
               "w4_drop_2016": "issued 2003-2015 (final sample)"}
     w["step"] = w["step"].map(lambda k: labels.get(k, k))
     doc.table(w.rename(columns={"step": "Step", "ours": "Ours", "paper": "Paper", "diff": "Difference"}),

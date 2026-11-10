@@ -62,8 +62,9 @@ EPS_CONCURRENT_DAYS = 0        # D9: drop capex forecast if earnings guidance wi
 #     earnings-type I/B/E/S measures (GPS fully reported EPS, NET net income, PRE pretax income, EBT EBITDA,
 #     EBS EBITDA per share, OPR operating profit, FFO funds from operations), pulled into `guidance_earn`.
 EXTRA_EARNINGS_MEASURES = ("GPS", "NET", "PRE", "EBT", "EBS", "OPR", "FFO")
-CONCURRENT_MEASURES = ("EPS",) + EXTRA_EARNINGS_MEASURES   # D9: closest to the paper's N (see output/calibrate_d9.csv)
-EA_CONCURRENT_DAYS = 0         # D10: EA_DUM = 1 if |anndats - rdq| <= N calendar days
+CONCURRENT_MEASURES = ("EPS",) + EXTRA_EARNINGS_MEASURES   # D9 (WRDS calibration): closest to the paper's N,
+                                        # 18,866 vs 17,577; ("EPS",) is the robustness check (output/calibrate_d9.csv)
+EA_CONCURRENT_DAYS = 0         # D10 (WRDS calibration): same day gives EA_DUM 0.662 vs 0.899 at +/-1 day (paper 0.559)
 AFTER_CLOSE_SHIFT = False      # D11: day 0 -> next trading day if anntims >= 16:00:00
 
 # ----------------------------------------------------------------------------- event windows (trading days)

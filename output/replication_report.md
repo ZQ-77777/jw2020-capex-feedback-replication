@@ -41,14 +41,14 @@ Paper stars as printed in the working paper. 'partial' = within two paper standa
 
 Capex, sales and EPS guidance come from I/B/E/S Guidance (ibes.det_guidance); actual capex and accounting variables from Compustat (comp.funda, comp.fundq); returns, the S&P 500 return and closing bid/ask quotes from CRSP (crsp.dsf, crsp.dsi). I/B/E/S tickers are linked to CRSP PERMNOs with the WRDS link table valid on the announcement date, and PERMNOs to GVKEYs with the CCM link history (LU/LC links). The forecasted fiscal year is matched to the Compustat fiscal year whose datadate has the same year and month as the I/B/E/S period end.
 
-| Step                                      |   Ours |   Paper | Difference   |
-|:------------------------------------------|-------:|--------:|:-------------|
-| I/B/E/S annual capex forecasts, 2002-2016 | 49,999 |         |              |
-| one forecast per firm-quarter (first)     | 43,422 |         |              |
-| matched to Compustat actual capex         | 41,452 |  40,785 | +1.6%        |
-| with a five-day CRSP market reaction      | 41,443 |  36,900 | +12.3%       |
-| not issued on the day of an EPS forecast  | 20,344 |  19,427 | +4.7%        |
-| issued 2003-2015 (final sample)           | 18,866 |  17,577 | +7.3%        |
+| Step                                               |   Ours |   Paper | Difference   |
+|:---------------------------------------------------|-------:|--------:|:-------------|
+| I/B/E/S annual capex forecasts, 2002-2016          | 49,999 |         |              |
+| one forecast per firm-quarter (first)              | 43,422 |         |              |
+| matched to Compustat actual capex                  | 41,452 |  40,785 | +1.6%        |
+| with a five-day CRSP market reaction               | 41,443 |  36,900 | +12.3%       |
+| not issued on the day of an earnings forecast (D9) | 20,344 |  19,427 | +4.7%        |
+| issued 2003-2015 (final sample)                    | 18,866 |  17,577 | +7.3%        |
 
 Paper counts from Section 2.2. The paper's arithmetic is exact (36,900 - 17,473 - 1,850 = 17,577), so the collapse to firm-quarters is applied before the first count (decision D6).
 
@@ -242,7 +242,7 @@ The switches below were set against sample characteristics only, before Tables 2
 - **D4, units.** Guidance values are recorded in millions or billions. After conversion, the median ratio of actual to forecast capex is 0.99.
 - **D9, "concurrent with an earnings forecast".** Four definitions were compared (table below). Counting all earnings-type guidance (EPS, GAAP EPS, net income, pretax income, EBITDA, EBITDA per share, operating profit, FFO) as an earnings forecast brings the final sample closest to the paper: 18,866 against 17,577, and 20,344 against 19,427 after this step. EPS-only guidance is reported as a robustness check (§9).
 - **D10, earnings announcement window.** A same-day match gives an EA_DUM mean of 0.662, against 0.899 within ±1 day and 0.559 in the paper. Same day is adopted; ±1 day is a robustness check (§9).
-- **D14, winsorisation (revised).** The pre-data inference that dollar levels were not winsorised was overturned by the data: the 99th percentile of actual capex is exactly 9,496, the paper's maximum, and the 1st percentile of forecast capex equals the paper's minimum of 2.0. All Table 1 variables are winsorised at 1% and 99%. For SIZE the evidence is mixed (the paper's minimum is close to our raw minimum, its maximum close to our 99th percentile); SIZE is kept winsorised, which matters little because it is a control.
+- **D14, winsorisation (revised).** The pre-data inference that dollar levels were not winsorised (from the paper's minimum of 0.000 for actual capex) was overturned by the data: zero capex is common enough that the 1st percentile is itself about 0. In the first WRDS run (EPS-only definition, 22,961 forecasts) the 99th percentile of actual capex was exactly 9,496, the paper's maximum; in the final sample the 1st percentile of forecast capex equals the paper's minimum of 2.0, and for every Table 1 variable except SIZE the paper's extremes are closer to our 1st/99th percentiles than to our raw extremes. All Table 1 variables are therefore winsorised at 1% and 99%. For SIZE the evidence is mixed (the paper's minimum is close to our raw minimum, its maximum close to our 99th percentile); SIZE is kept winsorised, which matters little because it is a control.
 - **Extraction fixes.** Two technical issues in the WRDS download were fixed before estimation (repeated row indices in chunked downloads; nullable pyarrow data types). Neither changes any variable definition.
 
 ### D9: sample characteristics under four definitions (no regressions)
@@ -370,4 +370,4 @@ python diagnose.py
 python run_all.py
 ```
 
-Generated 2026-11-10 03:21 with Python 3.11.18, pandas 2.2.3, numpy 2.4.6. Data: WRDS.
+Generated 2026-11-10 14:39 with Python 3.11.18, pandas 2.2.3, numpy 2.4.6. Data: WRDS.
